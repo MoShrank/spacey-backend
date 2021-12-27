@@ -3,8 +3,7 @@ package store
 import (
 	"context"
 
-	"spacey/auth-service/entities"
-
+	"github.com/moshrank/spacey-backend/services/auth/entities"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

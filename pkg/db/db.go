@@ -2,30 +2,33 @@ package db
 
 import (
 	"context"
-	"log"
 
+	"github.com/moshrank/spacey-backend/pkg/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Database struct {
-	db *mongo.Database
+	db     *mongo.Database
+	logger logger.LoggerInterface
 }
 
 type DatabaseInterface interface {
+	GetDB() *mongo.Database
 }
 
-func NewDB(connectionString string) DatabaseInterface {
+func NewDB(connectionString string, logger logger.LoggerInterface) DatabaseInterface {
 	database, err := connect(connectionString)
 
 	if err != nil {
-		log.Panic(err)
+		logger.Fatal(err)
 	}
 
-	log.Print("Database Connection Established!")
+	logger.Debug("Database Connection Established!")
 
 	return &Database{
-		db: database,
+		db:     database,
+		logger: logger,
 	}
 }
 
@@ -43,4 +46,8 @@ func connect(connectionString string) (*mongo.Database, error) {
 	database := client.Database("users")
 
 	return database, nil
+}
+
+func (db *Database) GetDB() *mongo.Database {
+	return db.db
 }

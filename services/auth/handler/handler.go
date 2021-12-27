@@ -3,9 +3,11 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"spacey/auth-service/entities"
-	"spacey/auth-service/store"
 	"time"
+
+	"github.com/moshrank/spacey-backend/services/auth/entities"
+
+	"github.com/moshrank/spacey-backend/services/auth/store"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"

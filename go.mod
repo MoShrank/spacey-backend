@@ -1,16 +1,13 @@
-module spacey/auth-service
+module github.com/moshrank/spacey-backend
 
 go 1.17
-
-replace spacey/db => ../../pkg/db
 
 require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	go.mongodb.org/mongo-driver v1.8.1
 	go.uber.org/fx v1.16.0
-	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
-	spacey/db v0.0.0-00010101000000-000000000000
+	golang.org/x/crypto v0.0.0-20201216223049-8b5274cf687f
 )
 
 require (
@@ -39,6 +36,6 @@ require (
 	go.uber.org/zap v1.16.0 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20210903071746-97244b99971b // indirect
-	golang.org/x/text v0.3.6 // indirect
+	golang.org/x/text v0.3.5 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
