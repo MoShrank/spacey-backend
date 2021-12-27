@@ -9,6 +9,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type SecretKey struct {
+	SecretKey string
+}
+
 type UserUsecase struct {
 	logger    logger.LoggerInterface
 	secretKey string
@@ -21,10 +25,10 @@ type UserUsecaseInterface interface {
 	CreateJWTWithClaims(usesrID string) (string, error)
 }
 
-func NewUserUseCase(loggerObj logger.LoggerInterface, secretKey string) UserUsecaseInterface {
+func NewUserUseCase(loggerObj logger.LoggerInterface, secretKey SecretKey) UserUsecaseInterface {
 	return &UserUsecase{
 		logger:    loggerObj,
-		secretKey: secretKey,
+		secretKey: secretKey.SecretKey,
 	}
 }
 
