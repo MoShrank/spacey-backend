@@ -3,28 +3,26 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"time"
 
+	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/services/auth/entities"
 
 	"github.com/moshrank/spacey-backend/services/auth/store"
+	"github.com/moshrank/spacey-backend/services/auth/usecase"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt"
-	"golang.org/x/crypto/bcrypt"
 )
 
-var hmacSampleSecret []byte = []byte("secret")
-
 type Handler struct {
-	database store.StoreInterface
+	database    store.StoreInterface
+	logger      logger.LoggerInterface
+	userUsecase usecase.UserUsecaseInterface
 }
 
 type HandlerInterface interface {
-	Ping(c *gin.Context)
 	CreateUser(c *gin.Context)
 	Login(c *gin.Context)
-	ValidateJWT(c *gin.Context)
+	Authenticate(c *gin.Context)
 }
 
 func NewHandler(database store.StoreInterface) HandlerInterface {
@@ -33,37 +31,19 @@ func NewHandler(database store.StoreInterface) HandlerInterface {
 	}
 }
 
-func (h *Handler) hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
-}
-
-func (h *Handler) checkPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	fmt.Print(err)
-	return err == nil
-}
-
-func (h *Handler) Ping(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "pong",
-	})
-}
-
 func (h *Handler) CreateUser(c *gin.Context) {
 	var user entities.User
 	err := c.BindJSON(&user)
 
 	if err != nil {
+		h.logger.Error(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
-		fmt.Print(err.Error())
 		return
 	}
 
-	user.CreatedAt = time.Now()
-	user.Password, _ = h.hashPassword(user.Password)
+	user.Password, _ = h.userUsecase.HashPassword(user.Password)
 
 	_, err = h.database.SaveUser(&user)
 
@@ -97,19 +77,14 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	if !h.checkPasswordHash(user.Password, password) {
+	if !h.userUsecase.CheckPasswordHash(user.Password, password) {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Invalid credentials",
 		})
 		return
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": user.ID,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
-	})
-
-	tokenString, err := token.SignedString(hmacSampleSecret)
+	tokenString, _ := h.userUsecase.CreateJWTWithClaims(user.ID)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
@@ -118,38 +93,18 @@ func (h *Handler) Login(c *gin.Context) {
 
 }
 
-func (h *Handler) ValidateJWT(c *gin.Context) {
+func (h *Handler) Authenticate(c *gin.Context) {
 	tokenString := c.Request.Header.Get("Authentication")
 	tokenString = tokenString[7:]
 
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "Invalid credentials",
-			})
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
-
-		return hmacSampleSecret, nil
-	})
-
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "Invalid credentials",
-		})
-		return
-	}
-
-	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		c.JSON(http.StatusAccepted, gin.H{
+	if ok, _ := h.userUsecase.ValidateJWT(tokenString); ok {
+		c.JSON(http.StatusOK, gin.H{
 			"message": "Authentication successful",
 		})
-		return
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Invalid credentials",
 		})
-		return
 	}
 
 }

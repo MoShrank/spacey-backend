@@ -34,7 +34,7 @@ func main() {
 	authGroup := router.Group("/auth")
 	flashcardGroup := router.Group("/flashcards")
 
-	auth.NewAuthService(authGroup, dbConnection, loggerObj)
+	auth.NewAuthService(authGroup, dbConnection, loggerObj, config.GetSecretKey())
 	flashcard.NewFlashCardService(flashcardGroup, dbConnection, loggerObj)
 
 	router.Run(":" + config.GetPort())
