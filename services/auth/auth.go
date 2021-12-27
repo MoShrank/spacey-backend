@@ -16,7 +16,7 @@ import (
 )
 
 type AuthService struct {
-	router *gin.RouterGroup
+	router gin.IRoutes
 }
 
 type AuthServiceInterface interface {
@@ -25,7 +25,7 @@ type AuthServiceInterface interface {
 func runAddRoutes(
 	lifecycle fx.Lifecycle,
 	handler handler.HandlerInterface,
-	router *gin.RouterGroup,
+	router gin.IRoutes,
 ) {
 	lifecycle.Append(fx.Hook{OnStart: func(context.Context) error {
 		router.POST("/user", handler.CreateUser)
@@ -36,13 +36,13 @@ func runAddRoutes(
 }
 
 func NewAuthService(
-	router *gin.RouterGroup,
+	router gin.IRoutes,
 	dbConnection db.DatabaseInterface,
 	loggerObj logger.LoggerInterface,
 	secretKey string,
 ) AuthServiceInterface {
 	fx.New(
-		fx.Provide(func() *gin.RouterGroup { return router }),
+		fx.Provide(func() gin.IRoutes { return router }),
 		fx.Provide(func() *mongo.Database { return dbConnection.GetDB() }),
 		fx.Provide(func() logger.LoggerInterface { return loggerObj }),
 		fx.Provide(func() usecase.SecretKey { return usecase.SecretKey{SecretKey: secretKey} }),

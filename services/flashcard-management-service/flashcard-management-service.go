@@ -13,20 +13,21 @@ import (
 )
 
 type FlashCardService struct {
-	router *gin.RouterGroup
+	router gin.IRoutes
 }
 
 type FlashCardServiceInterface interface {
 }
 
 func NewFlashCardService(
-	router *gin.RouterGroup,
+	router gin.IRoutes,
 	dbObj db.DatabaseInterface,
 	loggerObj logger.LoggerInterface,
 ) FlashCardServiceInterface {
 	ctx := context.TODO()
 
 	app := fx.New(
+		fx.Provide(func() gin.IRoutes { return router }),
 		fx.Provide(func() db.DatabaseInterface { return dbObj }),
 		fx.Provide(func() logger.LoggerInterface { return loggerObj }),
 		fx.Provide(handler.NewHandler),
@@ -44,7 +45,7 @@ func NewFlashCardService(
 
 func runHttpServer(
 	lifecycle fx.Lifecycle,
-	router *gin.RouterGroup,
+	router gin.IRoutes,
 	cardHandler handler.CardHandlerInterface,
 	deckHandler handler.DeckHandlerInterface,
 ) {
