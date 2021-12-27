@@ -25,9 +25,15 @@ type HandlerInterface interface {
 	Authenticate(c *gin.Context)
 }
 
-func NewHandler(database store.StoreInterface) HandlerInterface {
+func NewHandler(
+	database store.StoreInterface,
+	logger logger.LoggerInterface,
+	usecase usecase.UserUsecaseInterface,
+) HandlerInterface {
 	return &Handler{
-		database: database,
+		database:    database,
+		logger:      logger,
+		userUsecase: usecase,
 	}
 }
 
@@ -45,12 +51,14 @@ func (h *Handler) CreateUser(c *gin.Context) {
 
 	user.Password, _ = h.userUsecase.HashPassword(user.Password)
 
-	_, err = h.database.SaveUser(&user)
+	err = h.database.SaveUser(&user)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	user.Password = ""
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "User created successfully",
