@@ -12,7 +12,7 @@ type Store struct {
 }
 
 type StoreInterface interface {
-	SaveUser(user *entities.User) (string, error)
+	SaveUser(user *entities.User) error
 	GetPassword(email string) (string, error)
 }
 
@@ -22,17 +22,19 @@ func NewStore(db *mongo.Database) StoreInterface {
 	}
 }
 
-func (db *Store) SaveUser(user *entities.User) (string, error) {
+func (db *Store) SaveUser(user *entities.User) error {
 	userCollection := db.db.Collection("users")
+
 	_, err := userCollection.InsertOne(context.TODO(), user)
 
-	return "", err
+	return err
 }
 
 func (db *Store) GetPassword(email string) (string, error) {
 	userCollection := db.db.Collection("users")
 	var user entities.User
-	err := userCollection.FindOne(context.TODO(), map[string]interface{}{"email": email}).Decode(&user)
+	err := userCollection.FindOne(context.TODO(), map[string]interface{}{"email": email}).
+		Decode(&user)
 
 	return user.Password, err
 }
