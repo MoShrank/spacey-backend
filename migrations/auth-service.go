@@ -10,8 +10,8 @@ import (
 
 func main() {
 	m, err := migrate.New(
-		"file:///home/shrank/dev/spacey/spacey-backend/migrations/files",
-		"mongodb://localhost/users:27017")
+		"file:///Users/moritzeich/dev/spacey/backend/migrations/files",
+		"mongodb://localhost:27017/users")
 
 	if err != nil {
 		fmt.Print(err)
@@ -19,5 +19,12 @@ func main() {
 		return
 	}
 
-	m.Steps(2)
+	err = m.Up()
+
+	if err != nil {
+		fmt.Print(err)
+
+		return
+	}
+
 }
