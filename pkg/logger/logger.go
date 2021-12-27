@@ -3,6 +3,7 @@ package logger
 import "log"
 
 type Logger struct {
+	LogLevel string
 }
 
 type LoggerInterface interface {
@@ -13,8 +14,10 @@ type LoggerInterface interface {
 	Fatal(args ...interface{})
 }
 
-func NewLogger() LoggerInterface {
-	return &Logger{}
+func NewLogger(logLevel string) LoggerInterface {
+	return &Logger{
+		LogLevel: logLevel,
+	}
 }
 
 func (l *Logger) Debug(args ...interface{}) {
