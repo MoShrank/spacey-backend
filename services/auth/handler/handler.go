@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 
 	"github.com/moshrank/spacey-backend/services/auth/models"
@@ -16,6 +17,7 @@ type Handler struct {
 	database    store.StoreInterface
 	logger      logger.LoggerInterface
 	userUsecase usecase.UserUsecaseInterface
+	validator   *validator.Validate
 }
 
 type HandlerInterface interface {
@@ -33,12 +35,23 @@ func NewHandler(
 		database:    database,
 		logger:      logger,
 		userUsecase: usecase,
+		validator:   validator.New(),
 	}
 }
 
 func (h *Handler) CreateUser(c *gin.Context) {
 	var user models.User
 	err := c.BindJSON(&user)
+
+	if err != nil {
+		h.logger.Error(err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	err = h.validator.Struct(user)
 
 	if err != nil {
 		h.logger.Error(err.Error())
@@ -90,7 +103,7 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	tokenString, _ := h.userUsecase.CreateJWTWithClaims(user.ID.Hex())
+	tokenString, _ := h.userUsecase.CreateJWTWithClaims(user.ID)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
