@@ -1,12 +1,11 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/moshrank/spacey-backend/pkg/logger"
-	"github.com/moshrank/spacey-backend/services/auth/entities"
 
+	"github.com/moshrank/spacey-backend/services/auth/models"
 	"github.com/moshrank/spacey-backend/services/auth/store"
 	"github.com/moshrank/spacey-backend/services/auth/usecase"
 
@@ -38,7 +37,7 @@ func NewHandler(
 }
 
 func (h *Handler) CreateUser(c *gin.Context) {
-	var user entities.User
+	var user models.User
 	err := c.BindJSON(&user)
 
 	if err != nil {
@@ -67,14 +66,13 @@ func (h *Handler) CreateUser(c *gin.Context) {
 }
 
 func (h *Handler) Login(c *gin.Context) {
-	var user entities.User
+	var user models.User
 	err := c.BindJSON(&user)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
-		fmt.Print(err.Error())
 		return
 	}
 
@@ -92,7 +90,7 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	tokenString, _ := h.userUsecase.CreateJWTWithClaims(user.ID)
+	tokenString, _ := h.userUsecase.CreateJWTWithClaims(user.ID.Hex())
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
