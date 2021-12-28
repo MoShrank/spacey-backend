@@ -3,7 +3,7 @@ package store
 import (
 	"context"
 
-	"github.com/moshrank/spacey-backend/services/auth/models"
+	"github.com/moshrank/spacey-backend/services/user-service/models"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
