@@ -13,7 +13,7 @@ type CardHandlerInterface interface {
 type Card struct {
 }
 
-func NewHandler() CardHandlerInterface {
+func NewCardHandler() CardHandlerInterface {
 	return &Card{}
 }
 

@@ -30,7 +30,8 @@ func NewFlashCardService(
 		fx.Provide(func() gin.IRoutes { return router }),
 		fx.Provide(func() db.DatabaseInterface { return dbObj }),
 		fx.Provide(func() logger.LoggerInterface { return loggerObj }),
-		fx.Provide(handler.NewHandler),
+		fx.Provide(handler.NewCardHandler),
+		fx.Provide(handler.NewDeckHandler),
 		fx.Invoke(runHttpServer),
 	)
 
