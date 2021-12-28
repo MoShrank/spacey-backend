@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -25,6 +26,23 @@ func validateJWT(tokenString string, secretKey []byte) (bool, error) {
 
 }
 
+func extractClaims(tokenStr string, secretKey []byte) (jwt.MapClaims, bool) {
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		return secretKey, nil
+	})
+
+	if err != nil {
+		return nil, false
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims, true
+	} else {
+		log.Printf("Invalid JWT Token")
+		return nil, false
+	}
+}
+
 func Auth(secretKey string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.Request.Header.Get("Authorization")
@@ -38,14 +56,28 @@ func Auth(secretKey string) gin.HandlerFunc {
 		}
 		tokenString = tokenString[7:]
 
-		if ok, err := validateJWT(tokenString, []byte(secretKey)); ok {
-			c.Next()
+		if ok, _ := validateJWT(tokenString, []byte(secretKey)); ok {
+
+			if claims, ok := extractClaims(tokenString, []byte(secretKey)); ok {
+				userID := claims["sub"].(string)
+
+				c.Set("userID", userID)
+
+				c.Next()
+			} else {
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"error": "Invalid credentials",
+				})
+				c.Abort()
+				return
+			}
+
 		} else {
-			fmt.Print(err)
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid token!",
 			})
 			c.Abort()
 		}
+
 	}
 }
