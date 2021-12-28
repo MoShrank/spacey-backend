@@ -1,3 +1,5 @@
+//go:build migrations
+
 package main
 
 import (
