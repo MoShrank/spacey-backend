@@ -8,7 +8,6 @@ import (
 	"github.com/moshrank/spacey-backend/services/auth/usecase"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 
 	"github.com/gin-gonic/gin"
@@ -37,13 +36,13 @@ func runAddRoutes(
 
 func NewAuthService(
 	router gin.IRoutes,
-	dbConnection db.DatabaseInterface,
+	dbConnection *mongo.Database,
 	loggerObj logger.LoggerInterface,
 	secretKey string,
 ) AuthServiceInterface {
 	fx.New(
 		fx.Provide(func() gin.IRoutes { return router }),
-		fx.Provide(func() *mongo.Database { return dbConnection.GetDB() }),
+		fx.Provide(func() *mongo.Database { return dbConnection }),
 		fx.Provide(func() logger.LoggerInterface { return loggerObj }),
 		fx.Provide(
 			func() usecase.SecretKey { return usecase.SecretKey{SecretKey: []byte(secretKey)} },

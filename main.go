@@ -31,11 +31,21 @@ func main() {
 	router.Use(middleware.JSONMiddleware())
 
 	router.GET("/ping", ping)
+
 	userGroup := router.Group("/user")
 	flashcardGroup := router.Group("/flashcards").Use(middleware.Auth(config.GetSecretKey()))
 
-	auth.NewAuthService(userGroup, dbConnection, loggerObj, config.GetSecretKey())
-	flashcard.NewFlashCardService(flashcardGroup, dbConnection, loggerObj)
+	auth.NewAuthService(
+		userGroup,
+		dbConnection.GetDB(config.GetUserSeviceDBNAME()),
+		loggerObj,
+		config.GetSecretKey(),
+	)
+	flashcard.NewFlashCardService(
+		flashcardGroup,
+		dbConnection.GetDB(config.GetFlashcardServiceDBName()),
+		loggerObj,
+	)
 
 	router.Run(":" + config.GetPort())
 

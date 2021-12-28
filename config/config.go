@@ -3,13 +3,17 @@ package config
 import (
 	"errors"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	Port              string
-	MongoDBConnection string
-	LogLevel          string
-	AuthSecretKey     string
+	Port                   string
+	MongoDBConnection      string
+	LogLevel               string
+	AuthSecretKey          string
+	UserServiceDBName      string
+	FlashcardServiceDBName string
 }
 
 type ConfigInterface interface {
@@ -17,9 +21,11 @@ type ConfigInterface interface {
 	GetMongoDBConnection() string
 	GetLogLevel() string
 	GetSecretKey() string
+	GetUserSeviceDBNAME() string
+	GetFlashcardServiceDBName() string
 }
 
-func loadEnvWithDefault(key string) string {
+func loadEnvWithoutDefault(key string) string {
 	value := os.Getenv(key)
 	if value == "" {
 		panic(errors.New("Missing env variable: " + key))
@@ -38,11 +44,18 @@ func loadEnv(name, defaultValue string) string {
 }
 
 func NewConfig() (ConfigInterface, error) {
+	err := godotenv.Load()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Config{
-		Port:              loadEnv("PORT", "8080"),
-		MongoDBConnection: loadEnv("MONGO_DB_CONNECTION", "mongodb://localhost:27017"),
-		LogLevel:          loadEnv("LOG_LEVEL", "debug"),
-		AuthSecretKey:     loadEnvWithDefault("AUTH_SECRET_KEY"),
+		Port:                   loadEnv("PORT", "8080"),
+		MongoDBConnection:      loadEnv("MONGO_DB_CONNECTION", "mongodb://localhost:27017"),
+		LogLevel:               loadEnv("LOG_LEVEL", "debug"),
+		AuthSecretKey:          loadEnvWithoutDefault("AUTH_SECRET_KEY"),
+		UserServiceDBName:      loadEnvWithoutDefault("USER_SERVICE_DB_NAME"),
+		FlashcardServiceDBName: loadEnvWithoutDefault("FLASHCARD_SERVICE_DB_NAME"),
 	}, nil
 }
 
@@ -60,4 +73,12 @@ func (c *Config) GetLogLevel() string {
 
 func (c *Config) GetSecretKey() string {
 	return c.AuthSecretKey
+}
+
+func (c *Config) GetUserSeviceDBNAME() string {
+	return c.UserServiceDBName
+}
+
+func (c *Config) GetFlashcardServiceDBName() string {
+	return c.FlashcardServiceDBName
 }

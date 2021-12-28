@@ -9,16 +9,16 @@ import (
 )
 
 type Database struct {
-	db     *mongo.Database
+	client *mongo.Client
 	logger logger.LoggerInterface
 }
 
 type DatabaseInterface interface {
-	GetDB() *mongo.Database
+	GetDB(string) *mongo.Database
 }
 
 func NewDB(connectionString string, logger logger.LoggerInterface) DatabaseInterface {
-	database, err := connect(connectionString)
+	client, err := connect(connectionString)
 
 	if err != nil {
 		logger.Fatal(err)
@@ -27,12 +27,12 @@ func NewDB(connectionString string, logger logger.LoggerInterface) DatabaseInter
 	logger.Debug("Database Connection Established!")
 
 	return &Database{
-		db:     database,
+		client: client,
 		logger: logger,
 	}
 }
 
-func connect(connectionString string) (*mongo.Database, error) {
+func connect(connectionString string) (*mongo.Client, error) {
 	clientOptions := options.Client().ApplyURI(connectionString)
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
@@ -43,11 +43,10 @@ func connect(connectionString string) (*mongo.Database, error) {
 		return nil, err
 	}
 
-	database := client.Database("users")
-
-	return database, nil
+	return client, nil
 }
 
-func (db *Database) GetDB() *mongo.Database {
-	return db.db
+func (db *Database) GetDB(dbName string) *mongo.Database {
+	return db.client.Database(dbName)
+
 }
