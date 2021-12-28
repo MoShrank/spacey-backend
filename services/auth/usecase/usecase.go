@@ -10,12 +10,12 @@ import (
 )
 
 type SecretKey struct {
-	SecretKey string
+	SecretKey []byte
 }
 
 type UserUsecase struct {
 	logger    logger.LoggerInterface
-	secretKey string
+	secretKey []byte
 }
 
 type UserUsecaseInterface interface {
@@ -39,7 +39,9 @@ func (u *UserUsecase) HashPassword(password string) (string, error) {
 
 func (u *UserUsecase) CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	u.logger.Error(err.Error())
+	if err != nil {
+		u.logger.Error(err)
+	}
 	return err == nil
 }
 
@@ -67,6 +69,5 @@ func (u *UserUsecase) CreateJWTWithClaims(userID string) (string, error) {
 	})
 
 	tokenString, err := token.SignedString(u.secretKey)
-
 	return tokenString, err
 }

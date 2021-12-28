@@ -45,7 +45,9 @@ func NewAuthService(
 		fx.Provide(func() gin.IRoutes { return router }),
 		fx.Provide(func() *mongo.Database { return dbConnection.GetDB() }),
 		fx.Provide(func() logger.LoggerInterface { return loggerObj }),
-		fx.Provide(func() usecase.SecretKey { return usecase.SecretKey{SecretKey: secretKey} }),
+		fx.Provide(
+			func() usecase.SecretKey { return usecase.SecretKey{SecretKey: []byte(secretKey)} },
+		),
 		fx.Provide(store.NewStore),
 		fx.Provide(usecase.NewUserUseCase),
 		fx.Provide(handler.NewHandler),

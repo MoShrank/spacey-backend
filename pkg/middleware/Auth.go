@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-func validateJWT(tokenString string, secretKey string) (bool, error) {
+func validateJWT(tokenString string, secretKey []byte) (bool, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
@@ -27,7 +27,7 @@ func validateJWT(tokenString string, secretKey string) (bool, error) {
 
 func Auth(secretKey string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := c.Request.Header.Get("Authentication")
+		tokenString := c.Request.Header.Get("Authorization")
 
 		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{
@@ -36,17 +36,16 @@ func Auth(secretKey string) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
 		tokenString = tokenString[7:]
 
-		if ok, _ := validateJWT(tokenString, secretKey); ok {
-			c.JSON(http.StatusOK, gin.H{
-				"message": "Authentication successful",
-			})
+		if ok, err := validateJWT(tokenString, []byte(secretKey)); ok {
+			c.Next()
 		} else {
+			fmt.Print(err)
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "Invalid credentials",
+				"error": "Invalid token!",
 			})
+			c.Abort()
 		}
 	}
 }
