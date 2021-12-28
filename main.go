@@ -6,8 +6,8 @@ import (
 	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/middleware"
-	"github.com/moshrank/spacey-backend/services/auth"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service"
+	userService "github.com/moshrank/spacey-backend/services/user-service"
 )
 
 func ping(c *gin.Context) {
@@ -35,7 +35,7 @@ func main() {
 	userGroup := router.Group("/user")
 	flashcardGroup := router.Group("/flashcards").Use(middleware.Auth(config.GetSecretKey()))
 
-	auth.NewAuthService(
+	userService.NewUserService(
 		userGroup,
 		dbConnection.GetDB(config.GetUserSeviceDBNAME()),
 		loggerObj,

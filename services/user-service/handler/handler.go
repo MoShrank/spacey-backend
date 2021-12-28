@@ -6,9 +6,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 
-	"github.com/moshrank/spacey-backend/services/auth/models"
-	"github.com/moshrank/spacey-backend/services/auth/store"
-	"github.com/moshrank/spacey-backend/services/auth/usecase"
+	"github.com/moshrank/spacey-backend/services/user-service/models"
+	"github.com/moshrank/spacey-backend/services/user-service/store"
+	"github.com/moshrank/spacey-backend/services/user-service/usecase"
 
 	"github.com/gin-gonic/gin"
 )

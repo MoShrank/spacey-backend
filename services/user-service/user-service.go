@@ -1,11 +1,11 @@
-package auth
+package user
 
 import (
 	"context"
 
-	"github.com/moshrank/spacey-backend/services/auth/handler"
-	"github.com/moshrank/spacey-backend/services/auth/store"
-	"github.com/moshrank/spacey-backend/services/auth/usecase"
+	"github.com/moshrank/spacey-backend/services/user-service/handler"
+	"github.com/moshrank/spacey-backend/services/user-service/store"
+	"github.com/moshrank/spacey-backend/services/user-service/usecase"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/moshrank/spacey-backend/pkg/logger"
@@ -14,11 +14,11 @@ import (
 	"go.uber.org/fx"
 )
 
-type AuthService struct {
+type UserService struct {
 	router gin.IRoutes
 }
 
-type AuthServiceInterface interface {
+type UserServiceInterface interface {
 }
 
 func runAddRoutes(
@@ -34,12 +34,12 @@ func runAddRoutes(
 	}})
 }
 
-func NewAuthService(
+func NewUserService(
 	router gin.IRoutes,
 	dbConnection *mongo.Database,
 	loggerObj logger.LoggerInterface,
 	secretKey string,
-) AuthServiceInterface {
+) UserServiceInterface {
 	fx.New(
 		fx.Provide(func() gin.IRoutes { return router }),
 		fx.Provide(func() *mongo.Database { return dbConnection }),
@@ -53,7 +53,7 @@ func NewAuthService(
 		fx.Invoke(runAddRoutes),
 	).Start(context.TODO())
 
-	return &AuthService{
+	return &UserService{
 		router: router,
 	}
 }
