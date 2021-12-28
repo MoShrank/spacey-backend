@@ -21,21 +21,21 @@ func NewLogger(logLevel string) LoggerInterface {
 }
 
 func (l *Logger) Debug(args ...interface{}) {
-	log.Println(args)
+	log.Println(args...)
 }
 
 func (l *Logger) Info(args ...interface{}) {
-	log.Println(args)
+	log.Println(args...)
 }
 
 func (l *Logger) Warn(args ...interface{}) {
-	log.Println(args)
+	log.Println(args...)
 }
 
 func (l *Logger) Error(args ...interface{}) {
-	log.Println(args)
+	log.Println(args...)
 }
 
 func (l *Logger) Fatal(args ...interface{}) {
-	log.Fatal(args)
+	log.Fatal(args...)
 }
