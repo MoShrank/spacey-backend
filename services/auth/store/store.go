@@ -14,6 +14,7 @@ type Store struct {
 type StoreInterface interface {
 	SaveUser(user *models.User) error
 	GetPassword(email string) (string, error)
+	GetUserByEmail(email string) (*models.User, error)
 }
 
 func NewStore(db *mongo.Database) StoreInterface {
@@ -37,4 +38,13 @@ func (db *Store) GetPassword(email string) (string, error) {
 		Decode(&user)
 
 	return user.Password, err
+}
+
+func (db *Store) GetUserByEmail(email string) (*models.User, error) {
+	userCollection := db.db.Collection("users")
+	var user models.User
+	err := userCollection.FindOne(context.TODO(), map[string]interface{}{"email": email}).
+		Decode(&user)
+
+	return &user, err
 }

@@ -89,21 +89,21 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	password, err := h.database.GetPassword(user.Email)
+	userFromDB, err := h.database.GetUserByEmail(user.Email)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	if !h.userUsecase.CheckPasswordHash(user.Password, password) {
+	if !h.userUsecase.CheckPasswordHash(user.Password, userFromDB.Password) {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Invalid credentials",
 		})
 		return
 	}
 
-	tokenString, _ := h.userUsecase.CreateJWTWithClaims(user.ID)
+	tokenString, _ := h.userUsecase.CreateJWTWithClaims(userFromDB.ID)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
