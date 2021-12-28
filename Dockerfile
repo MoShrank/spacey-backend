@@ -1,4 +1,4 @@
-FROM golang:1.16-alpine
+FROM golang:1.17-alpine
 
 LABEL miantainer="Moritz Eich <hey@moritz.dev"
 
