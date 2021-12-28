@@ -1,6 +1,6 @@
 FROM golang:1.16-alpine
 
-LABEL mantainer="Moritz Eich <hey@moritz.dev"
+LABEL miantainer="Moritz Eich <hey@moritz.dev"
 
 ENV PORT 8080
 
