@@ -7,6 +7,8 @@ import (
 	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service/handler"
+	"github.com/moshrank/spacey-backend/services/flashcard-management-service/store.go"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
@@ -21,15 +23,16 @@ type FlashCardServiceInterface interface {
 
 func NewFlashCardService(
 	router gin.IRoutes,
-	dbObj db.DatabaseInterface,
+	dbConnection db.DatabaseInterface,
 	loggerObj logger.LoggerInterface,
 ) FlashCardServiceInterface {
 	ctx := context.TODO()
 
 	app := fx.New(
 		fx.Provide(func() gin.IRoutes { return router }),
-		fx.Provide(func() db.DatabaseInterface { return dbObj }),
+		fx.Provide(func() *mongo.Database { return dbConnection.GetDB() }),
 		fx.Provide(func() logger.LoggerInterface { return loggerObj }),
+		fx.Provide(store.NewDeckStore),
 		fx.Provide(handler.NewCardHandler),
 		fx.Provide(handler.NewDeckHandler),
 		fx.Invoke(runHttpServer),
