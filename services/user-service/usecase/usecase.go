@@ -48,11 +48,15 @@ func (u *UserUsecase) CheckPasswordHash(password, hash string) bool {
 func (u *UserUsecase) ValidateJWT(tokenString string) (bool, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return false, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
 
 		return u.secretKey, nil
 	})
+
+	if err != nil {
+		return false, err
+	}
 
 	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		return true, nil

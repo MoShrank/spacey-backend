@@ -23,7 +23,6 @@ type Handler struct {
 type HandlerInterface interface {
 	CreateUser(c *gin.Context)
 	Login(c *gin.Context)
-	Authenticate(c *gin.Context)
 }
 
 func NewHandler(
@@ -53,10 +52,9 @@ func (h *Handler) CreateUser(c *gin.Context) {
 
 	err = h.validator.Struct(user)
 
-	if err != nil {
-		h.logger.Error(err.Error())
+	if err != nil || user.Name == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+			"error": err,
 		})
 		return
 	}
@@ -89,6 +87,15 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
+	err = h.validator.Struct(user)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+
 	userFromDB, err := h.database.GetUserByEmail(user.Email)
 
 	if err != nil {
@@ -109,21 +116,5 @@ func (h *Handler) Login(c *gin.Context) {
 		"message": "Login successful",
 		"token":   tokenString,
 	})
-
-}
-
-func (h *Handler) Authenticate(c *gin.Context) {
-	tokenString := c.Request.Header.Get("Authentication")
-	tokenString = tokenString[7:]
-
-	if ok, _ := h.userUsecase.ValidateJWT(tokenString); ok {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Authentication successful",
-		})
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "Invalid credentials",
-		})
-	}
 
 }
