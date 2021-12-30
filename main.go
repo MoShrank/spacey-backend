@@ -28,6 +28,7 @@ func main() {
 	dbConnection := db.NewDB(config.GetMongoDBConnection(), loggerObj)
 
 	router := gin.Default()
+	router.Use(middleware.CORSMiddleware())
 	router.Use(middleware.JSONMiddleware())
 
 	router.GET("/ping", ping)
