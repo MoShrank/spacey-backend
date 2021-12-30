@@ -45,7 +45,17 @@ func extractClaims(tokenStr string, secretKey []byte) (jwt.MapClaims, bool) {
 
 func Auth(secretKey string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := c.Request.Header.Get("Authorization")
+		authCookie, err := c.Request.Cookie("Authorization")
+
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Unauthorized",
+			})
+			c.Abort()
+			return
+		}
+
+		tokenString := authCookie.Value
 
 		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{
