@@ -28,7 +28,7 @@ func runAddRoutes(
 ) {
 	lifecycle.Append(fx.Hook{OnStart: func(context.Context) error {
 		router.POST("/user", handler.CreateUser)
-		router.GET("/user/login", handler.Login)
+		router.POST("/user/login", handler.Login)
 		return nil
 	}})
 }
