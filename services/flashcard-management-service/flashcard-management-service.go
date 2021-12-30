@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/moshrank/spacey-backend/pkg/logger"
+	"github.com/moshrank/spacey-backend/pkg/validator"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service/handler"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service/store.go"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,6 +25,7 @@ func NewFlashCardService(
 	router gin.IRoutes,
 	dbConnection *mongo.Database,
 	loggerObj logger.LoggerInterface,
+	validatorObj validator.ValidatorInterface,
 ) FlashCardServiceInterface {
 	ctx := context.TODO()
 
@@ -31,7 +33,9 @@ func NewFlashCardService(
 		fx.Provide(func() gin.IRoutes { return router }),
 		fx.Provide(func() *mongo.Database { return dbConnection }),
 		fx.Provide(func() logger.LoggerInterface { return loggerObj }),
+		fx.Provide(func() validator.ValidatorInterface { return validatorObj }),
 		fx.Provide(store.NewDeckStore),
+		fx.Provide(store.NewCardStore),
 		fx.Provide(handler.NewCardHandler),
 		fx.Provide(handler.NewDeckHandler),
 		fx.Invoke(runHttpServer),
