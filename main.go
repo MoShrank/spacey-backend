@@ -6,6 +6,7 @@ import (
 	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/middleware"
+	"github.com/moshrank/spacey-backend/pkg/validator"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service"
 	userService "github.com/moshrank/spacey-backend/services/user-service"
 )
@@ -26,8 +27,10 @@ func main() {
 
 	loggerObj := logger.NewLogger(config.GetLogLevel())
 	dbConnection := db.NewDB(config.GetMongoDBConnection(), loggerObj)
+	validator := validator.NewValidator()
 
 	router := gin.Default()
+
 	router.Use(middleware.CORSMiddleware())
 	router.Use(middleware.JSONMiddleware())
 
@@ -46,6 +49,7 @@ func main() {
 		flashcardGroup,
 		dbConnection.GetDB(config.GetFlashcardServiceDBName()),
 		loggerObj,
+		validator,
 	)
 
 	router.Run(":" + config.GetPort())

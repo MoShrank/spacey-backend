@@ -19,7 +19,7 @@ type DeckStoreInterface interface {
 	GetDeck(userID string, id string) (*models.Deck, error)
 	GetDecks(userID string) ([]models.Deck, error)
 	CreateDeck(deck *models.Deck) error
-	UpdateDeck(userID string, deck *models.Deck) error
+	UpdateDeck(deck *models.Deck) error
 	DeleteDeck(userID string, id string) error
 }
 
@@ -75,11 +75,11 @@ func (store *DeckStore) CreateDeck(deck *models.Deck) error {
 	return nil
 }
 
-func (store *DeckStore) UpdateDeck(userID string, deck *models.Deck) error {
+func (store *DeckStore) UpdateDeck(deck *models.Deck) error {
 	ctx := context.TODO()
 
 	_, err := store.db.Collection(DECK_COLLECTION).
-		UpdateOne(ctx, bson.M{"_id": deck.ID, "UserID": userID}, bson.M{"$set": deck})
+		UpdateOne(ctx, bson.M{"_id": deck.ID}, bson.M{"$set": deck})
 	if err != nil {
 		store.logger.Fatal(err)
 	}
