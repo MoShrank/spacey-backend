@@ -3,8 +3,9 @@ package handler
 import (
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
+	"github.com/moshrank/spacey-backend/pkg/httperror"
 	"github.com/moshrank/spacey-backend/pkg/logger"
+	"github.com/moshrank/spacey-backend/pkg/validator"
 
 	"github.com/moshrank/spacey-backend/services/user-service/models"
 	"github.com/moshrank/spacey-backend/services/user-service/store"
@@ -17,7 +18,7 @@ type Handler struct {
 	database    store.StoreInterface
 	logger      logger.LoggerInterface
 	userUsecase usecase.UserUsecaseInterface
-	validator   *validator.Validate
+	validator   validator.ValidatorInterface
 }
 
 type HandlerInterface interface {
@@ -29,42 +30,32 @@ func NewHandler(
 	database store.StoreInterface,
 	logger logger.LoggerInterface,
 	usecase usecase.UserUsecaseInterface,
+	validatorObj validator.ValidatorInterface,
 ) HandlerInterface {
 	return &Handler{
 		database:    database,
 		logger:      logger,
 		userUsecase: usecase,
-		validator:   validator.New(),
+		validator:   validatorObj,
 	}
 }
 
 func (h *Handler) CreateUser(c *gin.Context) {
 	var user models.User
-	err := c.BindJSON(&user)
 
-	if err != nil {
-		h.logger.Error(err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+	if err := h.validator.ValidateJSON(c, &user); err != nil {
 		return
 	}
 
-	err = h.validator.Struct(user)
-
-	if err != nil || user.Name == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
-		})
+	if user.Name == "" {
+		httperror.BadRequest(c)
 		return
 	}
 
 	user.Password, _ = h.userUsecase.HashPassword(user.Password)
 
-	err = h.database.SaveUser(&user)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	if err := h.database.SaveUser(&user); err != nil {
+		httperror.DatabaseError(c)
 		return
 	}
 
@@ -78,35 +69,20 @@ func (h *Handler) CreateUser(c *gin.Context) {
 
 func (h *Handler) Login(c *gin.Context) {
 	var user models.User
-	err := c.BindJSON(&user)
 
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	err = h.validator.Struct(user)
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
-		})
+	if err := h.validator.ValidateJSON(c, &user); err != nil {
 		return
 	}
 
 	userFromDB, err := h.database.GetUserByEmail(user.Email)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httperror.DatabaseError(c)
 		return
 	}
 
 	if !h.userUsecase.CheckPasswordHash(user.Password, userFromDB.Password) {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "Invalid credentials",
-		})
+		httperror.Unauthorized(c)
 		return
 	}
 

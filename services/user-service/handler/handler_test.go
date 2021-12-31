@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/moshrank/spacey-backend/pkg/logger"
+	"github.com/moshrank/spacey-backend/pkg/validator"
 	"github.com/moshrank/spacey-backend/services/user-service/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -107,6 +108,7 @@ func TestCreateUserHandler(t *testing.T) {
 		dbMock,
 		logger.NewLogger(""),
 		userUsecaseMock,
+		validator.NewValidator(),
 	)
 
 	dbMock.On("SaveUser", mock.Anything).Return(nil)
@@ -161,6 +163,7 @@ func TestLogin(t *testing.T) {
 		dbMock,
 		logger.NewLogger(""),
 		userUsecaseMock,
+		validator.NewValidator(),
 	)
 
 	dbMock.On("GetUserByEmail", mock.Anything).Return(&models.User{}, nil)

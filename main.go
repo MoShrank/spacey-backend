@@ -44,6 +44,7 @@ func main() {
 		dbConnection.GetDB(config.GetUserSeviceDBNAME()),
 		loggerObj,
 		config.GetSecretKey(),
+		validator,
 	)
 	flashcard.NewFlashCardService(
 		flashcardGroup,

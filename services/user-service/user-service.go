@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/moshrank/spacey-backend/pkg/logger"
+	"github.com/moshrank/spacey-backend/pkg/validator"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
@@ -38,6 +39,7 @@ func NewUserService(
 	dbConnection *mongo.Database,
 	loggerObj logger.LoggerInterface,
 	secretKey string,
+	validatorObj validator.ValidatorInterface,
 ) UserServiceInterface {
 	fx.New(
 		fx.Provide(func() gin.IRoutes { return router }),
@@ -46,6 +48,7 @@ func NewUserService(
 		fx.Provide(
 			func() usecase.SecretKey { return usecase.SecretKey{SecretKey: []byte(secretKey)} },
 		),
+		fx.Provide(func() validator.ValidatorInterface { return validatorObj }),
 		fx.Provide(store.NewStore),
 		fx.Provide(usecase.NewUserUseCase),
 		fx.Provide(handler.NewHandler),
