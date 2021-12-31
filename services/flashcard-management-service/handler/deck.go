@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/moshrank/spacey-backend/pkg/httperror"
@@ -92,6 +93,7 @@ func (h *DeckHandler) CreateDeck(c *gin.Context) {
 	}
 
 	deck.UserID = userID.(string)
+	deck.CreatedAt = time.Now()
 
 	if err := h.deckStore.CreateDeck(&deck); err != nil {
 		httperror.DatabaseError(c)
@@ -120,6 +122,7 @@ func (h *DeckHandler) UpdateDeck(c *gin.Context) {
 
 	deck.UserID = userID.(string)
 	deck.ID = c.Param("deckID")
+	deck.UpdatedAt = time.Now()
 
 	if err := h.deckStore.UpdateDeck(&deck); err != nil {
 		httperror.DatabaseError(c)

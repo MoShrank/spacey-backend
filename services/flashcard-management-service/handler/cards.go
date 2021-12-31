@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/moshrank/spacey-backend/pkg/httperror"
 	"github.com/moshrank/spacey-backend/pkg/logger"
@@ -49,6 +51,7 @@ func (h *CardHandler) CreateCard(c *gin.Context) {
 	}
 
 	card.UserID = userID.(string)
+	card.CreatedAt = time.Now()
 
 	if err := h.cardStore.CreateCard(&card); err != nil {
 		httperror.DatabaseError(c)
@@ -117,6 +120,7 @@ func (h *CardHandler) UpdateCard(c *gin.Context) {
 
 	card.UserID = userID.(string)
 	card.ID = cardID
+	card.UpdatedAt = time.Now()
 
 	if err := h.cardStore.UpdateCard(&card); err != nil {
 		httperror.DatabaseError(c)
