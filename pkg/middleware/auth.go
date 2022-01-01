@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/moshrank/spacey-backend/pkg/httperror"
 )
 
 func validateJWT(tokenString string, secretKey []byte) (bool, error) {
@@ -48,9 +49,7 @@ func Auth(secretKey string) gin.HandlerFunc {
 		authCookie, err := c.Request.Cookie("Authorization")
 
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "Unauthorized",
-			})
+			httperror.Unauthorized(c)
 			c.Abort()
 			return
 		}
@@ -58,9 +57,7 @@ func Auth(secretKey string) gin.HandlerFunc {
 		tokenString := authCookie.Value
 
 		if tokenString == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "Missing token",
-			})
+			httperror.Unauthorized(c)
 			c.Abort()
 			return
 		}
@@ -75,9 +72,7 @@ func Auth(secretKey string) gin.HandlerFunc {
 
 				c.Next()
 			} else {
-				c.JSON(http.StatusUnauthorized, gin.H{
-					"error": "Invalid credentials",
-				})
+				httperror.Unauthorized(c)
 				c.Abort()
 				return
 			}
