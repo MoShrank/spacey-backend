@@ -44,14 +44,11 @@ func loadEnv(name, defaultValue string) string {
 }
 
 func NewConfig() (ConfigInterface, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return nil, err
-	}
+	godotenv.Load()
 
 	return &Config{
 		Port:                   loadEnv("PORT", "8080"),
-		MongoDBConnection:      loadEnv("MONGO_DB_CONNECTION", "mongodb://localhost:27017"),
+		MongoDBConnection:      loadEnv("MONGO_DB_CONNECTION", "mongodb://mongodb:27017"),
 		LogLevel:               loadEnv("LOG_LEVEL", "debug"),
 		AuthSecretKey:          loadEnvWithoutDefault("AUTH_SECRET_KEY"),
 		UserServiceDBName:      loadEnvWithoutDefault("USER_SERVICE_DB_NAME"),
