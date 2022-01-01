@@ -1,10 +1,10 @@
 package logger
 
-import "log"
+import (
+	"os"
 
-type Logger struct {
-	LogLevel string
-}
+	log "github.com/sirupsen/logrus"
+)
 
 type LoggerInterface interface {
 	Debug(args ...interface{})
@@ -12,30 +12,22 @@ type LoggerInterface interface {
 	Warn(args ...interface{})
 	Error(args ...interface{})
 	Fatal(args ...interface{})
+	Panic(args ...interface{})
+}
+
+var logLevelMapping = map[string]log.Level{
+	"debug": log.DebugLevel,
+	"info":  log.InfoLevel,
+	"warn":  log.WarnLevel,
+	"error": log.ErrorLevel,
+	"fatal": log.FatalLevel,
+	"panic": log.PanicLevel,
 }
 
 func NewLogger(logLevel string) LoggerInterface {
-	return &Logger{
-		LogLevel: logLevel,
-	}
-}
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetOutput(os.Stdout)
+	log.SetLevel(logLevelMapping[logLevel])
 
-func (l *Logger) Debug(args ...interface{}) {
-	log.Println(args...)
-}
-
-func (l *Logger) Info(args ...interface{}) {
-	log.Println(args...)
-}
-
-func (l *Logger) Warn(args ...interface{}) {
-	log.Println(args...)
-}
-
-func (l *Logger) Error(args ...interface{}) {
-	log.Println(args...)
-}
-
-func (l *Logger) Fatal(args ...interface{}) {
-	log.Fatal(args...)
+	return log.New()
 }
