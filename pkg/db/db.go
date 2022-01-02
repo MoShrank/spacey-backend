@@ -15,24 +15,28 @@ type Database struct {
 
 type DatabaseInterface interface {
 	GetDB(string) *mongo.Database
+	connect(string) (*mongo.Client, error)
 }
 
 func NewDB(connectionString string, logger logger.LoggerInterface) DatabaseInterface {
-	client, err := connect(connectionString)
-
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	logger.Debug("Database Connection Established!")
-
-	return &Database{
-		client: client,
+	db := &Database{
+		client: nil,
 		logger: logger,
 	}
+
+	client, err := db.connect(connectionString)
+
+	if err != nil {
+		logger.Fatal("Could not connect to Database:", err)
+	}
+
+	db.client = client
+	logger.Info("Database Connection Established!")
+
+	return db
 }
 
-func connect(connectionString string) (*mongo.Client, error) {
+func (db *Database) connect(connectionString string) (*mongo.Client, error) {
 	clientOptions := options.Client().ApplyURI(connectionString)
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {

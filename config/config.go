@@ -14,6 +14,7 @@ type Config struct {
 	AuthSecretKey          string
 	UserServiceDBName      string
 	FlashcardServiceDBName string
+	GraylogConnection      string
 }
 
 type ConfigInterface interface {
@@ -23,6 +24,7 @@ type ConfigInterface interface {
 	GetSecretKey() string
 	GetUserSeviceDBNAME() string
 	GetFlashcardServiceDBName() string
+	GetGrayLogConnection() string
 }
 
 func loadEnvWithoutDefault(key string) string {
@@ -50,6 +52,7 @@ func NewConfig() (ConfigInterface, error) {
 		Port:                   loadEnv("PORT", "8080"),
 		MongoDBConnection:      loadEnv("MONGO_DB_CONNECTION", "mongodb://mongodb:27017"),
 		LogLevel:               loadEnv("LOG_LEVEL", "debug"),
+		GraylogConnection:      loadEnv("GRAYLOG_CONNECTION", "localhost://localhost:12201"),
 		AuthSecretKey:          loadEnvWithoutDefault("AUTH_SECRET_KEY"),
 		UserServiceDBName:      loadEnvWithoutDefault("USER_SERVICE_DB_NAME"),
 		FlashcardServiceDBName: loadEnvWithoutDefault("FLASHCARD_SERVICE_DB_NAME"),
@@ -78,4 +81,8 @@ func (c *Config) GetUserSeviceDBNAME() string {
 
 func (c *Config) GetFlashcardServiceDBName() string {
 	return c.FlashcardServiceDBName
+}
+
+func (c *Config) GetGrayLogConnection() string {
+	return c.GraylogConnection
 }

@@ -25,7 +25,7 @@ func main() {
 		panic(err)
 	}
 
-	loggerObj := logger.NewLogger(config.GetLogLevel())
+	loggerObj := logger.NewLogger(config.GetLogLevel(), config.GetGrayLogConnection())
 	dbConnection := db.NewDB(config.GetMongoDBConnection(), loggerObj)
 	validator := validator.NewValidator()
 

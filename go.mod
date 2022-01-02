@@ -13,6 +13,7 @@ require (
 	go.mongodb.org/mongo-driver v1.8.1
 	go.uber.org/fx v1.16.0
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
+	gopkg.in/Graylog2/go-gelf.v2 v2.0.0-20191017102106-1550ee647df0
 )
 
 require (

@@ -1,9 +1,11 @@
 package logger
 
 import (
+	"io"
 	"os"
 
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/Graylog2/go-gelf.v2/gelf"
 )
 
 type LoggerInterface interface {
@@ -24,10 +26,18 @@ var logLevelMapping = map[string]log.Level{
 	"panic": log.PanicLevel,
 }
 
-func NewLogger(logLevel string) LoggerInterface {
+func NewLogger(logLevel, graylogConnection string) LoggerInterface {
 	log.SetFormatter(&log.JSONFormatter{})
-	log.SetOutput(os.Stdout)
 	log.SetLevel(logLevelMapping[logLevel])
+	log.SetOutput(os.Stderr)
+
+	gelfWriter, err := gelf.NewUDPWriter(graylogConnection)
+
+	if err != nil {
+		log.Warn("Failed to connect to graylog: ", err)
+	} else {
+		log.SetOutput(io.MultiWriter(os.Stderr, gelfWriter))
+	}
 
 	return log.New()
 }
