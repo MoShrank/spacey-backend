@@ -53,6 +53,6 @@ func main() {
 		validator,
 	)
 
-	router.Run(":" + config.GetPort())
+	router.Run("localhost" + ":" + config.GetPort())
 
 }
