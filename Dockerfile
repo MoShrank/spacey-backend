@@ -10,4 +10,6 @@ WORKDIR /app
 
 RUN ls | grep "main"
 
+EXPOSE 80
+
 CMD ["./main"]
