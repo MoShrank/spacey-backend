@@ -6,8 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/gin-gonic/gin"
-	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/validator"
 	"github.com/moshrank/spacey-backend/services/user-service/models"
 	"github.com/stretchr/testify/assert"
@@ -106,7 +107,7 @@ func TestCreateUserHandler(t *testing.T) {
 
 	var handler = NewHandler(
 		dbMock,
-		logger.NewLogger(""),
+		log.New(),
 		userUsecaseMock,
 		validator.NewValidator(),
 	)
@@ -161,7 +162,7 @@ func TestLogin(t *testing.T) {
 
 	var handler = NewHandler(
 		dbMock,
-		logger.NewLogger(""),
+		log.New(),
 		userUsecaseMock,
 		validator.NewValidator(),
 	)

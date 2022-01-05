@@ -6,8 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/gin-gonic/gin"
-	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/validator"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service/models"
 	"github.com/stretchr/testify/assert"
@@ -90,7 +91,7 @@ func TestCreateCard(t *testing.T) {
 
 	cardStoreMock := new(CardStoreMock)
 
-	var handler = NewCardHandler(logger.NewLogger(""), cardStoreMock, validator.NewValidator())
+	var handler = NewCardHandler(log.New(), cardStoreMock, validator.NewValidator())
 
 	cardStoreMock.On("CreateCard", mock.Anything).Return(nil)
 
@@ -134,7 +135,7 @@ func TestGetCard(t *testing.T) {
 
 	cardStoreMock := new(CardStoreMock)
 
-	var handler = NewCardHandler(logger.NewLogger(""), cardStoreMock, validator.NewValidator())
+	var handler = NewCardHandler(log.New(), cardStoreMock, validator.NewValidator())
 
 	cardStoreMock.On("GetCard", mock.Anything, mock.Anything).Return(&models.Card{}, nil)
 
@@ -178,7 +179,7 @@ func TestGetCards(t *testing.T) {
 
 	cardStoreMock := new(CardStoreMock)
 
-	var handler = NewCardHandler(logger.NewLogger(""), cardStoreMock, validator.NewValidator())
+	var handler = NewCardHandler(log.New(), cardStoreMock, validator.NewValidator())
 
 	cardStoreMock.On("GetCards", mock.Anything, mock.Anything).Return([]models.Card{}, nil)
 
@@ -249,7 +250,7 @@ func TestUpdateCard(t *testing.T) {
 
 	cardStoreMock := new(CardStoreMock)
 
-	var handler = NewCardHandler(logger.NewLogger(""), cardStoreMock, validator.NewValidator())
+	var handler = NewCardHandler(log.New(), cardStoreMock, validator.NewValidator())
 
 	cardStoreMock.On("UpdateCard", mock.Anything).Return(nil)
 
@@ -293,7 +294,7 @@ func TestDeleteCard(t *testing.T) {
 
 	cardStoreMock := new(CardStoreMock)
 
-	var handler = NewCardHandler(logger.NewLogger(""), cardStoreMock, validator.NewValidator())
+	var handler = NewCardHandler(log.New(), cardStoreMock, validator.NewValidator())
 
 	cardStoreMock.On("DeleteCard", mock.Anything, mock.Anything).Return(nil)
 

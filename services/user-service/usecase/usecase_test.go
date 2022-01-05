@@ -3,12 +3,13 @@ package usecase
 import (
 	"testing"
 
-	"github.com/moshrank/spacey-backend/pkg/logger"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHashPassword(t *testing.T) {
-	var usecase = NewUserUseCase(logger.NewLogger(""), SecretKey{SecretKey: []byte("secret")})
+	var usecase = NewUserUseCase(log.New(), SecretKey{SecretKey: []byte("secret")})
 	password := "password"
 	hashedPassword, err := usecase.HashPassword(password)
 
@@ -18,7 +19,7 @@ func TestHashPassword(t *testing.T) {
 }
 
 func TestCheckPasswordHash(t *testing.T) {
-	var usecase = NewUserUseCase(logger.NewLogger(""), SecretKey{SecretKey: []byte("secret")})
+	var usecase = NewUserUseCase(log.New(), SecretKey{SecretKey: []byte("secret")})
 	password := "password"
 	hash := "password"
 
@@ -26,7 +27,7 @@ func TestCheckPasswordHash(t *testing.T) {
 }
 
 func TestValidateJWT(t *testing.T) {
-	var usecase = NewUserUseCase(logger.NewLogger(""), SecretKey{SecretKey: []byte("secret")})
+	var usecase = NewUserUseCase(log.New(), SecretKey{SecretKey: []byte("secret")})
 	jwtString := "test"
 
 	ok, err := usecase.ValidateJWT(jwtString)
@@ -36,7 +37,7 @@ func TestValidateJWT(t *testing.T) {
 }
 
 func TestCreateJWTWithClaims(t *testing.T) {
-	var usecase = NewUserUseCase(logger.NewLogger(""), SecretKey{SecretKey: []byte("secret")})
+	var usecase = NewUserUseCase(log.New(), SecretKey{SecretKey: []byte("secret")})
 
 	jwtString, err := usecase.CreateJWTWithClaims("test")
 

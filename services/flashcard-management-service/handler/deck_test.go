@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/validator"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service/models"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -80,7 +80,7 @@ func TestCreateDeck(t *testing.T) {
 
 	deckStoreMock := new(deckStoreMock)
 
-	var handler = NewDeckHandler(logger.NewLogger(""), deckStoreMock, validatorObj)
+	var handler = NewDeckHandler(log.New(), deckStoreMock, validatorObj)
 
 	deckStoreMock.On("CreateDeck", mock.Anything).Return(nil)
 
@@ -124,7 +124,7 @@ func TestGetDecks(t *testing.T) {
 
 	deckStoreMock := new(deckStoreMock)
 
-	var handler = NewDeckHandler(logger.NewLogger(""), deckStoreMock, validatorObj)
+	var handler = NewDeckHandler(log.New(), deckStoreMock, validatorObj)
 
 	deckStoreMock.On("GetDecks", mock.Anything).Return([]models.Deck{}, nil)
 
@@ -171,7 +171,7 @@ func TestGetDeck(t *testing.T) {
 
 	deckStoreMock := new(deckStoreMock)
 
-	var handler = NewDeckHandler(logger.NewLogger(""), deckStoreMock, validatorObj)
+	var handler = NewDeckHandler(log.New(), deckStoreMock, validatorObj)
 
 	deckStoreMock.On("GetDeck", mock.Anything, mock.Anything).Return(&models.Deck{}, nil)
 
@@ -235,7 +235,7 @@ func TestUpdateDeck(t *testing.T) {
 
 	deckStoreMock := new(deckStoreMock)
 
-	var handler = NewDeckHandler(logger.NewLogger(""), deckStoreMock, validatorObj)
+	var handler = NewDeckHandler(log.New(), deckStoreMock, validatorObj)
 
 	deckStoreMock.On("UpdateDeck", mock.Anything).Return(nil)
 
@@ -282,7 +282,7 @@ func TestDeleteDeck(t *testing.T) {
 
 	deckStoreMock := new(deckStoreMock)
 
-	var handler = NewDeckHandler(logger.NewLogger(""), deckStoreMock, validatorObj)
+	var handler = NewDeckHandler(log.New(), deckStoreMock, validatorObj)
 
 	deckStoreMock.On("DeleteDeck", mock.Anything, mock.Anything).Return(nil)
 
