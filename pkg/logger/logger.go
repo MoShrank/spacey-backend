@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/moshrank/spacey-backend/config"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/Graylog2/go-gelf.v2/gelf"
 )
@@ -26,10 +27,22 @@ var logLevelMapping = map[string]log.Level{
 	"panic": log.PanicLevel,
 }
 
-func NewLogger(logLevel, graylogConnection string) LoggerInterface {
+func NewLogger(
+	logLevel, graylogConnection string,
+	curConfig config.ConfigInterface,
+) LoggerInterface {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetLevel(logLevelMapping[logLevel])
 	log.SetOutput(os.Stderr)
+
+	logger := log.WithFields(
+		log.Fields{
+			"service":                   "spacey-backend",
+			"port":                      curConfig.GetPort(),
+			"user-service-db-name":      curConfig.GetUserSeviceDBNAME(),
+			"flashcard-service-db-name": curConfig.GetFlashcardServiceDBName(),
+		},
+	)
 
 	gelfWriter, err := gelf.NewUDPWriter(graylogConnection)
 
@@ -39,5 +52,5 @@ func NewLogger(logLevel, graylogConnection string) LoggerInterface {
 		log.SetOutput(io.MultiWriter(os.Stderr, gelfWriter))
 	}
 
-	return log.New()
+	return logger
 }
