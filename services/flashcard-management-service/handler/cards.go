@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/moshrank/spacey-backend/pkg/httperror"
+	"github.com/moshrank/spacey-backend/pkg/httpconst"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/validator"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service/models"
@@ -40,7 +40,7 @@ func NewCardHandler(
 func (h *CardHandler) CreateCard(c *gin.Context) {
 	userID, ok := c.Get("userID")
 	if !ok || userID == "" {
-		httperror.Unauthorized(c)
+		httpconst.WriteUnauthorized(c)
 		return
 	}
 
@@ -54,7 +54,7 @@ func (h *CardHandler) CreateCard(c *gin.Context) {
 	card.CreatedAt = time.Now()
 
 	if err := h.cardStore.CreateCard(&card); err != nil {
-		httperror.DatabaseError(c)
+		httpconst.WriteDatabaseError(c)
 		return
 	}
 
@@ -67,7 +67,7 @@ func (h *CardHandler) CreateCard(c *gin.Context) {
 func (h *CardHandler) GetCard(c *gin.Context) {
 	userID, ok := c.Get("userID")
 	if !ok || userID == "" {
-		httperror.Unauthorized(c)
+		httpconst.WriteUnauthorized(c)
 		return
 	}
 
@@ -75,7 +75,7 @@ func (h *CardHandler) GetCard(c *gin.Context) {
 
 	card, err := h.cardStore.GetCard(userID.(string), cardID)
 	if err != nil {
-		httperror.DatabaseError(c)
+		httpconst.WriteDatabaseError(c)
 		return
 	}
 
@@ -88,13 +88,13 @@ func (h *CardHandler) GetCard(c *gin.Context) {
 func (h *CardHandler) GetCards(c *gin.Context) {
 	userID, ok := c.Get("userID")
 	if !ok || userID == "" {
-		httperror.Unauthorized(c)
+		httpconst.WriteUnauthorized(c)
 		return
 	}
 
 	cards, err := h.cardStore.GetCards(userID.(string))
 	if err != nil {
-		httperror.DatabaseError(c)
+		httpconst.WriteDatabaseError(c)
 		return
 	}
 
@@ -106,7 +106,7 @@ func (h *CardHandler) GetCards(c *gin.Context) {
 func (h *CardHandler) UpdateCard(c *gin.Context) {
 	userID, ok := c.Get("userID")
 	if !ok || userID == "" {
-		httperror.Unauthorized(c)
+		httpconst.WriteUnauthorized(c)
 		return
 	}
 
@@ -123,7 +123,7 @@ func (h *CardHandler) UpdateCard(c *gin.Context) {
 	card.UpdatedAt = time.Now()
 
 	if err := h.cardStore.UpdateCard(&card); err != nil {
-		httperror.DatabaseError(c)
+		httpconst.WriteDatabaseError(c)
 		return
 	}
 
@@ -136,14 +136,14 @@ func (h *CardHandler) UpdateCard(c *gin.Context) {
 func (h *CardHandler) DeleteCard(c *gin.Context) {
 	userID, ok := c.Get("userID")
 	if !ok || userID == "" {
-		httperror.Unauthorized(c)
+		httpconst.WriteUnauthorized(c)
 		return
 	}
 
 	cardID := c.Param("id")
 
 	if err := h.cardStore.DeleteCard(userID.(string), cardID); err != nil {
-		httperror.DatabaseError(c)
+		httpconst.WriteDatabaseError(c)
 		return
 	}
 

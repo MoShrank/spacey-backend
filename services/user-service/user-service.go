@@ -38,16 +38,12 @@ func NewUserService(
 	router gin.IRoutes,
 	dbConnection *mongo.Database,
 	loggerObj logger.LoggerInterface,
-	secretKey string,
 	validatorObj validator.ValidatorInterface,
 ) UserServiceInterface {
 	fx.New(
 		fx.Provide(func() gin.IRoutes { return router }),
 		fx.Provide(func() *mongo.Database { return dbConnection }),
 		fx.Provide(func() logger.LoggerInterface { return loggerObj }),
-		fx.Provide(
-			func() usecase.SecretKey { return usecase.SecretKey{SecretKey: []byte(secretKey)} },
-		),
 		fx.Provide(func() validator.ValidatorInterface { return validatorObj }),
 		fx.Provide(store.NewStore),
 		fx.Provide(usecase.NewUserUseCase),

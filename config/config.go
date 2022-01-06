@@ -21,7 +21,7 @@ type ConfigInterface interface {
 	GetPort() string
 	GetMongoDBConnection() string
 	GetLogLevel() string
-	GetSecretKey() string
+	GetJWTSecret() string
 	GetUserSeviceDBNAME() string
 	GetFlashcardServiceDBName() string
 	GetGrayLogConnection() string
@@ -71,7 +71,7 @@ func (c *Config) GetLogLevel() string {
 	return c.LogLevel
 }
 
-func (c *Config) GetSecretKey() string {
+func (c *Config) GetJWTSecret() string {
 	return c.AuthSecretKey
 }
 
