@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/moshrank/spacey-backend/pkg/logger"
-	"github.com/moshrank/spacey-backend/services/flashcard-management-service/models"
+	"github.com/moshrank/spacey-backend/services/flashcard-management-service/entity"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,10 +16,10 @@ type CardStore struct {
 }
 
 type CardStoreInterface interface {
-	GetCard(userID string, id string) (*models.Card, error)
-	GetCards(userID string) ([]models.Card, error)
-	CreateCard(Card *models.Card) error
-	UpdateCard(Card *models.Card) error
+	GetCard(userID string, id string) (*entity.Card, error)
+	GetCards(userID string) ([]entity.Card, error)
+	CreateCard(Card *entity.Card) error
+	UpdateCard(Card *entity.Card) error
 	DeleteCard(userID string, id string) error
 }
 
@@ -35,10 +35,10 @@ func NewCardStore(
 
 const CARD_COLLECTION = "cards"
 
-func (store *CardStore) GetCard(userID string, id string) (*models.Card, error) {
+func (store *CardStore) GetCard(userID string, id string) (*entity.Card, error) {
 	ctx := context.TODO()
 
-	var Card models.Card
+	var Card entity.Card
 	err := store.db.Collection(CARD_COLLECTION).
 		FindOne(ctx, bson.M{"_id": id, "UserID": userID}).
 		Decode(&Card)
@@ -50,14 +50,14 @@ func (store *CardStore) GetCard(userID string, id string) (*models.Card, error) 
 	return &Card, nil
 }
 
-func (store *CardStore) GetCards(userID string) ([]models.Card, error) {
+func (store *CardStore) GetCards(userID string) ([]entity.Card, error) {
 	ctx := context.TODO()
 
 	cursor, err := store.db.Collection(CARD_COLLECTION).Find(ctx, bson.M{"UserID": userID})
 	if err != nil {
 		store.logger.Fatal(err)
 	}
-	var Cards []models.Card
+	var Cards []entity.Card
 	if err = cursor.All(ctx, &Cards); err != nil {
 		store.logger.Fatal(err)
 	}
@@ -65,7 +65,7 @@ func (store *CardStore) GetCards(userID string) ([]models.Card, error) {
 	return Cards, nil
 }
 
-func (store *CardStore) CreateCard(Card *models.Card) error {
+func (store *CardStore) CreateCard(Card *entity.Card) error {
 	ctx := context.TODO()
 	_, err := store.db.Collection(CARD_COLLECTION).InsertOne(ctx, Card)
 	if err != nil {
@@ -75,7 +75,7 @@ func (store *CardStore) CreateCard(Card *models.Card) error {
 	return nil
 }
 
-func (store *CardStore) UpdateCard(Card *models.Card) error {
+func (store *CardStore) UpdateCard(Card *entity.Card) error {
 	ctx := context.TODO()
 
 	_, err := store.db.Collection(CARD_COLLECTION).

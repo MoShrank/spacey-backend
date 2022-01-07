@@ -7,7 +7,7 @@ import (
 	"github.com/moshrank/spacey-backend/pkg/httpconst"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/validator"
-	"github.com/moshrank/spacey-backend/services/flashcard-management-service/models"
+	"github.com/moshrank/spacey-backend/services/flashcard-management-service/entity"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service/store.go"
 )
 
@@ -44,7 +44,7 @@ func (h *CardHandler) CreateCard(c *gin.Context) {
 		return
 	}
 
-	var card models.Card
+	var card entity.Card
 
 	if err := h.validator.ValidateJSON(c, &card); err != nil {
 		return
@@ -110,7 +110,7 @@ func (h *CardHandler) UpdateCard(c *gin.Context) {
 		return
 	}
 
-	var card models.Card
+	var card entity.Card
 
 	if err := h.validator.ValidateJSON(c, &card); err != nil {
 		return

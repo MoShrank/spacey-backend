@@ -10,7 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/moshrank/spacey-backend/pkg/validator"
-	"github.com/moshrank/spacey-backend/services/flashcard-management-service/models"
+	"github.com/moshrank/spacey-backend/services/flashcard-management-service/entity"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -19,22 +19,22 @@ type CardStoreMock struct {
 	mock.Mock
 }
 
-func (m *CardStoreMock) CreateCard(Card *models.Card) error {
+func (m *CardStoreMock) CreateCard(Card *entity.Card) error {
 	args := m.Called(Card)
 	return args.Error(0)
 }
 
-func (m *CardStoreMock) GetCards(userID string) ([]models.Card, error) {
+func (m *CardStoreMock) GetCards(userID string) ([]entity.Card, error) {
 	args := m.Called(userID)
-	return args.Get(0).([]models.Card), args.Error(1)
+	return args.Get(0).([]entity.Card), args.Error(1)
 }
 
-func (m *CardStoreMock) GetCard(userID string, id string) (*models.Card, error) {
+func (m *CardStoreMock) GetCard(userID string, id string) (*entity.Card, error) {
 	args := m.Called(userID, id)
-	return args.Get(0).(*models.Card), args.Error(1)
+	return args.Get(0).(*entity.Card), args.Error(1)
 }
 
-func (m *CardStoreMock) UpdateCard(Card *models.Card) error {
+func (m *CardStoreMock) UpdateCard(Card *entity.Card) error {
 	args := m.Called(Card)
 	return args.Error(0)
 }
@@ -137,7 +137,7 @@ func TestGetCard(t *testing.T) {
 
 	var handler = NewCardHandler(log.New(), cardStoreMock, validator.NewValidator())
 
-	cardStoreMock.On("GetCard", mock.Anything, mock.Anything).Return(&models.Card{}, nil)
+	cardStoreMock.On("GetCard", mock.Anything, mock.Anything).Return(&entity.Card{}, nil)
 
 	for _, test := range tests {
 
@@ -181,7 +181,7 @@ func TestGetCards(t *testing.T) {
 
 	var handler = NewCardHandler(log.New(), cardStoreMock, validator.NewValidator())
 
-	cardStoreMock.On("GetCards", mock.Anything, mock.Anything).Return([]models.Card{}, nil)
+	cardStoreMock.On("GetCards", mock.Anything, mock.Anything).Return([]entity.Card{}, nil)
 
 	for _, test := range tests {
 

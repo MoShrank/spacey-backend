@@ -8,7 +8,7 @@ import (
 	"github.com/moshrank/spacey-backend/pkg/httpconst"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/validator"
-	"github.com/moshrank/spacey-backend/services/flashcard-management-service/models"
+	"github.com/moshrank/spacey-backend/services/flashcard-management-service/entity"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service/store.go"
 )
 
@@ -87,7 +87,7 @@ func (h *DeckHandler) CreateDeck(c *gin.Context) {
 		return
 	}
 
-	var deck models.Deck
+	var deck entity.Deck
 	if err := h.validator.ValidateJSON(c, &deck); err != nil {
 		return
 	}
@@ -114,7 +114,7 @@ func (h *DeckHandler) UpdateDeck(c *gin.Context) {
 		return
 	}
 
-	var deck models.Deck
+	var deck entity.Deck
 
 	if err := h.validator.ValidateJSON(c, &deck); err != nil {
 		return

@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/moshrank/spacey-backend/pkg/validator"
-	"github.com/moshrank/spacey-backend/services/flashcard-management-service/models"
+	"github.com/moshrank/spacey-backend/services/flashcard-management-service/entity"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -20,22 +20,22 @@ type deckStoreMock struct {
 	mock.Mock
 }
 
-func (m *deckStoreMock) CreateDeck(deck *models.Deck) error {
+func (m *deckStoreMock) CreateDeck(deck *entity.Deck) error {
 	args := m.Called(deck)
 	return args.Error(0)
 }
 
-func (m *deckStoreMock) GetDecks(userID string) ([]models.Deck, error) {
+func (m *deckStoreMock) GetDecks(userID string) ([]entity.Deck, error) {
 	args := m.Called(userID)
-	return args.Get(0).([]models.Deck), args.Error(1)
+	return args.Get(0).([]entity.Deck), args.Error(1)
 }
 
-func (m *deckStoreMock) GetDeck(userID string, id string) (*models.Deck, error) {
+func (m *deckStoreMock) GetDeck(userID string, id string) (*entity.Deck, error) {
 	args := m.Called(userID, id)
-	return args.Get(0).(*models.Deck), args.Error(1)
+	return args.Get(0).(*entity.Deck), args.Error(1)
 }
 
-func (m *deckStoreMock) UpdateDeck(deck *models.Deck) error {
+func (m *deckStoreMock) UpdateDeck(deck *entity.Deck) error {
 	args := m.Called(deck)
 	return args.Error(0)
 }
@@ -126,7 +126,7 @@ func TestGetDecks(t *testing.T) {
 
 	var handler = NewDeckHandler(log.New(), deckStoreMock, validatorObj)
 
-	deckStoreMock.On("GetDecks", mock.Anything).Return([]models.Deck{}, nil)
+	deckStoreMock.On("GetDecks", mock.Anything).Return([]entity.Deck{}, nil)
 
 	for _, test := range tests {
 
@@ -173,7 +173,7 @@ func TestGetDeck(t *testing.T) {
 
 	var handler = NewDeckHandler(log.New(), deckStoreMock, validatorObj)
 
-	deckStoreMock.On("GetDeck", mock.Anything, mock.Anything).Return(&models.Deck{}, nil)
+	deckStoreMock.On("GetDeck", mock.Anything, mock.Anything).Return(&entity.Deck{}, nil)
 
 	for _, test := range tests {
 
