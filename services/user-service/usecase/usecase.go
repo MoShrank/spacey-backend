@@ -1,77 +1,79 @@
 package usecase
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/golang-jwt/jwt"
+	mapper "github.com/PeteProgrammer/go-automapper"
+	"github.com/moshrank/spacey-backend/pkg/auth"
 	"github.com/moshrank/spacey-backend/pkg/logger"
-	"golang.org/x/crypto/bcrypt"
+	"github.com/moshrank/spacey-backend/services/user-service/entity"
 )
-
-type SecretKey struct {
-	SecretKey []byte
-}
 
 type UserUsecase struct {
 	logger    logger.LoggerInterface
-	secretKey []byte
+	jwt       auth.JWTInterface
+	userStore entity.UserStoreInterface
 }
 
-type UserUsecaseInterface interface {
-	HashPassword(password string) (string, error)
-	CheckPasswordHash(password, hash string) bool
-	ValidateJWT(tokenString string) (bool, error)
-	CreateJWTWithClaims(usesrID string) (string, error)
-}
-
-func NewUserUseCase(loggerObj logger.LoggerInterface, secretKey SecretKey) UserUsecaseInterface {
+func NewUserUseCase(
+	loggerObj logger.LoggerInterface,
+	jwtObj auth.JWTInterface,
+	userStore entity.UserStoreInterface,
+) entity.UserUsecaseInterface {
 	return &UserUsecase{
 		logger:    loggerObj,
-		secretKey: secretKey.SecretKey,
+		jwt:       jwtObj,
+		userStore: userStore,
 	}
 }
 
-func (u *UserUsecase) HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
-}
+func (u *UserUsecase) CreateUser(user interface{}) (*entity.UserResponseModel, error) {
+	var dbUser entity.User
+	mapper.MapLoose(user, &dbUser)
 
-func (u *UserUsecase) CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	hashedPassword, err := u.jwt.HashPassword(dbUser.Password)
 	if err != nil {
-		u.logger.Error(err)
+		return nil, err
 	}
-	return err == nil
-}
 
-func (u *UserUsecase) ValidateJWT(tokenString string) (bool, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return false, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
+	now := time.Now()
 
-		return u.secretKey, nil
-	})
+	dbUser.Password = hashedPassword
+	dbUser.CreatedAtTs = &now
+	dbUser.UpdatedAtTs = &now
+	dbUser.DeletedAtTs = nil
 
+	id, err := u.userStore.SaveUser(&dbUser)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return true, nil
-	} else {
-		return false, err
-	}
+	dbUser.ID = id
 
+	var respUser entity.UserResponseModel
+	mapper.MapLoose(dbUser, &respUser)
+
+	return &respUser, nil
 }
 
-func (u *UserUsecase) CreateJWTWithClaims(userID string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": userID,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
-	})
+func (u *UserUsecase) Login(email, password string) (*entity.UserResponseModel, error) {
+	dbUser, err := u.userStore.GetUserByEmail(email)
+	if err != nil {
+		return nil, err
+	}
 
-	tokenString, err := token.SignedString(u.secretKey)
-	return tokenString, err
+	if ok, _ := u.jwt.CheckPasswordHash(password, dbUser.Password); !ok {
+		return nil, err
+	}
+
+	token, err := u.jwt.CreateJWTWithClaims(dbUser.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	var respUser entity.UserResponseModel
+	mapper.MapLoose(dbUser, &respUser)
+	respUser.Token = token
+
+	return &respUser, nil
 }

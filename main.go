@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/moshrank/spacey-backend/config"
+	"github.com/moshrank/spacey-backend/pkg/auth"
 	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/middleware"
@@ -28,6 +29,7 @@ func main() {
 	loggerObj := logger.NewLogger(config.GetLogLevel(), config.GetGrayLogConnection(), config)
 	dbConnection := db.NewDB(config.GetMongoDBConnection(), loggerObj)
 	validator := validator.NewValidator()
+	authObj := auth.NewJWT(config.GetJWTSecret())
 
 	router := gin.Default()
 
@@ -37,13 +39,12 @@ func main() {
 	router.GET("/ping", ping)
 
 	userGroup := router.Group("/user")
-	flashcardGroup := router.Group("/flashcards").Use(middleware.Auth(config.GetSecretKey()))
+	flashcardGroup := router.Group("/flashcards").Use(middleware.Auth(authObj))
 
 	user.NewUserService(
 		userGroup,
 		dbConnection.GetDB(config.GetUserSeviceDBNAME()),
 		loggerObj,
-		config.GetSecretKey(),
 		validator,
 	)
 	flashcard.NewFlashCardService(

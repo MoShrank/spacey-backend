@@ -3,6 +3,7 @@ module github.com/moshrank/spacey-backend
 go 1.17
 
 require (
+	github.com/PeteProgrammer/go-automapper v0.0.0-20200419053654-7c63d5bb0eb4
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/golang-jwt/jwt v3.2.2+incompatible

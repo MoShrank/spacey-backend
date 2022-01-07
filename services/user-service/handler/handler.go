@@ -1,23 +1,18 @@
 package handler
 
 import (
-	"net/http"
-
-	"github.com/moshrank/spacey-backend/pkg/httperror"
+	"github.com/moshrank/spacey-backend/pkg/httpconst"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/validator"
 
-	"github.com/moshrank/spacey-backend/services/user-service/models"
-	"github.com/moshrank/spacey-backend/services/user-service/store"
-	"github.com/moshrank/spacey-backend/services/user-service/usecase"
+	"github.com/moshrank/spacey-backend/services/user-service/entity"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
-	database    store.StoreInterface
 	logger      logger.LoggerInterface
-	userUsecase usecase.UserUsecaseInterface
+	userUsecase entity.UserUsecaseInterface
 	validator   validator.ValidatorInterface
 }
 
@@ -27,13 +22,11 @@ type HandlerInterface interface {
 }
 
 func NewHandler(
-	database store.StoreInterface,
 	logger logger.LoggerInterface,
-	usecase usecase.UserUsecaseInterface,
+	usecase entity.UserUsecaseInterface,
 	validatorObj validator.ValidatorInterface,
 ) HandlerInterface {
 	return &Handler{
-		database:    database,
 		logger:      logger,
 		userUsecase: usecase,
 		validator:   validatorObj,
@@ -41,56 +34,40 @@ func NewHandler(
 }
 
 func (h *Handler) CreateUser(c *gin.Context) {
-	var user models.User
+	var user entity.UserReq
 
 	if err := h.validator.ValidateJSON(c, &user); err != nil {
 		return
 	}
 
 	if user.Name == "" {
-		httperror.BadRequest(c)
+		httpconst.WriteBadRequest(c)
 		return
 	}
 
-	user.Password, _ = h.userUsecase.HashPassword(user.Password)
-
-	if err := h.database.SaveUser(&user); err != nil {
-		httperror.DatabaseError(c)
+	userRes, err := h.userUsecase.CreateUser(&user)
+	// TODO create custom errors
+	if err != nil {
+		httpconst.WriteInternalServerError(c)
 		return
 	}
 
-	user.Password = ""
-
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "User created successfully",
-		"user":    user,
-	})
+	httpconst.WriteCreated(c, userRes)
 }
 
 func (h *Handler) Login(c *gin.Context) {
-	var user models.User
+	var user entity.UserReq
 
 	if err := h.validator.ValidateJSON(c, &user); err != nil {
 		return
 	}
 
-	userFromDB, err := h.database.GetUserByEmail(user.Email)
-
+	userRes, err := h.userUsecase.Login(user.Email, user.Password)
 	if err != nil {
-		httperror.DatabaseError(c)
+		httpconst.WriteInternalServerError(c)
 		return
 	}
 
-	if !h.userUsecase.CheckPasswordHash(user.Password, userFromDB.Password) {
-		httperror.Unauthorized(c)
-		return
-	}
-
-	tokenString, _ := h.userUsecase.CreateJWTWithClaims(userFromDB.ID)
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Login successful",
-		"token":   tokenString,
-	})
+	httpconst.WriteSuccess(c, userRes)
 
 }

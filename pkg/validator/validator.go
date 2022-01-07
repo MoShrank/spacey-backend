@@ -3,7 +3,7 @@ package validator
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/moshrank/spacey-backend/pkg/httperror"
+	"github.com/moshrank/spacey-backend/pkg/httpconst"
 )
 
 type Validator struct {
@@ -27,12 +27,12 @@ func (v *Validator) Validate(obj interface{}) error {
 
 func (v *Validator) ValidateJSON(c *gin.Context, obj interface{}) error {
 	if err := c.ShouldBindJSON(obj); err != nil {
-		httperror.ValidationError(c, err)
+		httpconst.WriteValidationError(c, err)
 		return err
 	}
 
 	if err := v.Validate(obj); err != nil {
-		httperror.ValidationError(c, err)
+		httpconst.WriteValidationError(c, err)
 		return err
 	}
 

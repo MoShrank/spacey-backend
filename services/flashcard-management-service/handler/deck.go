@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/moshrank/spacey-backend/pkg/httperror"
+	"github.com/moshrank/spacey-backend/pkg/httpconst"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/validator"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service/models"
@@ -42,7 +42,7 @@ func (h *DeckHandler) GetDeck(c *gin.Context) {
 	userID, ok := c.Get("userID")
 
 	if !ok || userID == "" {
-		httperror.Unauthorized(c)
+		httpconst.WriteUnauthorized(c)
 		return
 	}
 
@@ -50,7 +50,7 @@ func (h *DeckHandler) GetDeck(c *gin.Context) {
 
 	deck, err := h.deckStore.GetDeck(userID.(string), deckID)
 	if err != nil {
-		httperror.DatabaseError(c)
+		httpconst.WriteDatabaseError(c)
 		return
 	}
 
@@ -63,13 +63,13 @@ func (h *DeckHandler) GetDecks(c *gin.Context) {
 	userID, ok := c.Get("userID")
 
 	if !ok || userID == "" {
-		httperror.Unauthorized(c)
+		httpconst.WriteUnauthorized(c)
 		return
 	}
 
 	decks, err := h.deckStore.GetDecks(userID.(string))
 	if err != nil {
-		httperror.DatabaseError(c)
+		httpconst.WriteDatabaseError(c)
 		return
 	}
 
@@ -83,7 +83,7 @@ func (h *DeckHandler) CreateDeck(c *gin.Context) {
 	userID, ok := c.Get("userID")
 
 	if !ok || userID == "" {
-		httperror.Unauthorized(c)
+		httpconst.WriteUnauthorized(c)
 		return
 	}
 
@@ -96,7 +96,7 @@ func (h *DeckHandler) CreateDeck(c *gin.Context) {
 	deck.CreatedAt = time.Now()
 
 	if err := h.deckStore.CreateDeck(&deck); err != nil {
-		httperror.DatabaseError(c)
+		httpconst.WriteDatabaseError(c)
 		return
 	}
 
@@ -110,7 +110,7 @@ func (h *DeckHandler) UpdateDeck(c *gin.Context) {
 	userID, ok := c.Get("userID")
 
 	if !ok || userID == "" {
-		httperror.Unauthorized(c)
+		httpconst.WriteUnauthorized(c)
 		return
 	}
 
@@ -125,7 +125,7 @@ func (h *DeckHandler) UpdateDeck(c *gin.Context) {
 	deck.UpdatedAt = time.Now()
 
 	if err := h.deckStore.UpdateDeck(&deck); err != nil {
-		httperror.DatabaseError(c)
+		httpconst.WriteDatabaseError(c)
 		return
 	}
 
@@ -138,14 +138,14 @@ func (h *DeckHandler) DeleteDeck(c *gin.Context) {
 	userID, ok := c.Get("userID")
 
 	if !ok || userID == "" {
-		httperror.Unauthorized(c)
+		httpconst.WriteUnauthorized(c)
 		return
 	}
 
 	deckID := c.Param("deckID")
 
 	if err := h.deckStore.DeleteDeck(userID.(string), deckID); err != nil {
-		httperror.DatabaseError(c)
+		httpconst.WriteDatabaseError(c)
 		return
 	}
 
