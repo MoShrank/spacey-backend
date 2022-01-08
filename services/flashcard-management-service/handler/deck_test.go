@@ -14,36 +14,39 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-var validatorObj = validator.NewValidator()
-
-type deckStoreMock struct {
+type DeckUseCaseMock struct {
 	mock.Mock
 }
 
-func (m *deckStoreMock) CreateDeck(deck *entity.Deck) error {
-	args := m.Called(deck)
+func (u *DeckUseCaseMock) CreateDeck(userID string, deck *entity.DeckReq) (*entity.DeckRes, error) {
+	args := u.Called(userID, deck)
+	return args.Get(0).(*entity.DeckRes), args.Error(1)
+}
+
+func (u *DeckUseCaseMock) GetDecks(userID string) ([]entity.DeckRes, error) {
+	args := u.Called(userID)
+	return args.Get(0).([]entity.DeckRes), args.Error(1)
+}
+
+func (u *DeckUseCaseMock) GetDeck(userID, DeckID string) (*entity.DeckRes, error) {
+	args := u.Called(userID, DeckID)
+	return args.Get(0).(*entity.DeckRes), args.Error(1)
+}
+
+func (u *DeckUseCaseMock) UpdateDeck(
+	userID, DeckID string,
+	deck *entity.DeckReq,
+) (*entity.DeckRes, error) {
+	args := u.Called(userID, DeckID, deck)
+	return args.Get(0).(*entity.DeckRes), args.Error(1)
+}
+
+func (u *DeckUseCaseMock) DeleteDeck(userID, deckID string) error {
+	args := u.Called(userID, deckID)
 	return args.Error(0)
 }
 
-func (m *deckStoreMock) GetDecks(userID string) ([]entity.Deck, error) {
-	args := m.Called(userID)
-	return args.Get(0).([]entity.Deck), args.Error(1)
-}
-
-func (m *deckStoreMock) GetDeck(userID string, id string) (*entity.Deck, error) {
-	args := m.Called(userID, id)
-	return args.Get(0).(*entity.Deck), args.Error(1)
-}
-
-func (m *deckStoreMock) UpdateDeck(deck *entity.Deck) error {
-	args := m.Called(deck)
-	return args.Error(0)
-}
-
-func (m *deckStoreMock) DeleteDeck(userID string, id string) error {
-	args := m.Called(userID, id)
-	return args.Error(0)
-}
+var validatorObj = validator.NewValidator()
 
 func TestCreateDeck(t *testing.T) {
 	tests := []struct {
@@ -78,11 +81,11 @@ func TestCreateDeck(t *testing.T) {
 		},
 	}
 
-	deckStoreMock := new(deckStoreMock)
+	deckUseCaseMock := new(DeckUseCaseMock)
 
-	var handler = NewDeckHandler(log.New(), deckStoreMock, validatorObj)
+	var handler = NewDeckHandler(log.New(), deckUseCaseMock, validatorObj)
 
-	deckStoreMock.On("CreateDeck", mock.Anything).Return(nil)
+	deckUseCaseMock.On("CreateDeck", mock.Anything, mock.Anything).Return(&entity.DeckRes{}, nil)
 
 	for _, test := range tests {
 
@@ -122,11 +125,11 @@ func TestGetDecks(t *testing.T) {
 		},
 	}
 
-	deckStoreMock := new(deckStoreMock)
+	deckUseCaseMock := new(DeckUseCaseMock)
 
-	var handler = NewDeckHandler(log.New(), deckStoreMock, validatorObj)
+	var handler = NewDeckHandler(log.New(), deckUseCaseMock, validatorObj)
 
-	deckStoreMock.On("GetDecks", mock.Anything).Return([]entity.Deck{}, nil)
+	deckUseCaseMock.On("GetDecks", mock.Anything).Return([]entity.DeckRes{}, nil)
 
 	for _, test := range tests {
 
@@ -169,11 +172,11 @@ func TestGetDeck(t *testing.T) {
 		},
 	}
 
-	deckStoreMock := new(deckStoreMock)
+	deckUseCaseMock := new(DeckUseCaseMock)
 
-	var handler = NewDeckHandler(log.New(), deckStoreMock, validatorObj)
+	var handler = NewDeckHandler(log.New(), deckUseCaseMock, validatorObj)
 
-	deckStoreMock.On("GetDeck", mock.Anything, mock.Anything).Return(&entity.Deck{}, nil)
+	deckUseCaseMock.On("GetDeck", mock.Anything, mock.Anything).Return(&entity.DeckRes{}, nil)
 
 	for _, test := range tests {
 
@@ -187,6 +190,12 @@ func TestGetDeck(t *testing.T) {
 			)
 
 			c.Set("userID", test.userID)
+			c.Params = []gin.Param{
+				{
+					Key:   "id",
+					Value: test.deckID,
+				},
+			}
 
 			handler.GetDeck(c)
 
@@ -208,7 +217,7 @@ func TestUpdateDeck(t *testing.T) {
 			"{\"name\": \"Test Deck\"}",
 			"test_user_id",
 			"test_deck_id",
-			201,
+			200,
 		},
 		{
 			"Invalid Deck",
@@ -233,11 +242,12 @@ func TestUpdateDeck(t *testing.T) {
 		},
 	}
 
-	deckStoreMock := new(deckStoreMock)
+	deckUseCaseMock := new(DeckUseCaseMock)
 
-	var handler = NewDeckHandler(log.New(), deckStoreMock, validatorObj)
+	var handler = NewDeckHandler(log.New(), deckUseCaseMock, validatorObj)
 
-	deckStoreMock.On("UpdateDeck", mock.Anything).Return(nil)
+	deckUseCaseMock.On("UpdateDeck", mock.Anything, mock.Anything, mock.Anything).
+		Return(&entity.DeckRes{}, nil)
 
 	for _, test := range tests {
 
@@ -251,6 +261,12 @@ func TestUpdateDeck(t *testing.T) {
 			)
 
 			c.Set("userID", test.userID)
+			c.Params = []gin.Param{
+				{
+					Key:   "id",
+					Value: test.deckID,
+				},
+			}
 
 			handler.UpdateDeck(c)
 
@@ -280,11 +296,11 @@ func TestDeleteDeck(t *testing.T) {
 		},
 	}
 
-	deckStoreMock := new(deckStoreMock)
+	deckUseCaseMock := new(DeckUseCaseMock)
 
-	var handler = NewDeckHandler(log.New(), deckStoreMock, validatorObj)
+	var handler = NewDeckHandler(log.New(), deckUseCaseMock, validatorObj)
 
-	deckStoreMock.On("DeleteDeck", mock.Anything, mock.Anything).Return(nil)
+	deckUseCaseMock.On("DeleteDeck", mock.Anything, mock.Anything).Return(nil)
 
 	for _, test := range tests {
 
@@ -298,6 +314,12 @@ func TestDeleteDeck(t *testing.T) {
 			)
 
 			c.Set("userID", test.userID)
+			c.Params = []gin.Param{
+				{
+					Key:   "id",
+					Value: test.deckID,
+				},
+			}
 
 			handler.DeleteDeck(c)
 
