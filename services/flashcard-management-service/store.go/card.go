@@ -15,18 +15,10 @@ type CardStore struct {
 	logger logger.LoggerInterface
 }
 
-type CardStoreInterface interface {
-	GetCard(userID string, id string) (*entity.Card, error)
-	GetCards(userID string) ([]entity.Card, error)
-	CreateCard(Card *entity.Card) error
-	UpdateCard(Card *entity.Card) error
-	DeleteCard(userID string, id string) error
-}
-
 func NewCardStore(
 	db *mongo.Database,
 	loggerObj logger.LoggerInterface,
-) CardStoreInterface {
+) entity.CardStoreInterface {
 	return &CardStore{
 		db:     db,
 		logger: loggerObj,
@@ -35,12 +27,12 @@ func NewCardStore(
 
 const CARD_COLLECTION = "cards"
 
-func (store *CardStore) GetCard(userID string, id string) (*entity.Card, error) {
+func (store *CardStore) GetCardByID(userID, cardID string) (*entity.Card, error) {
 	ctx := context.TODO()
 
 	var Card entity.Card
 	err := store.db.Collection(CARD_COLLECTION).
-		FindOne(ctx, bson.M{"_id": id, "UserID": userID}).
+		FindOne(ctx, bson.M{"_id": cardID, "UserID": userID}).
 		Decode(&Card)
 
 	if err != nil {
@@ -50,10 +42,11 @@ func (store *CardStore) GetCard(userID string, id string) (*entity.Card, error) 
 	return &Card, nil
 }
 
-func (store *CardStore) GetCards(userID string) ([]entity.Card, error) {
+func (store *CardStore) GetCardsByDeckID(userID, cardID string) ([]entity.Card, error) {
 	ctx := context.TODO()
 
-	cursor, err := store.db.Collection(CARD_COLLECTION).Find(ctx, bson.M{"UserID": userID})
+	cursor, err := store.db.Collection(CARD_COLLECTION).
+		Find(ctx, bson.M{"UserID": userID, "DeckID": cardID})
 	if err != nil {
 		store.logger.Fatal(err)
 	}
@@ -65,21 +58,21 @@ func (store *CardStore) GetCards(userID string) ([]entity.Card, error) {
 	return Cards, nil
 }
 
-func (store *CardStore) CreateCard(Card *entity.Card) error {
+func (store *CardStore) SaveCard(Card *entity.Card) (string, error) {
 	ctx := context.TODO()
-	_, err := store.db.Collection(CARD_COLLECTION).InsertOne(ctx, Card)
+	insertionResult, err := store.db.Collection(CARD_COLLECTION).InsertOne(ctx, Card)
 	if err != nil {
 		store.logger.Fatal(err)
 	}
 
-	return nil
+	return insertionResult.InsertedID.(string), nil
 }
 
-func (store *CardStore) UpdateCard(Card *entity.Card) error {
+func (store *CardStore) UpdateCard(userID string, Card *entity.Card) error {
 	ctx := context.TODO()
 
 	_, err := store.db.Collection(CARD_COLLECTION).
-		UpdateOne(ctx, bson.M{"_id": Card.ID}, bson.M{"$set": Card})
+		UpdateOne(ctx, bson.M{"_id": Card.ID, "userID": userID}, bson.M{"$set": Card})
 	if err != nil {
 		store.logger.Fatal(err)
 	}
