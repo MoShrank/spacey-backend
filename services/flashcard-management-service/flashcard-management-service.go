@@ -8,6 +8,7 @@ import (
 	"github.com/moshrank/spacey-backend/pkg/validator"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service/handler"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service/store.go"
+	"github.com/moshrank/spacey-backend/services/flashcard-management-service/usecase"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/gin-gonic/gin"
@@ -36,6 +37,8 @@ func NewFlashCardService(
 		fx.Provide(func() validator.ValidatorInterface { return validatorObj }),
 		fx.Provide(store.NewDeckStore),
 		fx.Provide(store.NewCardStore),
+		fx.Provide(usecase.NewCardUseCase),
+		fx.Provide(usecase.NewDeckUseCase),
 		fx.Provide(handler.NewCardHandler),
 		fx.Provide(handler.NewDeckHandler),
 		fx.Invoke(runHttpServer),

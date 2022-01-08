@@ -38,14 +38,14 @@ func main() {
 
 	router.GET("/ping", ping)
 
-	userGroup := router.Group("/user")
 	flashcardGroup := router.Group("/flashcards").Use(middleware.Auth(authObj))
 
 	user.NewUserService(
-		userGroup,
+		router,
 		dbConnection.GetDB(config.GetUserSeviceDBNAME()),
 		loggerObj,
 		validator,
+		authObj,
 	)
 	flashcard.NewFlashCardService(
 		flashcardGroup,

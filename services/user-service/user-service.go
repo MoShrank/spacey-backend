@@ -8,6 +8,7 @@ import (
 	"github.com/moshrank/spacey-backend/services/user-service/usecase"
 	"go.mongodb.org/mongo-driver/mongo"
 
+	"github.com/moshrank/spacey-backend/pkg/auth"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/validator"
 
@@ -39,12 +40,14 @@ func NewUserService(
 	dbConnection *mongo.Database,
 	loggerObj logger.LoggerInterface,
 	validatorObj validator.ValidatorInterface,
+	jwtObj auth.JWTInterface,
 ) UserServiceInterface {
 	fx.New(
 		fx.Provide(func() gin.IRoutes { return router }),
 		fx.Provide(func() *mongo.Database { return dbConnection }),
 		fx.Provide(func() logger.LoggerInterface { return loggerObj }),
 		fx.Provide(func() validator.ValidatorInterface { return validatorObj }),
+		fx.Provide(func() auth.JWTInterface { return jwtObj }),
 		fx.Provide(store.NewStore),
 		fx.Provide(usecase.NewUserUseCase),
 		fx.Provide(handler.NewHandler),
