@@ -15,32 +15,35 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type CardStoreMock struct {
+type CardUseCaseMock struct {
 	mock.Mock
 }
 
-func (m *CardStoreMock) CreateCard(Card *entity.Card) error {
-	args := m.Called(Card)
-	return args.Error(0)
+func (m *CardUseCaseMock) CreateCard(userID string, Card *entity.CardReq) (*entity.CardRes, error) {
+	args := m.Called(userID, Card)
+	return args.Get(0).(*entity.CardRes), args.Error(1)
 }
 
-func (m *CardStoreMock) GetCards(userID string) ([]entity.Card, error) {
-	args := m.Called(userID)
-	return args.Get(0).([]entity.Card), args.Error(1)
+func (m *CardUseCaseMock) GetCardsByDeckID(userID, deckID string) ([]entity.CardRes, error) {
+	args := m.Called(userID, deckID)
+	return args.Get(0).([]entity.CardRes), args.Error(1)
 }
 
-func (m *CardStoreMock) GetCard(userID string, id string) (*entity.Card, error) {
-	args := m.Called(userID, id)
-	return args.Get(0).(*entity.Card), args.Error(1)
+func (m *CardUseCaseMock) GetCardByID(userID, cardID string) (*entity.CardRes, error) {
+	args := m.Called(userID, cardID)
+	return args.Get(0).(*entity.CardRes), args.Error(1)
 }
 
-func (m *CardStoreMock) UpdateCard(Card *entity.Card) error {
-	args := m.Called(Card)
-	return args.Error(0)
+func (m *CardUseCaseMock) UpdateCard(
+	userID, cardID string,
+	card *entity.CardReq,
+) (*entity.CardRes, error) {
+	args := m.Called(userID, card)
+	return args.Get(0).(*entity.CardRes), args.Error(1)
 }
 
-func (m *CardStoreMock) DeleteCard(userID string, id string) error {
-	args := m.Called(userID, id)
+func (m *CardUseCaseMock) DeleteCard(userID string, cardID string) error {
+	args := m.Called(userID, cardID)
 	return args.Error(0)
 }
 
@@ -89,11 +92,11 @@ func TestCreateCard(t *testing.T) {
 		},
 	}
 
-	cardStoreMock := new(CardStoreMock)
+	cardUseCaseMock := new(CardUseCaseMock)
 
-	var handler = NewCardHandler(log.New(), cardStoreMock, validator.NewValidator())
+	var handler = NewCardHandler(log.New(), cardUseCaseMock, validator.NewValidator())
 
-	cardStoreMock.On("CreateCard", mock.Anything).Return(nil)
+	cardUseCaseMock.On("CreateCard", mock.Anything, mock.Anything).Return(&entity.CardRes{}, nil)
 
 	for _, test := range tests {
 
@@ -109,50 +112,6 @@ func TestCreateCard(t *testing.T) {
 			c.Set("userID", test.userID)
 
 			handler.CreateCard(c)
-
-			assert.Equal(t, test.wantStatusCode, c.Writer.Status())
-		})
-	}
-}
-
-func TestGetCard(t *testing.T) {
-	tests := []struct {
-		testName       string
-		userID         string
-		wantStatusCode int
-	}{
-		{
-			"Valid User ID",
-			"test_user_id",
-			200,
-		},
-		{
-			"Missing User ID",
-			"",
-			401,
-		},
-	}
-
-	cardStoreMock := new(CardStoreMock)
-
-	var handler = NewCardHandler(log.New(), cardStoreMock, validator.NewValidator())
-
-	cardStoreMock.On("GetCard", mock.Anything, mock.Anything).Return(&entity.Card{}, nil)
-
-	for _, test := range tests {
-
-		t.Run(test.testName, func(t *testing.T) {
-			w := httptest.NewRecorder()
-			c, _ := gin.CreateTestContext(w)
-			c.Request, _ = http.NewRequest(
-				"GET",
-				"/flashcards/cards/test_id",
-				nil,
-			)
-
-			c.Set("userID", test.userID)
-
-			handler.GetCard(c)
 
 			assert.Equal(t, test.wantStatusCode, c.Writer.Status())
 		})
@@ -177,11 +136,12 @@ func TestGetCards(t *testing.T) {
 		},
 	}
 
-	cardStoreMock := new(CardStoreMock)
+	cardUseCaseMock := new(CardUseCaseMock)
 
-	var handler = NewCardHandler(log.New(), cardStoreMock, validator.NewValidator())
+	var handler = NewCardHandler(log.New(), cardUseCaseMock, validator.NewValidator())
 
-	cardStoreMock.On("GetCards", mock.Anything, mock.Anything).Return([]entity.Card{}, nil)
+	cardUseCaseMock.On("GetCardsByDeckID", mock.Anything, mock.Anything).
+		Return([]entity.CardRes{}, nil)
 
 	for _, test := range tests {
 
@@ -190,13 +150,64 @@ func TestGetCards(t *testing.T) {
 			c, _ := gin.CreateTestContext(w)
 			c.Request, _ = http.NewRequest(
 				"GET",
-				"/flashcards/cards",
+				"/flashcards/cards?deck_id=test_deck_id",
 				nil,
 			)
 
 			c.Set("userID", test.userID)
 
 			handler.GetCards(c)
+
+			assert.Equal(t, test.wantStatusCode, c.Writer.Status())
+		})
+	}
+}
+
+func TestGetCard(t *testing.T) {
+	tests := []struct {
+		testName       string
+		userID         string
+		wantStatusCode int
+	}{
+		{
+			"Valid User ID",
+			"test_user_id",
+			200,
+		},
+		{
+			"Missing User ID",
+			"",
+			401,
+		},
+	}
+
+	cardUseCaseMock := new(CardUseCaseMock)
+
+	var handler = NewCardHandler(log.New(), cardUseCaseMock, validator.NewValidator())
+
+	cardUseCaseMock.On("GetCardByID", mock.Anything, mock.Anything).Return(&entity.CardRes{}, nil)
+
+	for _, test := range tests {
+
+		t.Run(test.testName, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+
+			// create request with url parameter
+			c.Request, _ = http.NewRequest(
+				"GET",
+				"/flashcards/cards/test_card_id",
+				nil,
+			)
+			c.Params = []gin.Param{
+				{
+					Key:   "id",
+					Value: "test",
+				},
+			}
+			c.Set("userID", test.userID)
+
+			handler.GetCard(c)
 
 			assert.Equal(t, test.wantStatusCode, c.Writer.Status())
 		})
@@ -248,11 +259,11 @@ func TestUpdateCard(t *testing.T) {
 		},
 	}
 
-	cardStoreMock := new(CardStoreMock)
+	cardUseCaseMock := new(CardUseCaseMock)
 
-	var handler = NewCardHandler(log.New(), cardStoreMock, validator.NewValidator())
+	var handler = NewCardHandler(log.New(), cardUseCaseMock, validator.NewValidator())
 
-	cardStoreMock.On("UpdateCard", mock.Anything).Return(nil)
+	cardUseCaseMock.On("UpdateCard", mock.Anything, mock.Anything).Return(&entity.CardRes{}, nil)
 
 	for _, test := range tests {
 
@@ -261,9 +272,15 @@ func TestUpdateCard(t *testing.T) {
 			c, _ := gin.CreateTestContext(w)
 			c.Request, _ = http.NewRequest(
 				"PUT",
-				"/flashcards/cards/test_id",
+				"/flashcards/cards/test_card_id",
 				bytes.NewBuffer([]byte(test.body)),
 			)
+			c.Params = []gin.Param{
+				{
+					Key:   "id",
+					Value: "test",
+				},
+			}
 
 			c.Set("userID", test.userID)
 
@@ -292,7 +309,7 @@ func TestDeleteCard(t *testing.T) {
 		},
 	}
 
-	cardStoreMock := new(CardStoreMock)
+	cardStoreMock := new(CardUseCaseMock)
 
 	var handler = NewCardHandler(log.New(), cardStoreMock, validator.NewValidator())
 
@@ -308,7 +325,12 @@ func TestDeleteCard(t *testing.T) {
 				"/flashcards/cards/test_id",
 				nil,
 			)
-
+			c.Params = []gin.Param{
+				{
+					Key:   "id",
+					Value: "test",
+				},
+			}
 			c.Set("userID", test.userID)
 
 			handler.DeleteCard(c)
