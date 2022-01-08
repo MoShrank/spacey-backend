@@ -89,9 +89,5 @@ func (c *CardUseCase) UpdateCard(
 }
 
 func (c *CardUseCase) DeleteCard(userID, cardID string) error {
-<<<<<<< HEAD
 	return c.cardStore.DeleteCard(userID, cardID)
-=======
-	return nil
->>>>>>> 9f50d37... .
 }

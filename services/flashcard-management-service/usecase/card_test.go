@@ -135,35 +135,21 @@ func TestUpdateCard(t *testing.T) {
 	expOutCard := entity.CardRes{
 		ID: "test_card_id",
 		CardReq: entity.CardReq{
-<<<<<<< HEAD
 			Question: "Test Question",
 			Answer:   "Test Answer",
 			DeckID:   "test_deck_id",
-=======
-			Question: "New Test Question",
-			Answer:   "New Test Answer",
-			DeckID:   "New test_deck_id",
->>>>>>> 9f50d37... .
 		},
 	}
 
 	cardStoreMock := new(CardStoreMock)
-<<<<<<< HEAD
 	cardStoreMock.On("UpdateCard", mock.Anything, mock.Anything).Return(nil)
 
 	cardUseCase := NewCardUseCase(cardStoreMock)
 	newCard, err := cardUseCase.UpdateCard("1", "test_card_id", &inpCard)
-=======
-	cardStoreMock.On("UpdateCard", mock.Anything, mock.Anything).Return(&expOutCard)
-
-	cardUseCase := NewCardUseCase(cardStoreMock)
-	newCard, err := cardUseCase.UpdateCard("1", &inpCard)
->>>>>>> 9f50d37... .
 
 	assert.Nil(t, err)
 	assert.Equal(t, &expOutCard, newCard)
 }
-<<<<<<< HEAD
 
 func TestDeleteCard(t *testing.T) {
 	cardStoreMock := new(CardStoreMock)
@@ -174,5 +160,3 @@ func TestDeleteCard(t *testing.T) {
 
 	assert.Nil(t, err)
 }
-=======
->>>>>>> 9f50d37... .
