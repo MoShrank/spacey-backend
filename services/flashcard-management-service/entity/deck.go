@@ -3,12 +3,12 @@ package entity
 import "time"
 
 type Deck struct {
-	ID        string    `bson:"id"`
-	Name      string    `bson:"name"`
-	UserID    string    `bson:"user_id"`
-	CreatedAt time.Time `bson:"created_at"`
-	UpdatedAt time.Time `                  jbson:"updated_at"`
-	DeletedAt time.Time `bson:"deleted_at"`
+	ID        string     `bson:"id"`
+	Name      string     `bson:"name"`
+	UserID    string     `bson:"user_id"`
+	CreatedAt *time.Time `bson:"created_at"`
+	UpdatedAt *time.Time `bson:"updated_at"`
+	DeletedAt *time.Time `bson:"deleted_at"`
 }
 
 type DeckReq struct {
@@ -16,9 +16,8 @@ type DeckReq struct {
 }
 
 type DeckRes struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	UserID string `json:"user_id"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type DeckUseCaseInterface interface {
@@ -30,9 +29,9 @@ type DeckUseCaseInterface interface {
 }
 
 type DeckStoreInterface interface {
-	Save(deck *Deck) error
+	Save(deck *Deck) (string, error)
 	FindAll(userID string) ([]Deck, error)
-	Find(userID, deckID string) (*Deck, error)
+	FindByID(userID, deckID string) (*Deck, error)
 	Update(deck *Deck) error
 	Delete(userID, deckID string) error
 }

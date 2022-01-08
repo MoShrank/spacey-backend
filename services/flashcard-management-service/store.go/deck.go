@@ -15,18 +15,10 @@ type DeckStore struct {
 	logger logger.LoggerInterface
 }
 
-type DeckStoreInterface interface {
-	GetDeck(userID string, id string) (*entity.Deck, error)
-	GetDecks(userID string) ([]entity.Deck, error)
-	CreateDeck(deck *entity.Deck) error
-	UpdateDeck(deck *entity.Deck) error
-	DeleteDeck(userID string, id string) error
-}
-
 func NewDeckStore(
 	db *mongo.Database,
 	loggerObj logger.LoggerInterface,
-) DeckStoreInterface {
+) entity.DeckStoreInterface {
 	return &DeckStore{
 		db:     db,
 		logger: loggerObj,
@@ -35,7 +27,7 @@ func NewDeckStore(
 
 const DECK_COLLECTION = "decks"
 
-func (store *DeckStore) GetDeck(userID string, id string) (*entity.Deck, error) {
+func (store *DeckStore) FindByID(userID string, id string) (*entity.Deck, error) {
 	ctx := context.TODO()
 
 	var deck entity.Deck
@@ -50,7 +42,7 @@ func (store *DeckStore) GetDeck(userID string, id string) (*entity.Deck, error) 
 	return &deck, nil
 }
 
-func (store *DeckStore) GetDecks(userID string) ([]entity.Deck, error) {
+func (store *DeckStore) FindAll(userID string) ([]entity.Deck, error) {
 	ctx := context.TODO()
 
 	cursor, err := store.db.Collection(DECK_COLLECTION).Find(ctx, bson.M{"UserID": userID})
@@ -65,17 +57,17 @@ func (store *DeckStore) GetDecks(userID string) ([]entity.Deck, error) {
 	return decks, nil
 }
 
-func (store *DeckStore) CreateDeck(deck *entity.Deck) error {
+func (store *DeckStore) Save(deck *entity.Deck) (string, error) {
 	ctx := context.TODO()
-	_, err := store.db.Collection(DECK_COLLECTION).InsertOne(ctx, deck)
+	insertionResult, err := store.db.Collection(DECK_COLLECTION).InsertOne(ctx, deck)
 	if err != nil {
 		store.logger.Fatal(err)
 	}
 
-	return nil
+	return insertionResult.InsertedID.(string), nil
 }
 
-func (store *DeckStore) UpdateDeck(deck *entity.Deck) error {
+func (store *DeckStore) Update(deck *entity.Deck) error {
 	ctx := context.TODO()
 
 	_, err := store.db.Collection(DECK_COLLECTION).
@@ -87,7 +79,7 @@ func (store *DeckStore) UpdateDeck(deck *entity.Deck) error {
 	return nil
 }
 
-func (store *DeckStore) DeleteDeck(userID string, id string) error {
+func (store *DeckStore) Delete(userID string, id string) error {
 	ctx := context.TODO()
 
 	_, err := store.db.Collection(DECK_COLLECTION).
