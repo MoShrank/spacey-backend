@@ -54,3 +54,44 @@ func (db *Database) GetDB(dbName string) *mongo.Database {
 	return db.client.Database(dbName)
 
 }
+
+func (db *Database) QueryDocument(
+	dbName string,
+	collectionName string,
+	filter interface{},
+) *mongo.SingleResult {
+	return db.GetDB(dbName).Collection(collectionName).FindOne(context.TODO(), filter)
+}
+
+func (db *Database) QueryDocuments(
+	dbName string,
+	collectionName string,
+	filter interface{},
+) (*mongo.Cursor, error) {
+	return db.GetDB(dbName).Collection(collectionName).Find(context.TODO(), filter)
+}
+
+func (db *Database) CreateDocument(
+	dbName string,
+	collectionName string,
+	document interface{},
+) (*mongo.InsertOneResult, error) {
+	return db.GetDB(dbName).Collection(collectionName).InsertOne(context.TODO(), document)
+}
+
+func (db *Database) UpdateDocument(
+	dbName string,
+	collectionName string,
+	filter interface{},
+	update interface{},
+) (*mongo.UpdateResult, error) {
+	return db.GetDB(dbName).Collection(collectionName).UpdateOne(context.TODO(), filter, update)
+}
+
+func (db *Database) DeleteDocument(
+	dbName string,
+	collectionName string,
+	filter interface{},
+) (*mongo.DeleteResult, error) {
+	return db.GetDB(dbName).Collection(collectionName).DeleteOne(context.TODO(), filter)
+}
