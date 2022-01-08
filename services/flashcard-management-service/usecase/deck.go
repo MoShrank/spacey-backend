@@ -1,4 +1,5 @@
 package usecase
+<<<<<<< HEAD
 
 import (
 	"time"
@@ -88,3 +89,5 @@ func (u *DeckUseCase) UpdateDeck(
 func (u *DeckUseCase) DeleteDeck(userID, DeckID string) error {
 	return u.deckStore.Delete(userID, DeckID)
 }
+=======
+>>>>>>> 9f50d37... .

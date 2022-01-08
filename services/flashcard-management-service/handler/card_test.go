@@ -34,10 +34,14 @@ func (m *CardUseCaseMock) GetCardByID(userID, cardID string) (*entity.CardRes, e
 	return args.Get(0).(*entity.CardRes), args.Error(1)
 }
 
+<<<<<<< HEAD
 func (m *CardUseCaseMock) UpdateCard(
 	userID, cardID string,
 	card *entity.CardReq,
 ) (*entity.CardRes, error) {
+=======
+func (m *CardUseCaseMock) UpdateCard(userID string, card *entity.CardReq) (*entity.CardRes, error) {
+>>>>>>> 9f50d37... .
 	args := m.Called(userID, card)
 	return args.Get(0).(*entity.CardRes), args.Error(1)
 }
