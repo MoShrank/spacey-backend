@@ -1,22 +1,22 @@
 package store
 
 import (
-	"context"
-
+	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service/entity"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+const DECK_COLLECTION = "decks"
+
 type DeckStore struct {
-	db     *mongo.Database
+	db     db.DatabaseInterface
 	logger logger.LoggerInterface
 }
 
 func NewDeckStore(
-	db *mongo.Database,
+	db db.DatabaseInterface,
 	loggerObj logger.LoggerInterface,
 ) entity.DeckStoreInterface {
 	return &DeckStore{
@@ -25,68 +25,48 @@ func NewDeckStore(
 	}
 }
 
-const DECK_COLLECTION = "decks"
-
-func (store *DeckStore) FindByID(userID string, id string) (*entity.Deck, error) {
-	ctx := context.TODO()
-
+func (s *DeckStore) FindByID(userID string, id string) (*entity.Deck, error) {
+	res := s.db.QueryDocument(DECK_COLLECTION, map[string]interface{}{"_id": id, "UserID": userID})
 	var deck entity.Deck
-	err := store.db.Collection(DECK_COLLECTION).
-		FindOne(ctx, bson.M{"_id": id, "UserID": userID}).
-		Decode(&deck)
+	err := res.Decode(&deck)
 
-	if err != nil {
-		store.logger.Fatal(err)
-	}
-
-	return &deck, nil
+	return &deck, err
 }
 
-func (store *DeckStore) FindAll(userID string) ([]entity.Deck, error) {
-	ctx := context.TODO()
-
-	cursor, err := store.db.Collection(DECK_COLLECTION).Find(ctx, bson.M{"UserID": userID})
+func (s *DeckStore) FindAll(userID string) ([]entity.Deck, error) {
+	res, err := s.db.QueryDocuments(DECK_COLLECTION, map[string]interface{}{"UserID": userID})
 	if err != nil {
-		store.logger.Fatal(err)
+		return nil, err
 	}
+
 	var decks []entity.Deck
-	if err = cursor.All(ctx, &decks); err != nil {
-		store.logger.Fatal(err)
-	}
+	err = res.Decode(&decks)
+	return decks, err
 
-	return decks, nil
 }
 
-func (store *DeckStore) Save(deck *entity.Deck) (string, error) {
-	ctx := context.TODO()
-	insertionResult, err := store.db.Collection(DECK_COLLECTION).InsertOne(ctx, deck)
+func (s *DeckStore) Save(deck *entity.Deck) (string, error) {
+	res, err := s.db.CreateDocument(DECK_COLLECTION, deck)
 	if err != nil {
-		store.logger.Fatal(err)
+		return "", err
 	}
 
-	return insertionResult.InsertedID.(string), nil
+	id, err := res.InsertedID.(primitive.ObjectID).MarshalJSON()
+
+	return string(id[:]), err
 }
 
-func (store *DeckStore) Update(deck *entity.Deck) error {
-	ctx := context.TODO()
+func (s *DeckStore) Update(deck *entity.Deck) error {
+	_, err := s.db.UpdateDocument(DECK_COLLECTION, map[string]interface{}{}, deck)
 
-	_, err := store.db.Collection(DECK_COLLECTION).
-		UpdateOne(ctx, bson.M{"_id": deck.ID}, bson.M{"$set": deck})
-	if err != nil {
-		store.logger.Fatal(err)
-	}
-
-	return nil
+	return err
 }
 
-func (store *DeckStore) Delete(userID string, id string) error {
-	ctx := context.TODO()
+func (s *DeckStore) Delete(userID string, id string) error {
+	_, err := s.db.DeleteDocument(
+		DECK_COLLECTION,
+		map[string]interface{}{"_id": id, "UserID": userID},
+	)
 
-	_, err := store.db.Collection(DECK_COLLECTION).
-		DeleteOne(ctx, bson.M{"_id": id, "UserID": userID})
-	if err != nil {
-		store.logger.Fatal(err)
-	}
-
-	return nil
+	return err
 }
