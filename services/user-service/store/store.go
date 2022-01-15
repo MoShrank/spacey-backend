@@ -1,50 +1,39 @@
 package store
 
 import (
-	"context"
-
+	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/services/user-service/entity"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+const USER_COLLECTION = "users"
+
 type Store struct {
-	db *mongo.Database
+	db db.DatabaseInterface
 }
 
-type StoreInterface interface {
-	SaveUser(user *entity.User) error
-	GetPassword(email string) (string, error)
-	GetUserByEmail(email string) (*entity.User, error)
-}
-
-func NewStore(db *mongo.Database) StoreInterface {
+func NewStore(db db.DatabaseInterface) entity.UserStoreInterface {
 	return &Store{
 		db: db,
 	}
 }
 
-func (db *Store) SaveUser(user *entity.User) error {
-	userCollection := db.db.Collection("users")
+func (s *Store) SaveUser(user *entity.User) (string, error) {
+	res, err := s.db.CreateDocument(USER_COLLECTION, user)
 
-	_, err := userCollection.InsertOne(context.TODO(), user)
+	if err != nil {
+		return "", err
+	}
 
-	return err
+	id, err := res.InsertedID.(primitive.ObjectID).MarshalJSON()
+
+	return string(id[:]), err
 }
 
-func (db *Store) GetPassword(email string) (string, error) {
-	userCollection := db.db.Collection("users")
+func (s *Store) GetUserByEmail(email string) (*entity.User, error) {
 	var user entity.User
-	err := userCollection.FindOne(context.TODO(), map[string]interface{}{"email": email}).
-		Decode(&user)
-
-	return user.Password, err
-}
-
-func (db *Store) GetUserByEmail(email string) (*entity.User, error) {
-	userCollection := db.db.Collection("users")
-	var user entity.User
-	err := userCollection.FindOne(context.TODO(), map[string]interface{}{"email": email}).
-		Decode(&user)
+	res := s.db.QueryDocument(USER_COLLECTION, map[string]interface{}{"email": email})
+	err := res.Decode(&user)
 
 	return &user, err
 }

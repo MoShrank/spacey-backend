@@ -27,7 +27,7 @@ func main() {
 	}
 
 	loggerObj := logger.NewLogger(config.GetLogLevel(), config.GetGrayLogConnection(), config)
-	dbConnection := db.NewDB(config.GetMongoDBConnection(), loggerObj)
+	dbConnection := db.NewDB(config.GetMongoDBConnection(), config.GetDBName(), loggerObj)
 	validator := validator.NewValidator()
 	authObj := auth.NewJWT(config.GetJWTSecret())
 

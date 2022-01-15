@@ -11,17 +11,24 @@ import (
 type Database struct {
 	client *mongo.Client
 	logger logger.LoggerInterface
+	DB     *mongo.Database
 }
 
 type DatabaseInterface interface {
 	GetDB(string) *mongo.Database
 	connect(string) (*mongo.Client, error)
+	QueryDocument(string, interface{}) *mongo.SingleResult
+	QueryDocuments(string, interface{}) (*mongo.Cursor, error)
+	CreateDocument(string, interface{}) (*mongo.InsertOneResult, error)
+	UpdateDocument(string, interface{}, interface{}) (*mongo.UpdateResult, error)
+	DeleteDocument(string, interface{}) (*mongo.DeleteResult, error)
 }
 
-func NewDB(connectionString string, logger logger.LoggerInterface) DatabaseInterface {
+func NewDB(connectionString, dbName string, logger logger.LoggerInterface) DatabaseInterface {
 	db := &Database{
 		client: nil,
 		logger: logger,
+		DB:     nil,
 	}
 
 	client, err := db.connect(connectionString)
@@ -31,6 +38,8 @@ func NewDB(connectionString string, logger logger.LoggerInterface) DatabaseInter
 	}
 
 	db.client = client
+	db.DB = db.client.Database(dbName)
+
 	logger.Info("Database Connection Established!")
 
 	return db
@@ -56,42 +65,37 @@ func (db *Database) GetDB(dbName string) *mongo.Database {
 }
 
 func (db *Database) QueryDocument(
-	dbName string,
 	collectionName string,
 	filter interface{},
 ) *mongo.SingleResult {
-	return db.GetDB(dbName).Collection(collectionName).FindOne(context.TODO(), filter)
+	return db.DB.Collection(collectionName).FindOne(context.TODO(), filter)
 }
 
 func (db *Database) QueryDocuments(
-	dbName string,
 	collectionName string,
 	filter interface{},
 ) (*mongo.Cursor, error) {
-	return db.GetDB(dbName).Collection(collectionName).Find(context.TODO(), filter)
+	return db.DB.Collection(collectionName).Find(context.TODO(), filter)
 }
 
 func (db *Database) CreateDocument(
-	dbName string,
 	collectionName string,
 	document interface{},
 ) (*mongo.InsertOneResult, error) {
-	return db.GetDB(dbName).Collection(collectionName).InsertOne(context.TODO(), document)
+	return db.DB.Collection(collectionName).InsertOne(context.TODO(), document)
 }
 
 func (db *Database) UpdateDocument(
-	dbName string,
 	collectionName string,
 	filter interface{},
 	update interface{},
 ) (*mongo.UpdateResult, error) {
-	return db.GetDB(dbName).Collection(collectionName).UpdateOne(context.TODO(), filter, update)
+	return db.DB.Collection(collectionName).UpdateOne(context.TODO(), filter, update)
 }
 
 func (db *Database) DeleteDocument(
-	dbName string,
 	collectionName string,
 	filter interface{},
 ) (*mongo.DeleteResult, error) {
-	return db.GetDB(dbName).Collection(collectionName).DeleteOne(context.TODO(), filter)
+	return db.DB.Collection(collectionName).DeleteOne(context.TODO(), filter)
 }
