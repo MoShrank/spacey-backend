@@ -42,14 +42,14 @@ func main() {
 
 	user.NewUserService(
 		router,
-		dbConnection.GetDB(config.GetUserSeviceDBNAME()),
+		dbConnection,
 		loggerObj,
 		validator,
 		authObj,
 	)
 	flashcard.NewFlashCardService(
 		flashcardGroup,
-		dbConnection.GetDB(config.GetFlashcardServiceDBName()),
+		dbConnection,
 		loggerObj,
 		validator,
 	)

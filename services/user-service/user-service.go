@@ -6,9 +6,9 @@ import (
 	"github.com/moshrank/spacey-backend/services/user-service/handler"
 	"github.com/moshrank/spacey-backend/services/user-service/store"
 	"github.com/moshrank/spacey-backend/services/user-service/usecase"
-	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/moshrank/spacey-backend/pkg/auth"
+	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/validator"
 
@@ -37,14 +37,14 @@ func runAddRoutes(
 
 func NewUserService(
 	router gin.IRoutes,
-	dbConnection *mongo.Database,
+	dbConnection db.DatabaseInterface,
 	loggerObj logger.LoggerInterface,
 	validatorObj validator.ValidatorInterface,
 	jwtObj auth.JWTInterface,
 ) UserServiceInterface {
 	fx.New(
 		fx.Provide(func() gin.IRoutes { return router }),
-		fx.Provide(func() *mongo.Database { return dbConnection }),
+		fx.Provide(func() db.DatabaseInterface { return dbConnection }),
 		fx.Provide(func() logger.LoggerInterface { return loggerObj }),
 		fx.Provide(func() validator.ValidatorInterface { return validatorObj }),
 		fx.Provide(func() auth.JWTInterface { return jwtObj }),
