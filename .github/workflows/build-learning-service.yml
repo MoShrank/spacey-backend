@@ -1,0 +1,18 @@
+name: Build and Push Learning Service docker image
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "services/learning-service/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: MoShrank/spacey-backend/.github/workflows/build.yml@master
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    with:
+      service_name: learning-service
+      service_dir: services/learning-service

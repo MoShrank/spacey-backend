@@ -62,7 +62,7 @@ func CORSMiddleware() gin.HandlerFunc {
 
 			c.Next()
 		} else {
-			c.AbortWithStatus(403)
+			c.AbortWithStatusJSON(403, gin.H{"message": "cors error. invalid origin: " + remote.Host})
 			return
 		}
 	}
