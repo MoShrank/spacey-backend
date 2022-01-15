@@ -15,6 +15,7 @@ type Config struct {
 	UserServiceDBName      string
 	FlashcardServiceDBName string
 	GraylogConnection      string
+	DBName                 string
 }
 
 type ConfigInterface interface {
@@ -25,6 +26,7 @@ type ConfigInterface interface {
 	GetUserSeviceDBNAME() string
 	GetFlashcardServiceDBName() string
 	GetGrayLogConnection() string
+	GetDBName() string
 }
 
 func loadEnvWithoutDefault(key string) string {
@@ -56,6 +58,7 @@ func NewConfig() (ConfigInterface, error) {
 		AuthSecretKey:          loadEnvWithoutDefault("AUTH_SECRET_KEY"),
 		UserServiceDBName:      loadEnvWithoutDefault("USER_SERVICE_DB_NAME"),
 		FlashcardServiceDBName: loadEnvWithoutDefault("FLASHCARD_SERVICE_DB_NAME"),
+		DBName:                 loadEnvWithoutDefault("DB_NAME"),
 	}, nil
 }
 
@@ -85,4 +88,8 @@ func (c *Config) GetFlashcardServiceDBName() string {
 
 func (c *Config) GetGrayLogConnection() string {
 	return c.GraylogConnection
+}
+
+func (c *Config) GetDBName() string {
+	return c.DBName
 }

@@ -4,12 +4,12 @@ import (
 	"context"
 	"log"
 
+	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/validator"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service/handler"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service/store.go"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service/usecase"
-	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
@@ -24,7 +24,7 @@ type FlashCardServiceInterface interface {
 
 func NewFlashCardService(
 	router gin.IRoutes,
-	dbConnection *mongo.Database,
+	dbConnection db.DatabaseInterface,
 	loggerObj logger.LoggerInterface,
 	validatorObj validator.ValidatorInterface,
 ) FlashCardServiceInterface {
@@ -32,7 +32,7 @@ func NewFlashCardService(
 
 	app := fx.New(
 		fx.Provide(func() gin.IRoutes { return router }),
-		fx.Provide(func() *mongo.Database { return dbConnection }),
+		fx.Provide(func() db.DatabaseInterface { return dbConnection }),
 		fx.Provide(func() logger.LoggerInterface { return loggerObj }),
 		fx.Provide(func() validator.ValidatorInterface { return validatorObj }),
 		fx.Provide(store.NewDeckStore),
