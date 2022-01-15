@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-const DECK_COLLECTION = "decks"
+const DECK_COLLECTION = "deck"
 
 type DeckStore struct {
 	db     db.DatabaseInterface
@@ -57,7 +57,11 @@ func (s *DeckStore) Save(deck *entity.Deck) (string, error) {
 }
 
 func (s *DeckStore) Update(deck *entity.Deck) error {
-	_, err := s.db.UpdateDocument(DECK_COLLECTION, map[string]interface{}{}, deck)
+	_, err := s.db.UpdateDocument(
+		DECK_COLLECTION,
+		map[string]interface{}{"_id": deck.ID, "userID": deck.UserID},
+		deck,
+	)
 
 	return err
 }

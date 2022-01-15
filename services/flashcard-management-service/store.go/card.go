@@ -1,22 +1,22 @@
 package store
 
 import (
-	"context"
-
+	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/services/flashcard-management-service/entity"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+const CARD_COLLECTION = "card"
+
 type CardStore struct {
-	db     *mongo.Database
+	db     db.DatabaseInterface
 	logger logger.LoggerInterface
 }
 
 func NewCardStore(
-	db *mongo.Database,
+	db db.DatabaseInterface,
 	loggerObj logger.LoggerInterface,
 ) entity.CardStoreInterface {
 	return &CardStore{
@@ -25,69 +25,58 @@ func NewCardStore(
 	}
 }
 
-const CARD_COLLECTION = "cards"
+func (s *CardStore) GetCardByID(userID, cardID string) (*entity.Card, error) {
+	res := s.db.QueryDocument(
+		CARD_COLLECTION,
+		map[string]interface{}{"_id": cardID, "UserID": userID},
+	)
 
-func (store *CardStore) GetCardByID(userID, cardID string) (*entity.Card, error) {
-	ctx := context.TODO()
+	var card entity.Card
+	err := res.Decode(&card)
 
-	var Card entity.Card
-	err := store.db.Collection(CARD_COLLECTION).
-		FindOne(ctx, bson.M{"_id": cardID, "UserID": userID}).
-		Decode(&Card)
-
-	if err != nil {
-		store.logger.Fatal(err)
-	}
-
-	return &Card, nil
+	return &card, err
 }
 
-func (store *CardStore) GetCardsByDeckID(userID, cardID string) ([]entity.Card, error) {
-	ctx := context.TODO()
+func (s *CardStore) GetCardsByDeckID(userID, cardID string) ([]entity.Card, error) {
+	res, err := s.db.QueryDocuments(
+		CARD_COLLECTION,
+		map[string]interface{}{"UserID": userID, "DeckID": cardID},
+	)
 
-	cursor, err := store.db.Collection(CARD_COLLECTION).
-		Find(ctx, bson.M{"UserID": userID, "DeckID": cardID})
 	if err != nil {
-		store.logger.Fatal(err)
-	}
-	var Cards []entity.Card
-	if err = cursor.All(ctx, &Cards); err != nil {
-		store.logger.Fatal(err)
+		return nil, err
 	}
 
-	return Cards, nil
+	var cards []entity.Card
+	err = res.Decode(&cards)
+	return cards, err
 }
 
-func (store *CardStore) SaveCard(Card *entity.Card) (string, error) {
-	ctx := context.TODO()
-	insertionResult, err := store.db.Collection(CARD_COLLECTION).InsertOne(ctx, Card)
+func (s *CardStore) SaveCard(Card *entity.Card) (string, error) {
+	res, err := s.db.CreateDocument(CARD_COLLECTION, Card)
 	if err != nil {
-		store.logger.Fatal(err)
+		return "", err
 	}
 
-	return insertionResult.InsertedID.(string), nil
+	id, err := res.InsertedID.(primitive.ObjectID).MarshalJSON()
+
+	return string(id[:]), err
 }
 
-func (store *CardStore) UpdateCard(userID string, Card *entity.Card) error {
-	ctx := context.TODO()
+func (s *CardStore) UpdateCard(userID string, Card *entity.Card) error {
+	_, err := s.db.UpdateDocument(CARD_COLLECTION, map[string]interface{}{
+		"_id":    Card.ID,
+		"UserID": userID,
+	}, Card)
 
-	_, err := store.db.Collection(CARD_COLLECTION).
-		UpdateOne(ctx, bson.M{"_id": Card.ID, "userID": userID}, bson.M{"$set": Card})
-	if err != nil {
-		store.logger.Fatal(err)
-	}
-
-	return nil
+	return err
 }
 
-func (store *CardStore) DeleteCard(userID string, id string) error {
-	ctx := context.TODO()
+func (s *CardStore) DeleteCard(userID string, id string) error {
+	_, err := s.db.DeleteDocument(CARD_COLLECTION, map[string]interface{}{
+		"_id":    id,
+		"UserID": userID,
+	})
 
-	_, err := store.db.Collection(CARD_COLLECTION).
-		DeleteOne(ctx, bson.M{"_id": id, "UserID": userID})
-	if err != nil {
-		store.logger.Fatal(err)
-	}
-
-	return nil
+	return err
 }
