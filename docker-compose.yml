@@ -1,14 +1,29 @@
 version: "3.9"
 services:
-  web:
-    build: .
-    ports:
-      - "7000:8080"
-    links:
-      - mongodb
+  api:
+    build: ./services/api
     env_file:
       - .env
+    networks:
+      - proxy
+    ports:
+      - "80:80"
+
+  user-service:
+    build: ./services/user-service
+    env_file:
+      - .env
+    networks:
+      - proxy
+
   mongodb:
     image: mongo
     ports:
       - "27017:27017"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    name: proxy
+    driver: bridge

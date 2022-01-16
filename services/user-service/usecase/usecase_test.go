@@ -6,6 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/moshrank/spacey-backend/config"
 	"github.com/moshrank/spacey-backend/pkg/auth"
 	"github.com/moshrank/spacey-backend/services/user-service/entity"
 	"github.com/stretchr/testify/mock"
@@ -51,7 +52,9 @@ func TestCreateUser(t *testing.T) {
 	for _, test := range tests {
 		storeMock := &UserStoreMock{}
 		storeMock.On("SaveUser", mock.Anything).Return("1", nil)
-		usecase := NewUserUseCase(log.New(), auth.NewJWT("test_secret"), storeMock)
+
+		cfg, _ := config.NewConfig()
+		usecase := NewUserUseCase(log.New(), auth.NewJWT(cfg), storeMock)
 
 		res, err := usecase.CreateUser(test.inpUser)
 

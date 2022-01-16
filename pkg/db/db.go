@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 
+	"github.com/moshrank/spacey-backend/config"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -24,21 +25,21 @@ type DatabaseInterface interface {
 	DeleteDocument(string, interface{}) (*mongo.DeleteResult, error)
 }
 
-func NewDB(connectionString, dbName string, logger logger.LoggerInterface) DatabaseInterface {
+func NewDB(cfg config.ConfigInterface, logger logger.LoggerInterface) DatabaseInterface {
 	db := &Database{
 		client: nil,
 		logger: logger,
 		DB:     nil,
 	}
 
-	client, err := db.connect(connectionString)
+	client, err := db.connect(cfg.GetMongoDBConnection())
 
 	if err != nil {
 		logger.Fatal("Could not connect to Database:", err)
 	}
 
 	db.client = client
-	db.DB = db.client.Database(dbName)
+	db.DB = db.client.Database(cfg.GetDBName())
 
 	logger.Info("Database Connection Established!")
 

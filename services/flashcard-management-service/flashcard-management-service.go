@@ -1,9 +1,9 @@
-package flashcard
+package main
 
 import (
 	"context"
-	"log"
 
+	"github.com/moshrank/spacey-backend/config"
 	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/validator"
@@ -15,51 +15,15 @@ import (
 	"go.uber.org/fx"
 )
 
-type FlashCardService struct {
-	router gin.IRoutes
-}
-
-type FlashCardServiceInterface interface {
-}
-
-func NewFlashCardService(
-	router gin.IRoutes,
-	dbConnection db.DatabaseInterface,
-	loggerObj logger.LoggerInterface,
-	validatorObj validator.ValidatorInterface,
-) FlashCardServiceInterface {
-	ctx := context.TODO()
-
-	app := fx.New(
-		fx.Provide(func() gin.IRoutes { return router }),
-		fx.Provide(func() db.DatabaseInterface { return dbConnection }),
-		fx.Provide(func() logger.LoggerInterface { return loggerObj }),
-		fx.Provide(func() validator.ValidatorInterface { return validatorObj }),
-		fx.Provide(store.NewDeckStore),
-		fx.Provide(store.NewCardStore),
-		fx.Provide(usecase.NewCardUseCase),
-		fx.Provide(usecase.NewDeckUseCase),
-		fx.Provide(handler.NewCardHandler),
-		fx.Provide(handler.NewDeckHandler),
-		fx.Invoke(runHttpServer),
-	)
-
-	if err := app.Start(ctx); err != nil {
-		log.Println(err)
-	}
-
-	return &FlashCardService{
-		router: router,
-	}
-}
-
-func runHttpServer(
+func runServer(
 	lifecycle fx.Lifecycle,
-	router gin.IRoutes,
 	cardHandler handler.CardHandlerInterface,
 	deckHandler handler.DeckHandlerInterface,
+	cfg config.ConfigInterface,
 ) {
 	lifecycle.Append(fx.Hook{OnStart: func(context.Context) error {
+		router := gin.Default()
+
 		router.GET("/cards", cardHandler.GetCards)
 		router.GET("/cards/:id", cardHandler.GetCard)
 		router.POST("/cards", cardHandler.CreateCard)
@@ -70,6 +34,24 @@ func runHttpServer(
 		router.POST("/decks", deckHandler.CreateDeck)
 		router.PUT("/decks/:id", deckHandler.UpdateDeck)
 		router.DELETE("/decks/:id", deckHandler.DeleteDeck)
+
+		router.Run(":" + cfg.GetPort())
 		return nil
 	}})
+}
+
+func main() {
+	fx.New(
+		fx.Provide(config.NewConfig),
+		fx.Provide(logger.NewLogger),
+		fx.Provide(db.NewDB),
+		fx.Provide(validator.NewValidator),
+		fx.Provide(store.NewDeckStore),
+		fx.Provide(store.NewCardStore),
+		fx.Provide(usecase.NewCardUseCase),
+		fx.Provide(usecase.NewDeckUseCase),
+		fx.Provide(handler.NewCardHandler),
+		fx.Provide(handler.NewDeckHandler),
+		fx.Invoke(runServer),
+	).Start(context.TODO())
 }

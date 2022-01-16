@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/moshrank/spacey-backend/config"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -21,9 +22,11 @@ type JWTInterface interface {
 	CreateJWTWithClaims(userID string) (string, error)
 }
 
-func NewJWT(secretKey string) *JWT {
+func NewJWT(cfg config.ConfigInterface) JWTInterface {
+	secretKey := []byte(cfg.GetJWTSecret())
+
 	return &JWT{
-		secretKey:    []byte(secretKey),
+		secretKey:    secretKey,
 		expireOffset: 60 * 60 * 24,
 	}
 }

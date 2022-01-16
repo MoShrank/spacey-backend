@@ -1,8 +1,9 @@
-package user
+package main
 
 import (
 	"context"
 
+	"github.com/moshrank/spacey-backend/config"
 	"github.com/moshrank/spacey-backend/services/user-service/handler"
 	"github.com/moshrank/spacey-backend/services/user-service/store"
 	"github.com/moshrank/spacey-backend/services/user-service/usecase"
@@ -16,45 +17,37 @@ import (
 	"go.uber.org/fx"
 )
 
-type UserService struct {
-	router gin.IRoutes
-}
-
-type UserServiceInterface interface {
-}
-
-func runAddRoutes(
+func runServer(
 	lifecycle fx.Lifecycle,
 	handler handler.HandlerInterface,
-	router gin.IRoutes,
+	cfg config.ConfigInterface,
 ) {
 	lifecycle.Append(fx.Hook{OnStart: func(context.Context) error {
+		router := gin.Default()
+
+		router.GET("ping", func(c *gin.Context) {
+			c.JSON(200, gin.H{
+				"message": "pong",
+			})
+		})
 		router.POST("/user", handler.CreateUser)
 		router.POST("/user/login", handler.Login)
+
+		router.Run(":" + cfg.GetPort())
 		return nil
 	}})
 }
 
-func NewUserService(
-	router gin.IRoutes,
-	dbConnection db.DatabaseInterface,
-	loggerObj logger.LoggerInterface,
-	validatorObj validator.ValidatorInterface,
-	jwtObj auth.JWTInterface,
-) UserServiceInterface {
+func main() {
 	fx.New(
-		fx.Provide(func() gin.IRoutes { return router }),
-		fx.Provide(func() db.DatabaseInterface { return dbConnection }),
-		fx.Provide(func() logger.LoggerInterface { return loggerObj }),
-		fx.Provide(func() validator.ValidatorInterface { return validatorObj }),
-		fx.Provide(func() auth.JWTInterface { return jwtObj }),
+		fx.Provide(config.NewConfig),
+		fx.Provide(logger.NewLogger),
+		fx.Provide(db.NewDB),
+		fx.Provide(validator.NewValidator),
+		fx.Provide(auth.NewJWT),
 		fx.Provide(store.NewStore),
 		fx.Provide(usecase.NewUserUseCase),
 		fx.Provide(handler.NewHandler),
-		fx.Invoke(runAddRoutes),
+		fx.Invoke(runServer),
 	).Start(context.TODO())
-
-	return &UserService{
-		router: router,
-	}
 }
