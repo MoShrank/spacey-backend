@@ -2,6 +2,11 @@ name: Build and Push Docker Image
 
 on:
   workflow_call:
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
     inputs:
       service_name:
         required: true
@@ -10,9 +15,9 @@ on:
         required: true
         type: string
       registry:
-        require: false
+        required: false
         type: string
-        default: ghcr.io
+        default: moshrank/spacey
 
 jobs:
   build:
@@ -30,20 +35,20 @@ jobs:
         run: go test -v ./...
 
       - name: Build Go App
-        run: mkdir ./${{ inputs.registry }}/bin && env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./${{ inputs.registry }}/bin/main
+        run: mkdir ./${{ inputs.service_dir }}/bin && env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./${{ inputs.service_dir }}/bin/main ./${{ inputs.service_dir }}
 
-      - name: Login to Github Packages
+      - name: Log in to Docker Hub
+
         uses: docker/login-action@v1
         with:
-          registry: ${{ inputs.registry }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: ${{ inputs.registry }}/${{ inputs.service_name }}
+          images: ${{ inputs.registry }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
@@ -52,3 +57,4 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          file: ./${{ inputs.service_dir }}/Dockerfile
