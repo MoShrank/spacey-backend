@@ -8,14 +8,14 @@ import (
 )
 
 type Config struct {
-	Port                   string
-	MongoDBConnection      string
-	LogLevel               string
-	AuthSecretKey          string
-	UserServiceDBName      string
-	FlashcardServiceDBName string
-	GraylogConnection      string
-	DBName                 string
+	Port                string
+	MongoDBConnection   string
+	LogLevel            string
+	AuthSecretKey       string
+	GraylogConnection   string
+	DBName              string
+	UserServiceHostName string
+	deckServiceHostName string
 }
 
 type ConfigInterface interface {
@@ -23,10 +23,10 @@ type ConfigInterface interface {
 	GetMongoDBConnection() string
 	GetLogLevel() string
 	GetJWTSecret() string
-	GetUserSeviceDBNAME() string
-	GetFlashcardServiceDBName() string
 	GetGrayLogConnection() string
 	GetDBName() string
+	GetUserServiceHostName() string
+	GetDeckServiceHostName() string
 }
 
 func loadEnvWithoutDefault(key string) string {
@@ -51,14 +51,14 @@ func NewConfig() (ConfigInterface, error) {
 	godotenv.Load()
 
 	return &Config{
-		Port:                   loadEnv("PORT", "8080"),
-		MongoDBConnection:      loadEnv("MONGO_DB_CONNECTION", "mongodb://mongodb:27017"),
-		LogLevel:               loadEnv("LOG_LEVEL", "debug"),
-		GraylogConnection:      loadEnv("GRAYLOG_CONNECTION", "localhost://localhost:12201"),
-		AuthSecretKey:          loadEnvWithoutDefault("AUTH_SECRET_KEY"),
-		UserServiceDBName:      loadEnvWithoutDefault("USER_SERVICE_DB_NAME"),
-		FlashcardServiceDBName: loadEnvWithoutDefault("FLASHCARD_SERVICE_DB_NAME"),
-		DBName:                 loadEnvWithoutDefault("DB_NAME"),
+		Port:                loadEnv("PORT", "8080"),
+		MongoDBConnection:   loadEnv("MONGO_DB_CONNECTION", "mongodb://127.0.0.1:27017"),
+		LogLevel:            loadEnv("LOG_LEVEL", "debug"),
+		GraylogConnection:   loadEnv("GRAYLOG_CONNECTION", "localhost://localhost:12201"),
+		AuthSecretKey:       loadEnvWithoutDefault("AUTH_SECRET_KEY"),
+		DBName:              loadEnvWithoutDefault("DB_NAME"),
+		UserServiceHostName: loadEnv("USER_SERVICE_HOST_NAME", "user-service"),
+		deckServiceHostName: loadEnv("DECK_SERVICE_HOST_NAME", "deck-service"),
 	}, nil
 }
 
@@ -78,18 +78,18 @@ func (c *Config) GetJWTSecret() string {
 	return c.AuthSecretKey
 }
 
-func (c *Config) GetUserSeviceDBNAME() string {
-	return c.UserServiceDBName
-}
-
-func (c *Config) GetFlashcardServiceDBName() string {
-	return c.FlashcardServiceDBName
-}
-
 func (c *Config) GetGrayLogConnection() string {
 	return c.GraylogConnection
 }
 
 func (c *Config) GetDBName() string {
 	return c.DBName
+}
+
+func (c *Config) GetUserServiceHostName() string {
+	return c.UserServiceHostName
+}
+
+func (c *Config) GetDeckServiceHostName() string {
+	return c.deckServiceHostName
 }

@@ -4,7 +4,7 @@ import (
 	"time"
 
 	mapper "github.com/PeteProgrammer/go-automapper"
-	"github.com/moshrank/spacey-backend/services/flashcard-management-service/entity"
+	"github.com/moshrank/spacey-backend/services/deck-management-service/entity"
 )
 
 type DeckUseCase struct {

@@ -28,23 +28,20 @@ var logLevelMapping = map[string]log.Level{
 }
 
 func NewLogger(
-	logLevel, graylogConnection string,
-	curConfig config.ConfigInterface,
+	cfg config.ConfigInterface,
 ) LoggerInterface {
 	log.SetFormatter(&log.JSONFormatter{})
-	log.SetLevel(logLevelMapping[logLevel])
+	log.SetLevel(logLevelMapping[cfg.GetLogLevel()])
 	log.SetOutput(os.Stderr)
 
 	logger := log.WithFields(
 		log.Fields{
-			"service":                   "spacey-backend",
-			"port":                      curConfig.GetPort(),
-			"user-service-db-name":      curConfig.GetUserSeviceDBNAME(),
-			"flashcard-service-db-name": curConfig.GetFlashcardServiceDBName(),
+			"service": "spacey-backend",
+			"port":    cfg.GetPort(),
 		},
 	)
 
-	gelfWriter, err := gelf.NewUDPWriter(graylogConnection)
+	gelfWriter, err := gelf.NewUDPWriter(cfg.GetGrayLogConnection())
 
 	if err != nil {
 		log.Warn("Failed to connect to graylog: ", err)

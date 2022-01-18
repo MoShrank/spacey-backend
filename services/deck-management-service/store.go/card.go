@@ -3,7 +3,7 @@ package store
 import (
 	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/pkg/logger"
-	"github.com/moshrank/spacey-backend/services/flashcard-management-service/entity"
+	"github.com/moshrank/spacey-backend/services/deck-management-service/entity"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
