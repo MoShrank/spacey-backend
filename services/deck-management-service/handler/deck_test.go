@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/moshrank/spacey-backend/pkg/validator"
-	"github.com/moshrank/spacey-backend/services/flashcard-management-service/entity"
+	"github.com/moshrank/spacey-backend/services/deck-management-service/entity"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

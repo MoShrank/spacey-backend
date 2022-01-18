@@ -53,13 +53,16 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	{
 		userGroup.POST("/user", proxy(getUrl(userServiceHostName, "user")))
 		userGroup.POST("/login", proxy(getUrl(userServiceHostName, "login")))
-		userGroup.DELETE("/user", handler.DeleteAccount)
+		userGroup.POST("/login", proxy(getUrl(userServiceHostName, "login")))
+		userGroup.DELETE("/user", proxy(getUrl(userServiceHostName, "users")))
+		userGroup.PUT("/password", proxy(getUrl(userServiceHostName, "password")))
 	}
 
+	deckServiceHostName := cfg.GetDeckServiceHostName()
 	deckGroup := router.Group("/deck").Use(middleware.Auth(authMiddleware))
 	{
 		deckGroup.GET("/", handler.GetDecks)
-		deckGroup.POST("/", handler.CreateDeck)
+		deckGroup.POST("/", proxy(getUrl(deckServiceHostName, "deck")))
 		deckGroup.PUT("/:id", handler.UpdateDeck)
 		deckGroup.DELETE("/:id", handler.DeleteDeck)
 

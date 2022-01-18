@@ -7,9 +7,9 @@ import (
 	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/validator"
-	"github.com/moshrank/spacey-backend/services/flashcard-management-service/handler"
-	"github.com/moshrank/spacey-backend/services/flashcard-management-service/store.go"
-	"github.com/moshrank/spacey-backend/services/flashcard-management-service/usecase"
+	"github.com/moshrank/spacey-backend/services/deck-management-service/handler"
+	"github.com/moshrank/spacey-backend/services/deck-management-service/store.go"
+	"github.com/moshrank/spacey-backend/services/deck-management-service/usecase"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"

@@ -5,7 +5,7 @@ import (
 	"github.com/moshrank/spacey-backend/pkg/httpconst"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/validator"
-	"github.com/moshrank/spacey-backend/services/flashcard-management-service/entity"
+	"github.com/moshrank/spacey-backend/services/deck-management-service/entity"
 )
 
 type DeckHandler struct {
