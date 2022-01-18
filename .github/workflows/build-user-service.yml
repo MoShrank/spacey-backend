@@ -1,0 +1,18 @@
+name: Build and Push User Service docker image
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "services/user-service/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: MoShrank/spacey-backend/.github/workflows/build.yml@master
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+    with:
+      service_name: user-service
+      service_dir: services/user-service

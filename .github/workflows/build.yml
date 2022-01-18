@@ -2,6 +2,11 @@ name: Build and Push Docker Image
 
 on:
   workflow_call:
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
     inputs:
       service_name:
         required: true
@@ -9,10 +14,9 @@ on:
       service_dir:
         required: true
         type: string
-      registry:
-        require: false
+      repository:
+        required: true
         type: string
-        default: ghcr.io
 
 jobs:
   build:
@@ -30,25 +34,28 @@ jobs:
         run: go test -v ./...
 
       - name: Build Go App
-        run: mkdir ./${{ inputs.registry }}/bin && env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./${{ inputs.registry }}/bin/main
+        run: mkdir ./${{ inputs.service_dir }}/bin && env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./${{ inputs.service_dir }}/bin/main ./${{ inputs.service_dir }}
 
-      - name: Login to Github Packages
-        uses: docker/login-action@v1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          registry: ${{ inputs.registry }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: ${{ inputs.registry }}/${{ inputs.service_name }}
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+      - name: Build, tag, and push the image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.repository }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Build a docker container and push it to ECR 
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./${{ inputs.service_dir }}
+          echo "Pushing image to ECR..."
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
