@@ -4,7 +4,7 @@ on:
   push:
     branches: [master]
     paths:
-      - "services/api/**"
+      - "services/deck-management-service/**"
   workflow_dispatch:
 
 jobs:
@@ -14,5 +14,5 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
     with:
-      service_name: api
-      service_dir: services/api
+      service_name: deck-management-service
+      service_dir: services/deck-management-service

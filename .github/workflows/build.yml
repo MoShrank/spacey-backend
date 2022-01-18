@@ -55,6 +55,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ inputs.service_name }}/
           labels: ${{ steps.meta.outputs.labels }}
           file: ./${{ inputs.service_dir }}/Dockerfile
