@@ -55,8 +55,8 @@ func NewConfig() (ConfigInterface, error) {
 		MongoDBConnection:   loadEnv("MONGO_DB_CONNECTION", "mongodb://127.0.0.1:27017"),
 		LogLevel:            loadEnv("LOG_LEVEL", "debug"),
 		GraylogConnection:   loadEnv("GRAYLOG_CONNECTION", "localhost://localhost:12201"),
-		AuthSecretKey:       loadEnvWithoutDefault("AUTH_SECRET_KEY"),
-		DBName:              loadEnvWithoutDefault("DB_NAME"),
+		AuthSecretKey:       loadEnv("AUTH_SECRET_KEY", "secret"),
+		DBName:              loadEnv("DB_NAME", "spacey"),
 		UserServiceHostName: loadEnv("USER_SERVICE_HOST_NAME", "user-service"),
 		deckServiceHostName: loadEnv("DECK_SERVICE_HOST_NAME", "deck-service"),
 	}, nil

@@ -1,0 +1,13 @@
+name: Build and Push API docker image
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: MoShrank/spacey-backend/.github/workflows/build.yml
+    with:
+      service_name: api
+      service_dir: api
