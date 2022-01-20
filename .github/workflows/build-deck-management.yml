@@ -1,4 +1,4 @@
-name: Build and Push API docker image
+name: Build and Push Deck Management Service docker image
 
 on:
   push:
