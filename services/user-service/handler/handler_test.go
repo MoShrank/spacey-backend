@@ -88,6 +88,7 @@ func TestCreateUserHandlerInvalidUser(t *testing.T) {
 		validator:   validator.NewValidator(),
 	}
 	usecaseMock.On("CreateUser", mock.Anything).Return(&entity.UserResponseModel{}, nil)
+	usecaseMock.On("Login", mock.Anything).Return(&entity.User{}, true)
 
 	for _, test := range tests {
 
@@ -106,7 +107,7 @@ func TestCreateUserHandlerInvalidUser(t *testing.T) {
 func TestCreateUserValidUser(t *testing.T) {
 
 	inpBody := "{\"name\": \"moritz\", \"email\": \"moritz.e50@gmail.com\", \"password\": \"test_password\"}"
-	wantBody := "{\"data\": {\"id\": \"1\", \"name\": \"moritz\", \"email\": \"moritz.e50@gmail.com\"}, \"message\": \"Created\"}"
+	wantBody := "{\"data\": {\"id\": \"1\", \"name\": \"moritz\", \"email\": \"moritz.e50@gmail.com\", \"token\": \"test_token\"}, \"message\": \"Created\"}"
 	wantStatusCode := 201
 
 	usecaseMock := &UserUsecaseMock{}
@@ -119,6 +120,13 @@ func TestCreateUserValidUser(t *testing.T) {
 		ID:    "1",
 		Name:  "moritz",
 		Email: "moritz.e50@gmail.com",
+	}, nil)
+
+	usecaseMock.On("Login", mock.Anything, mock.Anything).Return(&entity.UserResponseModel{
+		ID:    "1",
+		Name:  "moritz",
+		Email: "moritz.e50@gmail.com",
+		Token: "test_token",
 	}, nil)
 
 	w := httptest.NewRecorder()
