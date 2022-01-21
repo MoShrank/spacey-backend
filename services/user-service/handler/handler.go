@@ -45,8 +45,16 @@ func (h *Handler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	userRes, err := h.userUsecase.CreateUser(&user)
+	_, err := h.userUsecase.CreateUser(&user)
+
 	// TODO create custom errors
+	if err != nil {
+		httpconst.WriteInternalServerError(c)
+		return
+	}
+
+	userRes, err := h.userUsecase.Login(user.Email, user.Password)
+
 	if err != nil {
 		httpconst.WriteInternalServerError(c)
 		return
