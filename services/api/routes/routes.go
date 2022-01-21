@@ -69,7 +69,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 		deckGroup.PUT("/:id/card/:card_id", handler.UpdateCard)
 		deckGroup.DELETE("/:id/card/:card_id", handler.DeleteCard)
 
-		deckGroup.GET("/public", handler.GetPublicDecks)
+		deckGroup.GET("/public", proxy(getUrl(deckServiceHostName, "/public")))
 		deckGroup.POST("/public", handler.CopyPublicDeck)
 	}
 
