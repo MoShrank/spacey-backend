@@ -31,7 +31,7 @@ func runServer(
 			})
 		})
 		router.POST("/user", handler.CreateUser)
-		router.POST("/user/login", handler.Login)
+		router.POST("/login", handler.Login)
 
 		router.Run(":" + cfg.GetPort())
 		return nil

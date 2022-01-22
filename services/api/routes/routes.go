@@ -51,9 +51,9 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	userServiceHostName := cfg.GetUserServiceHostName()
 	userGroup := router.Group("/user")
 	{
-		userGroup.POST("/user", proxy(getUrl(userServiceHostName, "user")))
+		userGroup.POST("/", proxy(getUrl(userServiceHostName, "user")))
 		userGroup.POST("/login", proxy(getUrl(userServiceHostName, "login")))
-		userGroup.DELETE("/user", proxy(getUrl(userServiceHostName, "users")))
+		userGroup.DELETE("/", proxy(getUrl(userServiceHostName, "users")))
 		userGroup.PUT("/password", proxy(getUrl(userServiceHostName, "password")))
 	}
 
