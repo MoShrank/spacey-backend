@@ -10,6 +10,7 @@ func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		validHost := false
+		var origin *url.URL
 
 		validCORS := []struct {
 			Host     string
@@ -35,11 +36,12 @@ func CORSMiddleware() gin.HandlerFunc {
 		for _, setting := range validCORS {
 			if remote.Host == setting.Host && remote.Scheme == setting.Protocol {
 				validHost = true
+				origin = remote
 			}
 		}
 
 		if validHost {
-			c.Writer.Header().Set("Access-Control-Allow-Origin", referer)
+			c.Writer.Header().Set("Access-Control-Allow-Origin", origin.Scheme+"://"+origin.Host)
 			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 			c.Writer.Header().
 				Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
