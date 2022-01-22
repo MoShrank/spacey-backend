@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"net/http"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,16 +11,29 @@ func CORSMiddleware() gin.HandlerFunc {
 
 		validHost := false
 
-		validDomains := []string{
-			"http://localhost:3000",
-			"https://www.spacey.moritz.dev",
-			"https://spacey.moritz.dev",
+		validCORS := []struct {
+			Host     string
+			Protocol string
+		}{
+			{
+				"localhost:3000",
+				"http",
+			},
+			{
+				"spacey.moritz.dev",
+				"https",
+			},
+			{
+				"www.spacey.moritz.dev",
+				"https",
+			},
 		}
 
 		referer := c.Request.Header.Get("Referer")
+		remote, _ := url.Parse(referer)
 
-		for _, domain := range validDomains {
-			if referer == domain {
+		for _, setting := range validCORS {
+			if remote.Host == setting.Host && remote.Scheme == setting.Protocol {
 				validHost = true
 			}
 		}
@@ -39,9 +52,7 @@ func CORSMiddleware() gin.HandlerFunc {
 
 			c.Next()
 		} else {
-			c.JSON(http.StatusForbidden, gin.H{
-				"message": "invalid host",
-			})
+			c.AbortWithStatus(403)
 			return
 		}
 	}
