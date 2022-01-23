@@ -63,6 +63,7 @@ func (h *Handler) CreateUser(c *gin.Context) {
 
 	// TODO should be set to a secure cookie + expire time should be equal to jwt token expire time
 	c.SetCookie("Authorization", userRes.Token, 604800, "/", "", false, true)
+	c.SetCookie("LoggedIn", userRes.Token, 604800, "/", "", false, false)
 
 	httpconst.WriteCreated(c, userRes)
 }
@@ -82,6 +83,7 @@ func (h *Handler) Login(c *gin.Context) {
 
 	// TODO should be set to a secure cookie + expire time should be equal to jwt token expire time
 	c.SetCookie("Authorization", userRes.Token, 604800, "/", "", false, true)
+	c.SetCookie("LoggedIn", "true", 604800, "/", "", false, false)
 
 	httpconst.WriteSuccess(c, userRes)
 
@@ -89,5 +91,6 @@ func (h *Handler) Login(c *gin.Context) {
 
 func (h *Handler) Logout(c *gin.Context) {
 	c.SetCookie("Authorization", "", -1, "/", "", false, true)
+	c.SetCookie("LoggedIn", "false", -1, "/", "", false, false)
 	httpconst.WriteSuccess(c, nil)
 }
