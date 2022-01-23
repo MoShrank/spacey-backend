@@ -2,28 +2,31 @@ version: "3.9"
 services:
   api:
     build: ./services/api
+    container_name: spacey-api
     env_file:
       - .env
     networks:
-      - proxy
+      - spacey-services
     ports:
       - "80:80"
 
   user-service:
     build: ./services/user-service
+    container_name: user-service
     env_file:
       - .env
     networks:
-      - proxy
+      - spacey-services
 
   mongodb:
     image: mongo
+    container_name: mongodb
     ports:
       - "27017:27017"
     networks:
-      - proxy
+      - spacey-services
 
 networks:
-  proxy:
-    name: proxy
+  spacey-services:
+    name: spacey-services
     driver: bridge

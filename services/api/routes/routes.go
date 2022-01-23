@@ -51,17 +51,17 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	userServiceHostName := cfg.GetUserServiceHostName()
 	userGroup := router.Group("/user")
 	{
-		userGroup.POST("/", proxy(getUrl(userServiceHostName, "user")))
+		userGroup.POST("", proxy(getUrl(userServiceHostName, "user")))
 		userGroup.POST("/login", proxy(getUrl(userServiceHostName, "login")))
-		userGroup.DELETE("/", proxy(getUrl(userServiceHostName, "users")))
+		userGroup.DELETE("", proxy(getUrl(userServiceHostName, "users")))
 		userGroup.PUT("/password", proxy(getUrl(userServiceHostName, "password")))
 	}
 
 	deckServiceHostName := cfg.GetDeckServiceHostName()
 	deckGroup := router.Group("/deck").Use(middleware.Auth(authMiddleware))
 	{
-		deckGroup.GET("/", handler.GetDecks)
-		deckGroup.POST("/", proxy(getUrl(deckServiceHostName, "deck")))
+		deckGroup.GET("", handler.GetDecks)
+		deckGroup.POST("", proxy(getUrl(deckServiceHostName, "deck")))
 		deckGroup.PUT("/:id", handler.UpdateDeck)
 		deckGroup.DELETE("/:id", handler.DeleteDeck)
 
@@ -83,7 +83,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 
 	reminder := router.Group("/reminder").Use(middleware.Auth(authMiddleware))
 	{
-		reminder.POST("/", handler.CreateReminder)
+		reminder.POST("", handler.CreateReminder)
 		reminder.GET("/:id", handler.GetReminder)
 		reminder.PUT("/:id", handler.UpdateReminder)
 		reminder.DELETE("/:id", handler.DeleteReminder)
@@ -91,6 +91,6 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 
 	statistics := router.Group("/statistics").Use(middleware.Auth(authMiddleware))
 	{
-		statistics.GET("/", handler.GetStatistics)
+		statistics.GET("", handler.GetStatistics)
 	}
 }
