@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/gin"
+	"github.com/moshrank/spacey-backend/config"
 	"github.com/moshrank/spacey-backend/pkg/httpconst"
 	"github.com/moshrank/spacey-backend/pkg/validator"
 	"github.com/moshrank/spacey-backend/services/user-service/entity"
@@ -82,10 +83,13 @@ func TestCreateUserHandlerInvalidUser(t *testing.T) {
 	}
 
 	usecaseMock := &UserUsecaseMock{}
+	conf, _ := config.NewConfig()
+
 	handler := Handler{
 		logger:      log.New(),
 		userUsecase: usecaseMock,
 		validator:   validator.NewValidator(),
+		config:      conf,
 	}
 	usecaseMock.On("CreateUser", mock.Anything).Return(&entity.UserResponseModel{}, nil)
 	usecaseMock.On("Login", mock.Anything).Return(&entity.User{}, true)
@@ -111,10 +115,13 @@ func TestCreateUserValidUser(t *testing.T) {
 	wantStatusCode := 201
 
 	usecaseMock := &UserUsecaseMock{}
+	conf, _ := config.NewConfig()
+
 	handler := Handler{
 		logger:      log.New(),
 		userUsecase: usecaseMock,
 		validator:   validator.NewValidator(),
+		config:      conf,
 	}
 	usecaseMock.On("CreateUser", mock.Anything).Return(&entity.UserResponseModel{
 		ID:    "1",
@@ -168,11 +175,13 @@ func TestLoginInvalidUser(t *testing.T) {
 	}
 
 	userUsecaseMock := new(UserUsecaseMock)
+	conf, _ := config.NewConfig()
 
 	var handler = NewHandler(
 		log.New(),
 		userUsecaseMock,
 		validator.NewValidator(),
+		conf,
 	)
 
 	userUsecaseMock.On("Login", mock.Anything).Return(&entity.User{}, true)
@@ -201,10 +210,13 @@ func TestLoginValidUser(t *testing.T) {
 	wantStatusCode := 200
 
 	usecaseMock := &UserUsecaseMock{}
+	conf, _ := config.NewConfig()
+
 	handler := Handler{
 		logger:      log.New(),
 		userUsecase: usecaseMock,
 		validator:   validator.NewValidator(),
+		config:      conf,
 	}
 	usecaseMock.On("Login", mock.Anything, mock.Anything).Return(&entity.UserResponseModel{
 		ID:    "1",

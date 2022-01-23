@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/moshrank/spacey-backend/config"
 	"github.com/moshrank/spacey-backend/pkg/httpconst"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/validator"
@@ -14,6 +15,7 @@ type Handler struct {
 	logger      logger.LoggerInterface
 	userUsecase entity.UserUsecaseInterface
 	validator   validator.ValidatorInterface
+	config      config.ConfigInterface
 }
 
 type HandlerInterface interface {
@@ -26,11 +28,13 @@ func NewHandler(
 	logger logger.LoggerInterface,
 	usecase entity.UserUsecaseInterface,
 	validatorObj validator.ValidatorInterface,
+	configObj config.ConfigInterface,
 ) HandlerInterface {
 	return &Handler{
 		logger:      logger,
 		userUsecase: usecase,
 		validator:   validatorObj,
+		config:      configObj,
 	}
 }
 
@@ -62,8 +66,8 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	}
 
 	// TODO should be set to a secure cookie + expire time should be equal to jwt token expire time
-	c.SetCookie("Authorization", userRes.Token, 604800, "/", "", false, true)
-	c.SetCookie("LoggedIn", userRes.Token, 604800, "/", "", false, false)
+	c.SetCookie("Authorization", userRes.Token, 604800, "/", h.config.GetDomain(), false, true)
+	c.SetCookie("LoggedIn", userRes.Token, 604800, "/", h.config.GetDomain(), false, false)
 
 	httpconst.WriteCreated(c, userRes)
 }
@@ -82,15 +86,15 @@ func (h *Handler) Login(c *gin.Context) {
 	}
 
 	// TODO should be set to a secure cookie + expire time should be equal to jwt token expire time
-	c.SetCookie("Authorization", userRes.Token, 604800, "/", "", false, true)
-	c.SetCookie("LoggedIn", "true", 604800, "/", "", false, false)
+	c.SetCookie("Authorization", userRes.Token, 604800, "/", h.config.GetDomain(), false, true)
+	c.SetCookie("LoggedIn", "true", 604800, "/", h.config.GetDomain(), false, false)
 
 	httpconst.WriteSuccess(c, userRes)
 
 }
 
 func (h *Handler) Logout(c *gin.Context) {
-	c.SetCookie("Authorization", "", -1, "/", "", false, true)
-	c.SetCookie("LoggedIn", "false", -1, "/", "", false, false)
+	c.SetCookie("Authorization", "", -1, "/", h.config.GetDomain(), false, true)
+	c.SetCookie("LoggedIn", "false", -1, "/", h.config.GetDomain(), false, false)
 	httpconst.WriteSuccess(c, nil)
 }

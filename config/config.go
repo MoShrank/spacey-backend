@@ -15,7 +15,8 @@ type Config struct {
 	GraylogConnection   string
 	DBName              string
 	UserServiceHostName string
-	deckServiceHostName string
+	DeckServiceHostName string
+	Domain              string
 }
 
 type ConfigInterface interface {
@@ -27,6 +28,7 @@ type ConfigInterface interface {
 	GetDBName() string
 	GetUserServiceHostName() string
 	GetDeckServiceHostName() string
+	GetDomain() string
 }
 
 func loadEnvWithoutDefault(key string) string {
@@ -58,7 +60,8 @@ func NewConfig() (ConfigInterface, error) {
 		AuthSecretKey:       loadEnv("AUTH_SECRET_KEY", "secret"),
 		DBName:              loadEnv("DB_NAME", "spacey"),
 		UserServiceHostName: loadEnv("USER_SERVICE_HOST_NAME", "user-service"),
-		deckServiceHostName: loadEnv("DECK_SERVICE_HOST_NAME", "deck-service"),
+		DeckServiceHostName: loadEnv("DECK_SERVICE_HOST_NAME", "deck-service"),
+		Domain:              loadEnv("DOMAIN", "localhost"),
 	}, nil
 }
 
@@ -91,5 +94,9 @@ func (c *Config) GetUserServiceHostName() string {
 }
 
 func (c *Config) GetDeckServiceHostName() string {
-	return c.deckServiceHostName
+	return c.DeckServiceHostName
+}
+
+func (c *Config) GetDomain() string {
+	return c.Domain
 }
