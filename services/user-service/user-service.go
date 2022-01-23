@@ -32,6 +32,7 @@ func runServer(
 		})
 		router.POST("/user", handler.CreateUser)
 		router.POST("/login", handler.Login)
+		router.GET("/logout", handler.Logout)
 
 		router.Run(":" + cfg.GetPort())
 		return nil

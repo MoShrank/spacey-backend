@@ -19,6 +19,7 @@ type Handler struct {
 type HandlerInterface interface {
 	CreateUser(c *gin.Context)
 	Login(c *gin.Context)
+	Logout(c *gin.Context)
 }
 
 func NewHandler(
@@ -60,6 +61,9 @@ func (h *Handler) CreateUser(c *gin.Context) {
 		return
 	}
 
+	// TODO should be set to a secure cookie + expire time should be equal to jwt token expire time
+	c.SetCookie("Authorization", userRes.Token, 604800, "/", "", false, true)
+
 	httpconst.WriteCreated(c, userRes)
 }
 
@@ -76,6 +80,14 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
+	// TODO should be set to a secure cookie + expire time should be equal to jwt token expire time
+	c.SetCookie("Authorization", userRes.Token, 604800, "/", "", false, true)
+
 	httpconst.WriteSuccess(c, userRes)
 
+}
+
+func (h *Handler) Logout(c *gin.Context) {
+	c.SetCookie("Authorization", "", -1, "/", "", false, true)
+	httpconst.WriteSuccess(c, nil)
 }
