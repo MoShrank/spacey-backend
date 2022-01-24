@@ -44,3 +44,10 @@ func WriteInternalServerError(c *gin.Context) {
 		"error": ErrorMapping[http.StatusInternalServerError],
 	})
 }
+
+func WriteNotFound(c *gin.Context, message string) {
+	c.JSON(http.StatusNotFound, gin.H{
+		"error":    ErrorMapping[http.StatusNotFound],
+		"messsage": message,
+	})
+}

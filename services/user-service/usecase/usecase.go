@@ -77,3 +77,15 @@ func (u *UserUsecase) Login(email, password string) (*entity.UserResponseModel, 
 
 	return &respUser, nil
 }
+
+func (u *UserUsecase) GetUserByID(id string) (*entity.UserResponseModel, error) {
+	dbUser, err := u.userStore.GetUserByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	var respUser entity.UserResponseModel
+	mapper.MapLoose(dbUser, &respUser)
+
+	return &respUser, nil
+}

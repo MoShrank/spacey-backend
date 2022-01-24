@@ -22,6 +22,7 @@ type HandlerInterface interface {
 	CreateUser(c *gin.Context)
 	Login(c *gin.Context)
 	Logout(c *gin.Context)
+	GetUser(c *gin.Context)
 }
 
 func NewHandler(
@@ -97,4 +98,21 @@ func (h *Handler) Logout(c *gin.Context) {
 	c.SetCookie("Authorization", "", -1, "/", h.config.GetDomain(), false, true)
 	c.SetCookie("LoggedIn", "false", -1, "/", h.config.GetDomain(), false, false)
 	httpconst.WriteSuccess(c, nil)
+}
+
+func (h *Handler) GetUser(c *gin.Context) {
+	userID := c.GetHeader("userID")
+
+	if userID == "" {
+		httpconst.WriteBadRequest(c)
+		return
+	}
+
+	userRes, err := h.userUsecase.GetUserByID(userID)
+	if err != nil {
+		httpconst.WriteNotFound(c, "Could not find userID in database.")
+		return
+	}
+
+	httpconst.WriteSuccess(c, userRes)
 }

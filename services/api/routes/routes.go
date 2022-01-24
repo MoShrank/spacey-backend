@@ -49,8 +49,14 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	authMiddleware := auth.NewJWT(cfg)
 
 	userServiceHostName := cfg.GetUserServiceHostName()
+
 	userGroup := router.Group("/user")
 	{
+		router.GET(
+			"/user",
+			middleware.Auth(authMiddleware),
+			proxy(getUrl(userServiceHostName, "user")),
+		)
 		userGroup.POST("", proxy(getUrl(userServiceHostName, "user")))
 		userGroup.POST("/login", proxy(getUrl(userServiceHostName, "login")))
 		userGroup.GET("/logout", proxy(getUrl(userServiceHostName, "logout")))

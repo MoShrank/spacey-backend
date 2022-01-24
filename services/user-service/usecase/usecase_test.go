@@ -26,6 +26,11 @@ func (m *UserStoreMock) GetUserByEmail(email string) (*entity.User, error) {
 	return args.Get(0).(*entity.User), args.Error(1)
 }
 
+func (m *UserStoreMock) GetUserByID(id string) (*entity.User, error) {
+	args := m.Called(id)
+	return args.Get(0).(*entity.User), args.Error(1)
+}
+
 func TestCreateUser(t *testing.T) {
 	tests := []struct {
 		TestName  string

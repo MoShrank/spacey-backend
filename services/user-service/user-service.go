@@ -30,6 +30,7 @@ func runServer(
 				"message": "pong",
 			})
 		})
+		router.GET("/user", handler.GetUser)
 		router.POST("/user", handler.CreateUser)
 		router.POST("/login", handler.Login)
 		router.GET("/logout", handler.Logout)

@@ -32,6 +32,11 @@ func (u *UserUsecaseMock) Login(email, password string) (*entity.UserResponseMod
 	return args.Get(0).(*entity.UserResponseModel), args.Error(1)
 }
 
+func (u *UserUsecaseMock) GetUserByID(id string) (*entity.UserResponseModel, error) {
+	args := u.Called(id)
+	return args.Get(0).(*entity.UserResponseModel), args.Error(1)
+}
+
 func getJSONErr(statusCode int) string {
 	return fmt.Sprintf("{\"error\": \"%s\"}", httpconst.ErrorMapping[statusCode])
 }
@@ -229,6 +234,37 @@ func TestLoginValidUser(t *testing.T) {
 	c, _ := gin.CreateTestContext(w)
 	c.Request, _ = http.NewRequest("GET", "/user/login", bytes.NewBuffer([]byte(inpBody)))
 	handler.Login(c)
+
+	assert.Equal(t, wantStatusCode, c.Writer.Status())
+	assert.JSONEq(t, wantBody, w.Body.String())
+
+}
+
+func TestGetUser(t *testing.T) {
+	wantBody := "{\"data\": {\"id\": \"1\", \"name\": \"moritz\", \"email\": \"moritz.e50@gmail.com\"}, \"message\": \"Success\"}"
+	wantStatusCode := 200
+
+	usecaseMock := &UserUsecaseMock{}
+	conf, _ := config.NewConfig()
+
+	handler := Handler{
+		logger:      log.New(),
+		userUsecase: usecaseMock,
+		validator:   validator.NewValidator(),
+		config:      conf,
+	}
+	usecaseMock.On("GetUserByID", mock.Anything).Return(&entity.UserResponseModel{
+		ID:    "1",
+		Name:  "moritz",
+		Email: "moritz.e50@gmail.com",
+	}, nil)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request, _ = http.NewRequest("GET", "/user", nil)
+	c.Request.Header.Set("userID", "1")
+
+	handler.GetUser(c)
 
 	assert.Equal(t, wantStatusCode, c.Writer.Status())
 	assert.JSONEq(t, wantBody, w.Body.String())

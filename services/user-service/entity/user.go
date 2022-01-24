@@ -18,7 +18,7 @@ type UserResponseModel struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
-	Token string `json:"token"`
+	Token string `json:"token,omitempty"`
 }
 
 type UserReq struct {
@@ -30,9 +30,11 @@ type UserReq struct {
 type UserStoreInterface interface {
 	SaveUser(user *User) (string, error)
 	GetUserByEmail(email string) (*User, error)
+	GetUserByID(id string) (*User, error)
 }
 
 type UserUsecaseInterface interface {
 	CreateUser(user interface{}) (*UserResponseModel, error)
 	Login(email, password string) (*UserResponseModel, error)
+	GetUserByID(id string) (*UserResponseModel, error)
 }

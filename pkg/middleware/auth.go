@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/moshrank/spacey-backend/pkg/auth"
 	"github.com/moshrank/spacey-backend/pkg/httpconst"
@@ -21,30 +19,20 @@ func Auth(authObj auth.JWTInterface) gin.HandlerFunc {
 		tokenString := authCookie.Value
 
 		if tokenString == "" {
-			httpconst.WriteUnauthorized(c)
+			httpconst.WriteBadRequest(c)
 			c.Abort()
 			return
 		}
-		tokenString = tokenString[7:]
 
-		if ok, _ := authObj.ValidateJWT(tokenString); ok {
+		if claims, err := authObj.ValidateJWT(tokenString); err == nil {
 
-			if claims, ok := authObj.ExtractClaims(tokenString); ok {
-				userID := claims["sub"].(string)
+			userID := claims.Id
+			c.Request.Header.Add("userID", userID)
 
-				c.Set("userID", userID)
-
-				c.Next()
-			} else {
-				httpconst.WriteUnauthorized(c)
-				c.Abort()
-				return
-			}
+			c.Next()
 
 		} else {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "Invalid token!",
-			})
+			httpconst.WriteUnauthorized(c)
 			c.Abort()
 		}
 
