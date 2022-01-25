@@ -68,7 +68,7 @@ func (h *Handler) CreateUser(c *gin.Context) {
 
 	// TODO should be set to a secure cookie + expire time should be equal to jwt token expire time
 	c.SetCookie("Authorization", userRes.Token, 604800, "/", h.config.GetDomain(), false, true)
-	c.SetCookie("LoggedIn", userRes.Token, 604800, "/", h.config.GetDomain(), false, false)
+	c.SetCookie("LoggedIn", "true", 604800, "/", h.config.GetDomain(), false, false)
 
 	httpconst.WriteCreated(c, userRes)
 }
