@@ -19,7 +19,7 @@ func Auth(authObj auth.JWTInterface) gin.HandlerFunc {
 		tokenString := authCookie.Value
 
 		if tokenString == "" {
-			httpconst.WriteBadRequest(c)
+			httpconst.WriteBadRequest(c, "Could not find authorization token.")
 			c.Abort()
 			return
 		}

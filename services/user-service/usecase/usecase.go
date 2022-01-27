@@ -45,7 +45,7 @@ func (u *UserUsecase) CreateUser(user interface{}) (*entity.UserResponseModel, e
 
 	id, err := u.userStore.SaveUser(&dbUser)
 	if err != nil {
-		return nil, err
+		return nil, entity.ErrEmailAlreadyExists
 	}
 
 	dbUser.ID = id

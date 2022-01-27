@@ -26,13 +26,14 @@ func (v *Validator) Validate(obj interface{}) error {
 }
 
 func (v *Validator) ValidateJSON(c *gin.Context, obj interface{}) error {
-	if err := c.ShouldBindJSON(obj); err != nil {
-		httpconst.WriteValidationError(c, err)
+	err := c.BindJSON(obj)
+	if err != nil {
+		httpconst.WriteValidationError(c, err.Error())
 		return err
 	}
 
 	if err := v.Validate(obj); err != nil {
-		httpconst.WriteValidationError(c, err)
+		httpconst.WriteValidationError(c, err.Error())
 		return err
 	}
 

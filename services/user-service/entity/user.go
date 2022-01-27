@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"errors"
 	"time"
 )
 
@@ -38,3 +39,5 @@ type UserUsecaseInterface interface {
 	Login(email, password string) (*UserResponseModel, error)
 	GetUserByID(id string) (*UserResponseModel, error)
 }
+
+var ErrEmailAlreadyExists = errors.New("email already exists.")

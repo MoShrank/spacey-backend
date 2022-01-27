@@ -27,15 +27,17 @@ func WriteDatabaseError(c *gin.Context) {
 	})
 }
 
-func WriteBadRequest(c *gin.Context) {
+func WriteBadRequest(c *gin.Context, message string) {
 	c.JSON(http.StatusBadRequest, gin.H{
-		"error": ErrorMapping[http.StatusBadRequest],
+		"error":    ErrorMapping[http.StatusBadRequest],
+		"messsage": message,
 	})
 }
 
-func WriteValidationError(c *gin.Context, err error) {
+func WriteValidationError(c *gin.Context, err string) {
 	c.JSON(http.StatusBadRequest, gin.H{
-		"error": ErrorMapping[http.StatusBadRequest],
+		"error":   ErrorMapping[http.StatusBadRequest],
+		"message": err,
 	})
 }
 

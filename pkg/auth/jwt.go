@@ -26,7 +26,7 @@ func NewJWT(cfg config.ConfigInterface) JWTInterface {
 
 	return &JWT{
 		secretKey:    secretKey,
-		expireOffset: time.Hour * 24 * 7,
+		expireOffset: time.Second * time.Duration(cfg.GetMaxAgeAuth()),
 	}
 }
 

@@ -39,6 +39,28 @@ func NewHandler(
 	}
 }
 
+func (h *Handler) setAuthCookie(c *gin.Context, token string) {
+	c.SetCookie(
+		"Authorization",
+		token,
+		h.config.GetMaxAgeAuth(),
+		"/",
+		h.config.GetDomain(),
+		false,
+		true,
+	)
+	c.SetCookie(
+		"LoggedIn",
+		"true",
+		h.config.GetMaxAgeAuth(),
+		"/",
+		h.config.GetDomain(),
+		false,
+		false,
+	)
+
+}
+
 func (h *Handler) CreateUser(c *gin.Context) {
 	var user entity.UserReq
 
@@ -47,28 +69,25 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	}
 
 	if user.Name == "" {
-		httpconst.WriteBadRequest(c)
+		httpconst.WriteBadRequest(c, "name is required.")
 		return
 	}
 
 	_, err := h.userUsecase.CreateUser(&user)
 
-	// TODO create custom errors
 	if err != nil {
-		httpconst.WriteInternalServerError(c)
+		httpconst.WriteBadRequest(c, err.Error())
 		return
 	}
 
 	userRes, err := h.userUsecase.Login(user.Email, user.Password)
 
 	if err != nil {
-		httpconst.WriteInternalServerError(c)
+		httpconst.WriteBadRequest(c, err.Error())
 		return
 	}
 
-	// TODO should be set to a secure cookie + expire time should be equal to jwt token expire time
-	c.SetCookie("Authorization", userRes.Token, 604800, "/", h.config.GetDomain(), false, true)
-	c.SetCookie("LoggedIn", "true", 604800, "/", h.config.GetDomain(), false, false)
+	h.setAuthCookie(c, userRes.Token)
 
 	httpconst.WriteCreated(c, userRes)
 }
@@ -82,13 +101,11 @@ func (h *Handler) Login(c *gin.Context) {
 
 	userRes, err := h.userUsecase.Login(user.Email, user.Password)
 	if err != nil {
-		httpconst.WriteInternalServerError(c)
+		httpconst.WriteBadRequest(c, "Invalid email or password.")
 		return
 	}
 
-	// TODO should be set to a secure cookie + expire time should be equal to jwt token expire time
-	c.SetCookie("Authorization", userRes.Token, 604800, "/", h.config.GetDomain(), false, true)
-	c.SetCookie("LoggedIn", "true", 604800, "/", h.config.GetDomain(), false, false)
+	h.setAuthCookie(c, userRes.Token)
 
 	httpconst.WriteSuccess(c, userRes)
 
@@ -104,7 +121,7 @@ func (h *Handler) GetUser(c *gin.Context) {
 	userID := c.GetHeader("userID")
 
 	if userID == "" {
-		httpconst.WriteBadRequest(c)
+		httpconst.WriteBadRequest(c, "userID is required.")
 		return
 	}
 

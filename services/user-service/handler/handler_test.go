@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -38,7 +39,12 @@ func (u *UserUsecaseMock) GetUserByID(id string) (*entity.UserResponseModel, err
 }
 
 func getJSONErr(statusCode int) string {
-	return fmt.Sprintf("{\"error\": \"%s\"}", httpconst.ErrorMapping[statusCode])
+	return fmt.Sprintf("{\"error\": \"%s\", \"message\": \"\"}", httpconst.ErrorMapping[statusCode])
+}
+
+type Err struct {
+	Error   string `json:"error"`
+	Message string `json:"message"`
 }
 
 func TestCreateUserHandlerInvalidUser(t *testing.T) {
@@ -57,7 +63,7 @@ func TestCreateUserHandlerInvalidUser(t *testing.T) {
 		},
 		{
 			"Empty Email",
-			"{\"name\": \"moritz\", \"email\": \", \"password\": \"test_password\"}",
+			"{\"name\": \"moritz\", \"email\": \"\", \"password\": \"test_password\"}",
 			getJSONErr(400),
 			400,
 		},
@@ -97,7 +103,7 @@ func TestCreateUserHandlerInvalidUser(t *testing.T) {
 		config:      conf,
 	}
 	usecaseMock.On("CreateUser", mock.Anything).Return(&entity.UserResponseModel{}, nil)
-	usecaseMock.On("Login", mock.Anything).Return(&entity.User{}, true)
+	usecaseMock.On("Login", mock.Anything, mock.Anything).Return(&entity.UserResponseModel{}, nil)
 
 	for _, test := range tests {
 
@@ -107,8 +113,14 @@ func TestCreateUserHandlerInvalidUser(t *testing.T) {
 			c.Request, _ = http.NewRequest("POST", "/user", bytes.NewBuffer([]byte(test.inpBody)))
 			handler.CreateUser(c)
 
+			// set message to empty strint since function does not return custom error msg
+			bodyRes := &Err{}
+			json.Unmarshal(w.Body.Bytes(), bodyRes)
+			bodyRes.Message = ""
+			expBody, _ := json.Marshal(bodyRes)
+
 			assert.Equal(t, test.wantStatusCode, c.Writer.Status())
-			assert.JSONEq(t, test.wantBody, w.Body.String())
+			assert.JSONEq(t, test.wantBody, string(expBody))
 		})
 	}
 }
@@ -203,8 +215,14 @@ func TestLoginInvalidUser(t *testing.T) {
 			)
 			handler.Login(c)
 
+			// set message to empty strint since function does not return custom error msg
+			bodyRes := &Err{}
+			json.Unmarshal(w.Body.Bytes(), bodyRes)
+			bodyRes.Message = ""
+			expBody, _ := json.Marshal(bodyRes)
+
 			assert.Equal(t, test.wantStatusCode, c.Writer.Status())
-			assert.JSONEq(t, test.wantBody, w.Body.String())
+			assert.JSONEq(t, test.wantBody, string(expBody))
 		})
 	}
 }

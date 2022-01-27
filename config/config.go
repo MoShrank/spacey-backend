@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -17,6 +18,7 @@ type Config struct {
 	UserServiceHostName string
 	DeckServiceHostName string
 	Domain              string
+	MaxAgeAuth          int
 }
 
 type ConfigInterface interface {
@@ -29,6 +31,7 @@ type ConfigInterface interface {
 	GetUserServiceHostName() string
 	GetDeckServiceHostName() string
 	GetDomain() string
+	GetMaxAgeAuth() int
 }
 
 func loadEnvWithoutDefault(key string) string {
@@ -52,6 +55,12 @@ func loadEnv(name, defaultValue string) string {
 func NewConfig() (ConfigInterface, error) {
 	godotenv.Load()
 
+	maxAgeAuth, err := strconv.Atoi(loadEnv("MAX_AGE_AUTH", "604800"))
+
+	if err != nil {
+		panic(err)
+	}
+
 	return &Config{
 		Port:                loadEnv("PORT", "8080"),
 		MongoDBConnection:   loadEnv("MONGO_DB_CONNECTION", "mongodb://127.0.0.1:27017"),
@@ -62,6 +71,7 @@ func NewConfig() (ConfigInterface, error) {
 		UserServiceHostName: loadEnv("USER_SERVICE_HOST_NAME", "user-service"),
 		DeckServiceHostName: loadEnv("DECK_SERVICE_HOST_NAME", "deck-service"),
 		Domain:              loadEnv("DOMAIN", "localhost"),
+		MaxAgeAuth:          maxAgeAuth,
 	}, nil
 }
 
@@ -99,4 +109,8 @@ func (c *Config) GetDeckServiceHostName() string {
 
 func (c *Config) GetDomain() string {
 	return c.Domain
+}
+
+func (c *Config) GetMaxAgeAuth() int {
+	return c.MaxAgeAuth
 }
