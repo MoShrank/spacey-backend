@@ -64,7 +64,7 @@ func (h *CardHandler) GetCards(c *gin.Context) {
 
 	deckID := c.Query("deck_id")
 	if deckID == "" {
-		httpconst.WriteBadRequest(c)
+		httpconst.WriteBadRequest(c, "deck_id is required")
 		return
 	}
 
@@ -86,7 +86,7 @@ func (h *CardHandler) GetCard(c *gin.Context) {
 
 	cardID := c.Param("id")
 	if cardID == "" {
-		httpconst.WriteBadRequest(c)
+		httpconst.WriteBadRequest(c, "card_id is required")
 		return
 	}
 
@@ -113,7 +113,7 @@ func (h *CardHandler) UpdateCard(c *gin.Context) {
 
 	cardID := c.Param("id")
 	if cardID == "" {
-		httpconst.WriteBadRequest(c)
+		httpconst.WriteBadRequest(c, "card_id is required")
 		return
 	}
 
@@ -135,7 +135,7 @@ func (h *CardHandler) DeleteCard(c *gin.Context) {
 
 	cardID := c.Param("id")
 	if cardID == "" {
-		httpconst.WriteBadRequest(c)
+		httpconst.WriteBadRequest(c, "card_id is required")
 		return
 	}
 
