@@ -10,6 +10,14 @@ services:
     ports:
       - "80:80"
 
+  config-service:
+    build: ./services/config-service
+    container_name: config-service
+    env_file:
+      - .env
+    networks:
+      - spacey-services
+
   user-service:
     build: ./services/user-service
     container_name: user-service

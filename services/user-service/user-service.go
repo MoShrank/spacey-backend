@@ -17,6 +17,16 @@ import (
 	"go.uber.org/fx"
 )
 
+type UserServiceConfig struct {
+	PORT                string `json:"port"`
+	LOGLEVEL            string `json:"loglevel"`
+	GRAYLOG_CONNECTION  string `json:"graylog_connection"`
+	DB_NAME             string `json:"db_name"`
+	MONGO_DB_CONNECTION string `json:"mongo_db_connection"`
+	JWT_SECRET          string `json:"jwt_secret"`
+	MAX_AGE_AUTH        int    `json:"max_age_auth"`
+}
+
 func runServer(
 	lifecycle fx.Lifecycle,
 	handler handler.HandlerInterface,
