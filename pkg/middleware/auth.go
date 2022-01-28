@@ -26,8 +26,13 @@ func Auth(authObj auth.JWTInterface) gin.HandlerFunc {
 
 		if claims, err := authObj.ValidateJWT(tokenString); err == nil {
 
+			//TODO refactor user-service to take user id from query parameter
+			// instead of header and remove userID here from header
 			userID := claims.Id
 			c.Request.Header.Add("userID", userID)
+
+			//construct new url with userID as query parameter and set it in request
+			c.Request.URL.Path = c.Request.URL.Path + "?userID=" + userID
 
 			c.Next()
 

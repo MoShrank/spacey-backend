@@ -57,19 +57,31 @@ func TestCreateDeck(t *testing.T) {
 	}{
 		{
 			"Valid Deck",
-			"{\"name\": \"Test Deck\"}",
+			`{"name": "Test Deck", "description": "Test Description", "color": "#FFFFFF"}`,
 			"test_user_id",
 			201,
 		},
 		{
-			"Invalid Deck",
-			"{\"name\": \"\"}",
+			"Missing Deck Name",
+			`{"description": "Test Description", "color": "#FFFFFF"}`,
+			"test_user_id",
+			400,
+		},
+		{
+			"Missing Description",
+			`{"name": "Test Deck", "color": "#FFFFFF"}`,
+			"test_user_id",
+			400,
+		},
+		{
+			"Missing Color",
+			`{"name": "Test Deck", "description": "Test Description"}`,
 			"test_user_id",
 			400,
 		},
 		{
 			"Missing User ID",
-			"{\"name\": \"Test Deck\"}",
+			`{"name": "Test Deck"}`,
 			"",
 			401,
 		},
@@ -214,21 +226,21 @@ func TestUpdateDeck(t *testing.T) {
 	}{
 		{
 			"Valid Deck",
-			"{\"name\": \"Test Deck\"}",
+			`{"name": "Test Deck", "description": "Test Description", "color": "#FFFFFF"}`,
 			"test_user_id",
 			"test_deck_id",
 			200,
 		},
 		{
 			"Invalid Deck",
-			"{\"name\": \"\"}",
+			`{"name": ""}`,
 			"test_user_id",
 			"test_deck_id",
 			400,
 		},
 		{
 			"Missing User ID",
-			"{\"name\": \"Test Deck\"}",
+			`{"name": "Test Deck"}`,
 			"",
 			"test_deck_id",
 			401,
