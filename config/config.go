@@ -69,7 +69,7 @@ func NewConfig() (ConfigInterface, error) {
 		AuthSecretKey:       loadEnv("AUTH_SECRET_KEY", "secret"),
 		DBName:              loadEnv("DB_NAME", "spacey"),
 		UserServiceHostName: loadEnv("USER_SERVICE_HOST_NAME", "user-service"),
-		DeckServiceHostName: loadEnv("DECK_SERVICE_HOST_NAME", "deck-service"),
+		DeckServiceHostName: loadEnv("DECK_SERVICE_HOST_NAME", "deck-management-service"),
 		Domain:              loadEnv("DOMAIN", "localhost"),
 		MaxAgeAuth:          maxAgeAuth,
 	}, nil

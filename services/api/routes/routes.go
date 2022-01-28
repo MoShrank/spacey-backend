@@ -70,8 +70,8 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	deckServiceHostName := cfg.GetDeckServiceHostName()
 	deckGroup := router.Group("/deck").Use(middleware.Auth(authMiddleware))
 	{
-		deckGroup.GET("", handler.GetDecks)
-		deckGroup.POST("", proxy(getUrl(deckServiceHostName, "deck")))
+		deckGroup.GET("", proxy(getUrl(deckServiceHostName, "decks")))
+		deckGroup.POST("", proxy(getUrl(deckServiceHostName, "decks")))
 		deckGroup.PUT("/:id", handler.UpdateDeck)
 		deckGroup.DELETE("/:id", handler.DeleteDeck)
 
