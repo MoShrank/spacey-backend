@@ -4,7 +4,7 @@ LABEL maintainer="Moritz Eich <hey@moritz.dev"
 
 RUN mkdir /app
 
-COPY ./services/deck-management-service/bin/ /app/
+COPY /bin/ /app/
 
 WORKDIR /app
 

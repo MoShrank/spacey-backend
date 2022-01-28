@@ -26,6 +26,14 @@ services:
     networks:
       - spacey-services
 
+  deck-management-service:
+    build: ./services/deck-management-service
+    container_name: deck-management-service
+    env_file:
+      - .env
+    networks:
+      - spacey-services
+
   mongodb:
     image: mongo
     container_name: mongodb
