@@ -3,7 +3,7 @@ package entity
 import "time"
 
 type Deck struct {
-	ID          string     `bson:"id"`
+	ID          string     `bson:"_id,omitempty"`
 	Name        string     `bson:"name"`
 	Description string     `bson:"description"`
 	Color       string     `bson:"color"`

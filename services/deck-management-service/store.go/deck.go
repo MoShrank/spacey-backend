@@ -1,10 +1,13 @@
 package store
 
 import (
+	"context"
+
 	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/services/deck-management-service/entity"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -26,7 +29,7 @@ func NewDeckStore(
 }
 
 func (s *DeckStore) FindByID(userID string, id string) (*entity.Deck, error) {
-	res := s.db.QueryDocument(DECK_COLLECTION, map[string]interface{}{"_id": id, "UserID": userID})
+	res := s.db.QueryDocument(DECK_COLLECTION, bson.M{"_id": id, "user_id": userID})
 	var deck entity.Deck
 	err := res.Decode(&deck)
 
@@ -34,13 +37,17 @@ func (s *DeckStore) FindByID(userID string, id string) (*entity.Deck, error) {
 }
 
 func (s *DeckStore) FindAll(userID string) ([]entity.Deck, error) {
-	res, err := s.db.QueryDocuments(DECK_COLLECTION, map[string]interface{}{"UserID": userID})
+	res, err := s.db.QueryDocuments(
+		DECK_COLLECTION,
+		bson.M{"user_id": userID},
+	)
 	if err != nil {
 		return nil, err
 	}
 
 	var decks []entity.Deck
-	err = res.Decode(&decks)
+	err = res.All(context.TODO(), &decks)
+
 	return decks, err
 
 }
@@ -59,7 +66,7 @@ func (s *DeckStore) Save(deck *entity.Deck) (string, error) {
 func (s *DeckStore) Update(deck *entity.Deck) error {
 	_, err := s.db.UpdateDocument(
 		DECK_COLLECTION,
-		map[string]interface{}{"_id": deck.ID, "userID": deck.UserID},
+		bson.M{"_id": deck.ID, "user_id": deck.UserID},
 		deck,
 	)
 
@@ -69,7 +76,7 @@ func (s *DeckStore) Update(deck *entity.Deck) error {
 func (s *DeckStore) Delete(userID string, id string) error {
 	_, err := s.db.DeleteDocument(
 		DECK_COLLECTION,
-		map[string]interface{}{"_id": id, "UserID": userID},
+		bson.M{"_id": id, "user_id": userID},
 	)
 
 	return err

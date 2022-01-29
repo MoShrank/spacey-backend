@@ -32,7 +32,9 @@ func Auth(authObj auth.JWTInterface) gin.HandlerFunc {
 			c.Request.Header.Add("userID", userID)
 
 			//construct new url with userID as query parameter and set it in request
-			c.Request.URL.Path = c.Request.URL.Path + "?userID=" + userID
+			q := c.Request.URL.Query()
+			q.Add("userID", userID)
+			c.Request.URL.RawQuery = q.Encode()
 
 			c.Next()
 

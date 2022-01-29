@@ -35,8 +35,9 @@ func NewDeckHandler(
 }
 
 func (h *DeckHandler) CreateDeck(c *gin.Context) {
-	userID, ok := c.Get("userID")
-	if !ok || userID == "" {
+	userID := c.Request.URL.Query().Get("userID")
+
+	if userID == "" {
 		httpconst.WriteUnauthorized(c)
 		return
 	}
@@ -46,7 +47,7 @@ func (h *DeckHandler) CreateDeck(c *gin.Context) {
 		return
 	}
 
-	deckRes, err := h.deckUseCase.CreateDeck(userID.(string), &deck)
+	deckRes, err := h.deckUseCase.CreateDeck(userID, &deck)
 	if err != nil {
 		httpconst.WriteDatabaseError(c)
 		return
@@ -57,8 +58,9 @@ func (h *DeckHandler) CreateDeck(c *gin.Context) {
 }
 
 func (h *DeckHandler) GetDeck(c *gin.Context) {
-	userID, ok := c.Get("userID")
-	if !ok || userID == "" {
+	userID := c.Request.URL.Query().Get("userID")
+
+	if userID == "" {
 		httpconst.WriteUnauthorized(c)
 		return
 	}
@@ -69,7 +71,7 @@ func (h *DeckHandler) GetDeck(c *gin.Context) {
 		return
 	}
 
-	deck, err := h.deckUseCase.GetDeck(userID.(string), deckID)
+	deck, err := h.deckUseCase.GetDeck(userID, deckID)
 	if err != nil {
 		httpconst.WriteDatabaseError(c)
 		return
@@ -79,25 +81,26 @@ func (h *DeckHandler) GetDeck(c *gin.Context) {
 }
 
 func (h *DeckHandler) GetDecks(c *gin.Context) {
-	userID, ok := c.Get("userID")
-	if !ok || userID == "" {
+	userID := c.Request.URL.Query().Get("userID")
+
+	if userID == "" {
 		httpconst.WriteUnauthorized(c)
 		return
 	}
 
-	decks, err := h.deckUseCase.GetDecks(userID.(string))
+	decks, err := h.deckUseCase.GetDecks(userID)
 	if err != nil {
-		httpconst.WriteDatabaseError(c)
+		httpconst.WriteBadRequest(c, err.Error())
 		return
 	}
 
 	httpconst.WriteSuccess(c, decks)
-
 }
 
 func (h *DeckHandler) UpdateDeck(c *gin.Context) {
-	userID, ok := c.Get("userID")
-	if !ok || userID == "" {
+	userID := c.Request.URL.Query().Get("userID")
+
+	if userID == "" {
 		httpconst.WriteUnauthorized(c)
 		return
 	}
@@ -113,7 +116,7 @@ func (h *DeckHandler) UpdateDeck(c *gin.Context) {
 		return
 	}
 
-	deckRes, err := h.deckUseCase.UpdateDeck(userID.(string), deckID, &deck)
+	deckRes, err := h.deckUseCase.UpdateDeck(userID, deckID, &deck)
 	if err != nil {
 		httpconst.WriteDatabaseError(c)
 		return
@@ -123,8 +126,9 @@ func (h *DeckHandler) UpdateDeck(c *gin.Context) {
 }
 
 func (h *DeckHandler) DeleteDeck(c *gin.Context) {
-	userID, ok := c.Get("userID")
-	if !ok || userID == "" {
+	userID := c.Request.URL.Query().Get("userID")
+
+	if userID == "" {
 		httpconst.WriteUnauthorized(c)
 		return
 	}
@@ -135,7 +139,7 @@ func (h *DeckHandler) DeleteDeck(c *gin.Context) {
 		return
 	}
 
-	if err := h.deckUseCase.DeleteDeck(userID.(string), deckID); err != nil {
+	if err := h.deckUseCase.DeleteDeck(userID, deckID); err != nil {
 		httpconst.WriteDatabaseError(c)
 		return
 	}

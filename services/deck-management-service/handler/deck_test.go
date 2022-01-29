@@ -106,11 +106,12 @@ func TestCreateDeck(t *testing.T) {
 			c, _ := gin.CreateTestContext(w)
 			c.Request, _ = http.NewRequest(
 				"POST",
-				"/flashcards/decks",
+				"/decks",
 				bytes.NewBuffer([]byte(test.body)),
 			)
-
-			c.Set("userID", test.userID)
+			q := c.Request.URL.Query()
+			q.Add("userID", test.userID)
+			c.Request.URL.RawQuery = q.Encode()
 
 			handler.CreateDeck(c)
 
@@ -150,11 +151,12 @@ func TestGetDecks(t *testing.T) {
 			c, _ := gin.CreateTestContext(w)
 			c.Request, _ = http.NewRequest(
 				"GET",
-				"/flashcards/decks",
+				"/decks",
 				nil,
 			)
-
-			c.Set("userID", test.userID)
+			q := c.Request.URL.Query()
+			q.Add("userID", test.userID)
+			c.Request.URL.RawQuery = q.Encode()
 
 			handler.GetDecks(c)
 
@@ -197,17 +199,18 @@ func TestGetDeck(t *testing.T) {
 			c, _ := gin.CreateTestContext(w)
 			c.Request, _ = http.NewRequest(
 				"GET",
-				"/flashcards/decks/"+test.deckID,
+				"/decks"+test.deckID,
 				nil,
 			)
-
-			c.Set("userID", test.userID)
 			c.Params = []gin.Param{
 				{
 					Key:   "id",
 					Value: test.deckID,
 				},
 			}
+			q := c.Request.URL.Query()
+			q.Add("userID", test.userID)
+			c.Request.URL.RawQuery = q.Encode()
 
 			handler.GetDeck(c)
 
@@ -268,11 +271,9 @@ func TestUpdateDeck(t *testing.T) {
 			c, _ := gin.CreateTestContext(w)
 			c.Request, _ = http.NewRequest(
 				"PUT",
-				"/flashcards/decks/"+test.deckID,
+				"/decks/"+test.deckID+"?userID="+test.userID,
 				bytes.NewBuffer([]byte(test.body)),
 			)
-
-			c.Set("userID", test.userID)
 			c.Params = []gin.Param{
 				{
 					Key:   "id",
@@ -321,17 +322,18 @@ func TestDeleteDeck(t *testing.T) {
 			c, _ := gin.CreateTestContext(w)
 			c.Request, _ = http.NewRequest(
 				"DELETE",
-				"/flashcards/decks/"+test.deckID,
+				"/decks/"+test.deckID,
 				nil,
 			)
-
-			c.Set("userID", test.userID)
 			c.Params = []gin.Param{
 				{
 					Key:   "id",
 					Value: test.deckID,
 				},
 			}
+			q := c.Request.URL.Query()
+			q.Add("userID", test.userID)
+			c.Request.URL.RawQuery = q.Encode()
 
 			handler.DeleteDeck(c)
 
