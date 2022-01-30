@@ -16,4 +16,3 @@ jobs:
     with:
       service_name: user-service
       service_dir: services/user-service
-      repository: user-service

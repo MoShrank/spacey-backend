@@ -16,4 +16,3 @@ jobs:
     with:
       service_name: api
       service_dir: services/api
-      repository: api
