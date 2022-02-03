@@ -24,16 +24,21 @@ func runServer(
 	lifecycle.Append(fx.Hook{OnStart: func(context.Context) error {
 		router := gin.Default()
 
-		router.GET("/cards", cardHandler.GetCards)
-		router.GET("/cards/:id", cardHandler.GetCard)
-		router.POST("/cards", cardHandler.CreateCard)
-		router.PUT("/cards/:id", cardHandler.UpdateCard)
-		router.DELETE("/cards/:id", cardHandler.DeleteCard)
-		router.GET("/decks", deckHandler.GetDecks)
-		router.GET("/decks/:id", deckHandler.GetDeck)
-		router.POST("/decks", deckHandler.CreateDeck)
-		router.PUT("/decks/:id", deckHandler.UpdateDeck)
-		router.DELETE("/decks/:id", deckHandler.DeleteDeck)
+		router.GET("ping", func(c *gin.Context) {
+			c.JSON(200, gin.H{
+				"message": "pong",
+			})
+		})
+
+		router.GET("decks", deckHandler.GetDecks)
+		router.GET("decks/:deckID", deckHandler.GetDeck)
+		router.POST("decks", deckHandler.CreateDeck)
+		router.PUT("decks/:deckID", deckHandler.UpdateDeck)
+		router.DELETE("decks/:deckID", deckHandler.DeleteDeck)
+
+		router.POST("decks/:deckID/cards", cardHandler.CreateCard)
+		router.PUT("decks/:deckID/cards/:id", cardHandler.UpdateCard)
+		router.DELETE("decks/:deckID/cards/:id", cardHandler.DeleteCard)
 
 		router.Run(":" + cfg.GetPort())
 		return nil

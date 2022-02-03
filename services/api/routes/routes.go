@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/moshrank/spacey-backend/config"
 	"github.com/moshrank/spacey-backend/pkg/auth"
+	"github.com/moshrank/spacey-backend/pkg/httpconst"
 	"github.com/moshrank/spacey-backend/pkg/middleware"
 	"github.com/moshrank/spacey-backend/services/api/handler"
 )
@@ -16,14 +17,13 @@ func getUrl(hostName, path string) string {
 	return "http://" + hostName + "/" + path
 }
 
-func proxy(targetUrl string) gin.HandlerFunc {
+func proxyWithPath(targetUrl string) gin.HandlerFunc {
 	remote, err := url.Parse(targetUrl)
 
 	return func(c *gin.Context) {
+
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": "failed to parse url",
-			})
+			httpconst.WriteBadRequest(c, "failed to parse url")
 			return
 		}
 
@@ -32,6 +32,22 @@ func proxy(targetUrl string) gin.HandlerFunc {
 			req.URL.Host = remote.Host
 			req.Host = remote.Host
 			req.URL.Path = remote.Path
+		}
+
+		proxy := &httputil.ReverseProxy{Director: director}
+		proxy.ServeHTTP(c.Writer, c.Request)
+
+	}
+}
+
+func proxy(serviceName string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		director := func(req *http.Request) {
+			req.URL.Scheme = c.Request.URL.Scheme
+			req.URL.Host = serviceName
+			req.Host = serviceName
+			req.URL.Path = c.Request.URL.Path
 		}
 
 		proxy := &httputil.ReverseProxy{Director: director}
@@ -51,35 +67,35 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	userServiceHostName := cfg.GetUserServiceHostName()
 	configServiceHostName := "config-service"
 
-	router.GET("/config/frontend", proxy(getUrl(configServiceHostName, "config/frontend")))
+	router.GET("/config/frontend", proxyWithPath(getUrl(configServiceHostName, "config/frontend")))
 
 	userGroup := router.Group("/user")
 	{
 		router.GET(
 			"/user",
 			middleware.Auth(authMiddleware),
-			proxy(getUrl(userServiceHostName, "user")),
+			proxyWithPath(getUrl(userServiceHostName, "user")),
 		)
-		userGroup.POST("", proxy(getUrl(userServiceHostName, "user")))
-		userGroup.POST("/login", proxy(getUrl(userServiceHostName, "login")))
-		userGroup.GET("/logout", proxy(getUrl(userServiceHostName, "logout")))
-		userGroup.DELETE("", proxy(getUrl(userServiceHostName, "users")))
-		userGroup.PUT("/password", proxy(getUrl(userServiceHostName, "password")))
+		userGroup.POST("", proxyWithPath(getUrl(userServiceHostName, "user")))
+		userGroup.POST("/login", proxyWithPath(getUrl(userServiceHostName, "login")))
+		userGroup.GET("/logout", proxyWithPath(getUrl(userServiceHostName, "logout")))
+		userGroup.DELETE("", proxyWithPath(getUrl(userServiceHostName, "users")))
+		userGroup.PUT("/password", proxyWithPath(getUrl(userServiceHostName, "password")))
 	}
 
 	deckServiceHostName := cfg.GetDeckServiceHostName()
-	deckGroup := router.Group("/deck").Use(middleware.Auth(authMiddleware))
+	deckGroup := router.Group("/decks").Use(middleware.Auth(authMiddleware))
 	{
-		deckGroup.GET("", proxy(getUrl(deckServiceHostName, "decks")))
-		deckGroup.POST("", proxy(getUrl(deckServiceHostName, "decks")))
-		deckGroup.PUT("/:id", handler.UpdateDeck)
-		deckGroup.DELETE("/:id", handler.DeleteDeck)
+		deckGroup.GET("", proxyWithPath(getUrl(deckServiceHostName, "decks")))
+		deckGroup.POST("", proxyWithPath(getUrl(deckServiceHostName, "decks")))
+		deckGroup.PUT("/:deckID", proxy(deckServiceHostName))
+		deckGroup.DELETE("/:deckID", proxy(deckServiceHostName))
 
-		deckGroup.POST("/:id/card", handler.CreateCard)
-		deckGroup.PUT("/:id/card/:card_id", handler.UpdateCard)
-		deckGroup.DELETE("/:id/card/:card_id", handler.DeleteCard)
+		deckGroup.POST("/:deckID/cards", proxy(deckServiceHostName))
+		deckGroup.PUT("/:deckID/cards/:id", proxy(deckServiceHostName))
+		deckGroup.DELETE("/:deckID/cards/:id", proxy(deckServiceHostName))
 
-		deckGroup.GET("/public", proxy(getUrl(deckServiceHostName, "/public")))
+		deckGroup.GET("/public", proxyWithPath(getUrl(deckServiceHostName, "/public")))
 		deckGroup.POST("/public", handler.CopyPublicDeck)
 	}
 

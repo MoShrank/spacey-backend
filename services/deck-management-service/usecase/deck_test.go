@@ -39,12 +39,17 @@ func (s *DeckStoreMock) Delete(userID, deckID string) error {
 
 func TestCreateDeck(t *testing.T) {
 	expDeck := entity.DeckRes{
-		ID:   "1",
-		Name: "Test Deck",
+		ID:          "1",
+		Name:        "Test Deck",
+		Description: "Test Description",
+		Color:       "Test Color",
+		Cards:       []entity.CardRes{},
 	}
 
 	inpDeck := entity.DeckReq{
-		Name: "Test Deck",
+		Name:        "Test Deck",
+		Description: "Test Description",
+		Color:       "Test Color",
 	}
 
 	deckStoreMock := new(DeckStoreMock)
@@ -61,20 +66,26 @@ func TestCreateDeck(t *testing.T) {
 func TestGetDecks(t *testing.T) {
 	expDecks := []entity.DeckRes{
 		{
-			ID:   "1",
-			Name: "Test Deck",
+			ID:          "1",
+			Name:        "Test Deck",
+			Description: "Test Description",
+			Color:       "Test Color",
+			Cards:       []entity.CardRes{},
 		},
 	}
 
 	deckStoreMock := new(DeckStoreMock)
 	deckStoreMock.On("FindAll", mock.Anything).Return([]entity.Deck{
 		{
-			ID:        "1",
-			Name:      "Test Deck",
-			UserID:    "1",
-			CreatedAt: nil,
-			UpdatedAt: nil,
-			DeletedAt: nil,
+			ID:          "1",
+			Name:        "Test Deck",
+			UserID:      "1",
+			Description: "Test Description",
+			Color:       "Test Color",
+			Cards:       []entity.Card{},
+			CreatedAt:   nil,
+			UpdatedAt:   nil,
+			DeletedAt:   nil,
 		},
 	}, nil)
 
@@ -89,19 +100,25 @@ func TestGetDecks(t *testing.T) {
 func TestGetDeck(t *testing.T) {
 	expDeck := entity.DeckRes{
 
-		ID:   "1",
-		Name: "Test Deck",
+		ID:          "1",
+		Name:        "Test Deck",
+		Description: "Test Description",
+		Color:       "Test Color",
+		Cards:       []entity.CardRes{},
 	}
 
 	deckStoreMock := new(DeckStoreMock)
 	deckStoreMock.On("FindByID", mock.Anything, mock.Anything).Return(&entity.Deck{
 
-		ID:        "1",
-		Name:      "Test Deck",
-		UserID:    "1",
-		CreatedAt: nil,
-		UpdatedAt: nil,
-		DeletedAt: nil,
+		ID:          "1",
+		Name:        "Test Deck",
+		UserID:      "1",
+		Description: "Test Description",
+		Color:       "Test Color",
+		Cards:       []entity.Card{},
+		CreatedAt:   nil,
+		UpdatedAt:   nil,
+		DeletedAt:   nil,
 	}, nil)
 
 	deckUseCase := NewDeckUseCase(deckStoreMock)
@@ -114,12 +131,17 @@ func TestGetDeck(t *testing.T) {
 
 func TestUpdateDeck(t *testing.T) {
 	expDeck := entity.DeckRes{
-		ID:   "1",
-		Name: "Test Deck",
+		ID:          "1",
+		Name:        "Test Deck",
+		Description: "Test Description",
+		Color:       "Test Color",
+		Cards:       []entity.CardRes{},
 	}
 
 	inpDeck := entity.DeckReq{
-		Name: "Test Deck",
+		Name:        "Test Deck",
+		Description: "Test Description",
+		Color:       "Test Color",
 	}
 
 	deckStoreMock := new(DeckStoreMock)
