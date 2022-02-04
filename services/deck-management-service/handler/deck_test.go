@@ -68,12 +68,6 @@ func TestCreateDeck(t *testing.T) {
 			400,
 		},
 		{
-			"Missing Description",
-			`{"name": "Test Deck", "color": "#FFFFFF"}`,
-			"test_user_id",
-			400,
-		},
-		{
 			"Missing Color",
 			`{"name": "Test Deck", "description": "Test Description"}`,
 			"test_user_id",
@@ -199,12 +193,12 @@ func TestGetDeck(t *testing.T) {
 			c, _ := gin.CreateTestContext(w)
 			c.Request, _ = http.NewRequest(
 				"GET",
-				"/decks"+test.deckID,
+				"/decks/:deckID",
 				nil,
 			)
 			c.Params = []gin.Param{
 				{
-					Key:   "id",
+					Key:   "deckID",
 					Value: test.deckID,
 				},
 			}
@@ -271,12 +265,17 @@ func TestUpdateDeck(t *testing.T) {
 			c, _ := gin.CreateTestContext(w)
 			c.Request, _ = http.NewRequest(
 				"PUT",
-				"/decks/"+test.deckID+"?userID="+test.userID,
+				"/decks/:deckID",
 				bytes.NewBuffer([]byte(test.body)),
 			)
+
+			q := c.Request.URL.Query()
+			q.Add("userID", test.userID)
+			c.Request.URL.RawQuery = q.Encode()
+
 			c.Params = []gin.Param{
 				{
-					Key:   "id",
+					Key:   "deckID",
 					Value: test.deckID,
 				},
 			}
@@ -322,12 +321,12 @@ func TestDeleteDeck(t *testing.T) {
 			c, _ := gin.CreateTestContext(w)
 			c.Request, _ = http.NewRequest(
 				"DELETE",
-				"/decks/"+test.deckID,
+				"/decks/:deckID",
 				nil,
 			)
 			c.Params = []gin.Param{
 				{
-					Key:   "id",
+					Key:   "deckID",
 					Value: test.deckID,
 				},
 			}

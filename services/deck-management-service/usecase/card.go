@@ -17,7 +17,10 @@ func NewCardUseCase(cardStore entity.CardStoreInterface) entity.CardUseCaseInter
 	}
 }
 
-func (c *CardUseCase) CreateCard(userID string, card *entity.CardReq) (*entity.CardRes, error) {
+func (c *CardUseCase) CreateCard(
+	deckID, userID string,
+	card *entity.CardReq,
+) (*entity.CardRes, error) {
 	var cardDB entity.Card
 	mapper.MapLoose(card, &cardDB)
 
@@ -27,7 +30,7 @@ func (c *CardUseCase) CreateCard(userID string, card *entity.CardReq) (*entity.C
 	cardDB.DeletedAt = nil
 	cardDB.UserID = userID
 
-	cardID, err := c.cardStore.SaveCard(&cardDB)
+	cardID, err := c.cardStore.SaveCard(deckID, userID, &cardDB)
 	if err != nil {
 		return nil, err
 	}
@@ -39,34 +42,8 @@ func (c *CardUseCase) CreateCard(userID string, card *entity.CardReq) (*entity.C
 	return &cardRes, nil
 }
 
-func (c *CardUseCase) GetCardsByDeckID(userID, deckID string) ([]entity.CardRes, error) {
-	cards, err := c.cardStore.GetCardsByDeckID(userID, deckID)
-	if err != nil {
-		return nil, err
-	}
-
-	var cardsRes []entity.CardRes
-	mapper.Map(cards, &cardsRes)
-
-	return cardsRes, nil
-}
-
-func (c *CardUseCase) GetCardByID(userID, cardID string) (*entity.CardRes, error) {
-	card, err := c.cardStore.GetCardByID(userID, cardID)
-	if err != nil {
-		return nil, err
-	}
-
-	var cardRes entity.CardRes
-	mapper.MapLoose(card, &cardRes)
-
-	return &cardRes, nil
-}
-
-//TODO redefine interface to take card ID
-//TODO check if all fields or only non nil fields are updated
 func (c *CardUseCase) UpdateCard(
-	userID, cardID string,
+	cardID, userID, deckID string,
 	card *entity.CardReq,
 ) (*entity.CardRes, error) {
 	var cardDB entity.Card
@@ -76,18 +53,17 @@ func (c *CardUseCase) UpdateCard(
 	cardDB.UpdatedAt = &timestamp
 	cardDB.DeletedAt = nil
 
-	err := c.cardStore.UpdateCard(userID, &cardDB)
+	err := c.cardStore.UpdateCard(cardID, userID, deckID, &cardDB)
 	if err != nil {
 		return nil, err
 	}
 
 	var cardRes entity.CardRes
 	mapper.MapLoose(&cardDB, &cardRes)
-	cardRes.ID = cardID
 
 	return &cardRes, nil
 }
 
-func (c *CardUseCase) DeleteCard(userID, cardID string) error {
-	return c.cardStore.DeleteCard(userID, cardID)
+func (c *CardUseCase) DeleteCard(userID, deckID, cardID string) error {
+	return c.cardStore.DeleteCard(userID, deckID, cardID)
 }

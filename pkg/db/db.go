@@ -91,7 +91,8 @@ func (db *Database) UpdateDocument(
 	filter interface{},
 	update interface{},
 ) (*mongo.UpdateResult, error) {
-	return db.DB.Collection(collectionName).UpdateOne(context.TODO(), filter, update)
+	return db.DB.Collection(collectionName).
+		UpdateOne(context.TODO(), filter, update)
 }
 
 func (db *Database) DeleteDocument(

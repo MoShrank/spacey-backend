@@ -5,10 +5,9 @@ import (
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/services/deck-management-service/entity"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-const CARD_COLLECTION = "card"
 
 type CardStore struct {
 	db     db.DatabaseInterface
@@ -25,58 +24,36 @@ func NewCardStore(
 	}
 }
 
-func (s *CardStore) GetCardByID(userID, cardID string) (*entity.Card, error) {
-	res := s.db.QueryDocument(
-		CARD_COLLECTION,
-		map[string]interface{}{"_id": cardID, "UserID": userID},
-	)
+func (s *CardStore) SaveCard(deckID, userID string, card *entity.Card) (string, error) {
+	id := primitive.NewObjectID()
 
-	var card entity.Card
-	err := res.Decode(&card)
+	card.ID = id.Hex()
 
-	return &card, err
+	_, err := s.db.UpdateDocument(DECK_COLLECTION, bson.M{
+		"user_id": userID,
+		"deck_id": deckID,
+	}, bson.M{"$push": bson.M{"cards.$": card}})
+
+	return id.Hex(), err
 }
 
-func (s *CardStore) GetCardsByDeckID(userID, cardID string) ([]entity.Card, error) {
-	res, err := s.db.QueryDocuments(
-		CARD_COLLECTION,
-		map[string]interface{}{"UserID": userID, "DeckID": cardID},
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	var cards []entity.Card
-	err = res.Decode(&cards)
-	return cards, err
-}
-
-func (s *CardStore) SaveCard(Card *entity.Card) (string, error) {
-	res, err := s.db.CreateDocument(CARD_COLLECTION, Card)
-	if err != nil {
-		return "", err
-	}
-
-	id, err := res.InsertedID.(primitive.ObjectID).MarshalJSON()
-
-	return string(id[:]), err
-}
-
-func (s *CardStore) UpdateCard(userID string, Card *entity.Card) error {
-	_, err := s.db.UpdateDocument(CARD_COLLECTION, map[string]interface{}{
-		"_id":    Card.ID,
-		"UserID": userID,
-	}, Card)
+func (s *CardStore) UpdateCard(cardID, userID, deckID string, Card *entity.Card) error {
+	_, err := s.db.UpdateDocument(DECK_COLLECTION, bson.M{
+		"_id":     Card.DeckID,
+		"user_id": userID,
+		"deck_id": deckID,
+		"cards":   bson.M{"$set": bson.M{"$elemMatch": bson.M{"_id": cardID}}},
+	}, bson.M{"cards.$": Card})
 
 	return err
 }
 
-func (s *CardStore) DeleteCard(userID string, id string) error {
-	_, err := s.db.DeleteDocument(CARD_COLLECTION, map[string]interface{}{
-		"_id":    id,
-		"UserID": userID,
-	})
+func (s *CardStore) DeleteCard(userID, deckID, cardID string) error {
+	_, err := s.db.UpdateDocument(DECK_COLLECTION, bson.M{
+		"_id":     deckID,
+		"user_id": userID,
+		"cards":   bson.M{"$elemMatch": bson.M{"_id": cardID}},
+	}, bson.M{"$pull": "cards.$"})
 
 	return err
 }

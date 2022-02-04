@@ -8,6 +8,7 @@ type Deck struct {
 	Description string     `bson:"description"`
 	Color       string     `bson:"color"`
 	UserID      string     `bson:"user_id"`
+	Cards       []Card     `bson:"cards"`
 	CreatedAt   *time.Time `bson:"created_at"`
 	UpdatedAt   *time.Time `bson:"updated_at"`
 	DeletedAt   *time.Time `bson:"deleted_at"`
@@ -15,15 +16,16 @@ type Deck struct {
 
 type DeckReq struct {
 	Name        string `json:"name"        validate:"required"`
-	Description string `json:"description" validate:"required"`
+	Description string `json:"description"`
 	Color       string `json:"color"       validate:"required"`
 }
 
 type DeckRes struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Color       string `json:"color"`
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Color       string    `json:"color"`
+	Cards       []CardRes `json:"cards"`
 }
 
 type DeckUseCaseInterface interface {
