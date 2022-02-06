@@ -34,10 +34,10 @@ func WriteBadRequest(c *gin.Context, message string) {
 	})
 }
 
-func WriteValidationError(c *gin.Context, err string) {
+func WriteValidationError(c *gin.Context, message string) {
 	c.JSON(http.StatusBadRequest, gin.H{
 		"error":   ErrorMapping[http.StatusBadRequest],
-		"message": err,
+		"message": message,
 	})
 }
 

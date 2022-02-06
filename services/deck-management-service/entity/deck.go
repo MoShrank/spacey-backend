@@ -15,9 +15,9 @@ type Deck struct {
 }
 
 type DeckReq struct {
-	Name        string `json:"name"        validate:"required"`
+	Name        string `json:"name"        binding:"required"`
 	Description string `json:"description"`
-	Color       string `json:"color"       validate:"required"`
+	Color       string `json:"color"       binding:"required"`
 }
 
 type DeckRes struct {
