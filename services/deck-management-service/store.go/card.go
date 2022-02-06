@@ -29,10 +29,16 @@ func (s *CardStore) SaveCard(deckID, userID string, card *entity.Card) (string, 
 
 	card.ID = id.Hex()
 
-	_, err := s.db.UpdateDocument(DECK_COLLECTION, bson.M{
+	// deckID and userID to objectID
+	deckIDObj, err := primitive.ObjectIDFromHex(deckID)
+	if err != nil {
+		return "", err
+	}
+
+	_, err = s.db.UpdateDocument(DECK_COLLECTION, bson.M{
+		"_id":     deckIDObj,
 		"user_id": userID,
-		"deck_id": deckID,
-	}, bson.M{"$push": bson.M{"cards.$": card}})
+	}, bson.M{"$push": bson.M{"cards": card}})
 
 	return id.Hex(), err
 }

@@ -44,7 +44,7 @@ func proxy(serviceName string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		director := func(req *http.Request) {
-			req.URL.Scheme = c.Request.URL.Scheme
+			req.URL.Scheme = "http"
 			req.URL.Host = serviceName
 			req.Host = serviceName
 			req.URL.Path = c.Request.URL.Path

@@ -26,6 +26,7 @@ func (u *DeckUseCase) CreateDeck(userID string, deck *entity.DeckReq) (*entity.D
 	deckDB.UpdatedAt = &timestamp
 	deckDB.DeletedAt = nil
 	deckDB.UserID = userID
+	deckDB.Cards = []entity.Card{}
 
 	deckID, err := u.deckStore.Save(&deckDB)
 	if err != nil {

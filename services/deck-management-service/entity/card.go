@@ -17,14 +17,14 @@ type CardReq struct {
 	ID       string `json:"id,omitempty"`
 	Question string `json:"question"     validate:"required"`
 	Answer   string `json:"answer"       validate:"required"`
-	DeckID   string `json:"deck_id"      validate:"required"`
+	DeckID   string `json:"deckID"       validate:"required"`
 }
 
 type CardRes struct {
 	ID       string `json:"id"`
 	Question string `json:"question" validate:"required"`
 	Answer   string `json:"answer"   validate:"required"`
-	DeckID   string `json:"deck_id"  validate:"required"`
+	DeckID   string `json:"deckID"   validate:"required"`
 }
 
 type CardUseCaseInterface interface {
