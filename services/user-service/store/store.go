@@ -27,9 +27,9 @@ func (s *Store) SaveUser(user *entity.User) (string, error) {
 		return "", err
 	}
 
-	id, err := res.InsertedID.(primitive.ObjectID).MarshalJSON()
+	id, _ := res.InsertedID.(primitive.ObjectID)
 
-	return string(id[:]), err
+	return id.Hex(), err
 }
 
 func (s *Store) GetUserByEmail(email string) (*entity.User, error) {

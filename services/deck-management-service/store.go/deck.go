@@ -58,9 +58,9 @@ func (s *DeckStore) Save(deck *entity.Deck) (string, error) {
 		return "", err
 	}
 
-	id, err := res.InsertedID.(primitive.ObjectID).MarshalJSON()
+	id, _ := res.InsertedID.(primitive.ObjectID)
 
-	return string(id[:]), err
+	return id.Hex(), err
 }
 
 func (s *DeckStore) Update(deck *entity.Deck) error {
