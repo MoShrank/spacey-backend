@@ -64,19 +64,35 @@ func (s *DeckStore) Save(deck *entity.Deck) (string, error) {
 }
 
 func (s *DeckStore) Update(deck *entity.Deck) error {
-	_, err := s.db.UpdateDocument(
-		DECK_COLLECTION,
-		bson.M{"_id": deck.ID, "user_id": deck.UserID},
-		deck,
-	)
+	id, err := primitive.ObjectIDFromHex(deck.ID)
+	if err != nil {
+		return err
+	}
 
+	_, err = s.db.UpdateDocument(
+		DECK_COLLECTION,
+		bson.M{"_id": id, "user_id": deck.UserID},
+		bson.M{
+			"$set": bson.M{
+				"name":        deck.Name,
+				"description": deck.Description,
+				"color":       deck.Color,
+				"updated_at":  deck.UpdatedAt,
+			},
+		},
+	)
 	return err
 }
 
 func (s *DeckStore) Delete(userID string, id string) error {
-	_, err := s.db.DeleteDocument(
+	idObj, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.db.DeleteDocument(
 		DECK_COLLECTION,
-		bson.M{"_id": id, "user_id": userID},
+		bson.M{"_id": idObj, "user_id": userID},
 	)
 
 	return err

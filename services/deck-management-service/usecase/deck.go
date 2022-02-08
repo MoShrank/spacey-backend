@@ -73,6 +73,8 @@ func (u *DeckUseCase) UpdateDeck(
 
 	timestamp := time.Now()
 	deckDB.UpdatedAt = &timestamp
+	deckDB.ID = DeckID
+	deckDB.UserID = userID
 
 	err := u.deckStore.Update(&deckDB)
 	if err != nil {
