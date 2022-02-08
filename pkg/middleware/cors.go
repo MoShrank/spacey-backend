@@ -28,6 +28,14 @@ func CORSMiddleware() gin.HandlerFunc {
 				"www.spacey.moritz.dev",
 				"https",
 			},
+			{
+				"www.spacey-learn.com",
+				"https",
+			},
+			{
+				"spacey-learn.com",
+				"https",
+			},
 		}
 
 		referer := c.Request.Header.Get("Referer")
