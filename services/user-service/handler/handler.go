@@ -118,7 +118,7 @@ func (h *Handler) Logout(c *gin.Context) {
 }
 
 func (h *Handler) GetUser(c *gin.Context) {
-	userID := c.GetHeader("userID")
+	userID := c.Request.URL.Query().Get("userID")
 
 	if userID == "" {
 		httpconst.WriteBadRequest(c, "userID is required.")

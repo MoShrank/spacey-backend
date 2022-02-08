@@ -280,7 +280,10 @@ func TestGetUser(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request, _ = http.NewRequest("GET", "/user", nil)
-	c.Request.Header.Set("userID", "1")
+
+	q := c.Request.URL.Query()
+	q.Add("userID", "1")
+	c.Request.URL.RawQuery = q.Encode()
 
 	handler.GetUser(c)
 
