@@ -1,0 +1,6 @@
+[
+	{
+		"delete": "configuration",
+		"deletes": [ { "q": { "name": "frontend" }, "limit": 1 } ]
+	}
+]

@@ -1,0 +1,6 @@
+[
+    {
+        "insert": "configuration",
+        "documents": [ {"name": "frontend", "colors": ["#FFEC87", "#BEBDFF", "#FFAB87", "#87FFE9", "#FF87DD", "#FF878E", "#E0FF87", "#87DBFF"]} ]
+    }
+]

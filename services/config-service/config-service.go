@@ -17,6 +17,7 @@ import (
 func runServer(
 	lifecycle fx.Lifecycle,
 	handler handler.ConfigHandlerInterface,
+	cfg config.ConfigInterface,
 ) {
 	lifecycle.Append(fx.Hook{OnStart: func(context.Context) error {
 		router := gin.Default()
@@ -28,7 +29,7 @@ func runServer(
 		})
 		router.GET("/config/:configName", handler.GetConfig)
 
-		router.Run(":" + "80")
+		router.Run(":" + cfg.GetPort())
 		return nil
 	}})
 }
