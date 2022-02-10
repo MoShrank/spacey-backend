@@ -65,8 +65,8 @@ func NewConfig() (ConfigInterface, error) {
 
 	return &Config{
 		Port:                loadEnv("PORT", "8080"),
-		MongoDBConnection:   loadEnv("MONGO_DB_CONNECTION", "mongodb://127.0.0.1:27017"),
-		LogLevel:            loadEnv("LOG_LEVEL", "debug"),
+		MongoDBConnection:   loadEnv("MONGO_DB_CONNECTION", "mongodb://127.0.0.1:27017/spacey"),
+		LogLevel:            loadEnv("LOG_LEVEL", "info"),
 		GraylogConnection:   loadEnv("GRAYLOG_CONNECTION", "localhost://localhost:12201"),
 		AuthSecretKey:       loadEnv("AUTH_SECRET_KEY", "secret"),
 		DBName:              loadEnv("DB_NAME", "spacey"),

@@ -43,12 +43,12 @@ func NewDB(cfg config.ConfigInterface, logger logger.LoggerInterface) DatabaseIn
 		DB:     nil,
 	}
 
-	db.logger.Info("Running migration...")
+	logger.Info("Running migration...")
 	err := db.runMigration(
 		cfg.GetMongoDBConnection(),
 	)
 	if err != nil {
-		logger.Error("Could not run migrations: ", err)
+		logger.Warn("Could not run migrations: ", err)
 	}
 
 	client, err := db.connect(cfg.GetMongoDBConnection())

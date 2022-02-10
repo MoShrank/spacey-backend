@@ -9,6 +9,7 @@ import (
 
 	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/pkg/logger"
+	"github.com/moshrank/spacey-backend/pkg/middleware"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
@@ -18,9 +19,12 @@ func runServer(
 	lifecycle fx.Lifecycle,
 	handler handler.ConfigHandlerInterface,
 	cfg config.ConfigInterface,
+	log logger.LoggerInterface,
 ) {
 	lifecycle.Append(fx.Hook{OnStart: func(context.Context) error {
-		router := gin.Default()
+		router := gin.New()
+		router.Use(gin.Logger())
+		router.Use(middleware.Recovery())
 
 		router.GET("/ping", func(c *gin.Context) {
 			c.JSON(200, gin.H{
@@ -29,6 +33,7 @@ func runServer(
 		})
 		router.GET("/config/:configName", handler.GetConfig)
 
+		log.Info("Starting server on port: " + cfg.GetPort())
 		router.Run(":" + cfg.GetPort())
 		return nil
 	}})
@@ -36,6 +41,7 @@ func runServer(
 
 func main() {
 	fx.New(
+		fx.NopLogger,
 		fx.Provide(config.NewConfig),
 		fx.Provide(logger.NewLogger),
 		fx.Provide(db.NewDB),

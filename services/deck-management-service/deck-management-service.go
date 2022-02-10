@@ -6,6 +6,7 @@ import (
 	"github.com/moshrank/spacey-backend/config"
 	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/pkg/logger"
+	"github.com/moshrank/spacey-backend/pkg/middleware"
 	"github.com/moshrank/spacey-backend/pkg/validator"
 	"github.com/moshrank/spacey-backend/services/deck-management-service/handler"
 	"github.com/moshrank/spacey-backend/services/deck-management-service/store.go"
@@ -20,9 +21,12 @@ func runServer(
 	cardHandler handler.CardHandlerInterface,
 	deckHandler handler.DeckHandlerInterface,
 	cfg config.ConfigInterface,
+	log logger.LoggerInterface,
 ) {
 	lifecycle.Append(fx.Hook{OnStart: func(context.Context) error {
-		router := gin.Default()
+		router := gin.New()
+		router.Use(gin.Logger())
+		router.Use(middleware.Recovery())
 
 		router.GET("ping", func(c *gin.Context) {
 			c.JSON(200, gin.H{
@@ -41,12 +45,14 @@ func runServer(
 		router.DELETE("decks/:deckID/cards/:id", cardHandler.DeleteCard)
 
 		router.Run(":" + cfg.GetPort())
+		log.Info("Starting server on port: " + cfg.GetPort())
 		return nil
 	}})
 }
 
 func main() {
 	fx.New(
+		fx.NopLogger,
 		fx.Provide(config.NewConfig),
 		fx.Provide(logger.NewLogger),
 		fx.Provide(db.NewDB),

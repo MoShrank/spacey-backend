@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"github.com/moshrank/spacey-backend/config"
 	"github.com/moshrank/spacey-backend/pkg/logger"
@@ -19,10 +17,6 @@ type APIInterface interface {
 }
 
 func NewAPI(config config.ConfigInterface) APIInterface {
-	logger := logger.NewLogger(config)
-	fmt.Println("fmt: Starting API...")
-	logger.Info("logger: Starting API...")
-
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(middleware.Recovery())
@@ -47,5 +41,7 @@ func main() {
 
 	api := NewAPI(config)
 
+	log := logger.NewLogger(config)
+	log.Info("Starting server on port: " + config.GetPort())
 	api.Run(config.GetPort())
 }
