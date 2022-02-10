@@ -1,8 +1,12 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/moshrank/spacey-backend/config"
+	"github.com/moshrank/spacey-backend/pkg/logger"
+	"github.com/moshrank/spacey-backend/pkg/middleware"
 	"github.com/moshrank/spacey-backend/services/api/routes"
 )
 
@@ -15,7 +19,13 @@ type APIInterface interface {
 }
 
 func NewAPI(config config.ConfigInterface) APIInterface {
-	router := gin.Default()
+	logger := logger.NewLogger(config)
+	fmt.Println("fmt: Starting API...")
+	logger.Info("logger: Starting API...")
+
+	router := gin.New()
+	router.Use(gin.Logger())
+	router.Use(middleware.Recovery())
 
 	routes.CreateRoutes(router, config)
 

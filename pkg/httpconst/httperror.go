@@ -41,9 +41,10 @@ func WriteValidationError(c *gin.Context, message string) {
 	})
 }
 
-func WriteInternalServerError(c *gin.Context) {
+func WriteInternalServerError(c *gin.Context, message string) {
 	c.JSON(http.StatusInternalServerError, gin.H{
-		"error": ErrorMapping[http.StatusInternalServerError],
+		"error":   ErrorMapping[http.StatusInternalServerError],
+		"message": message,
 	})
 }
 

@@ -1,12 +1,11 @@
 package logger
 
 import (
-	"io"
+	"fmt"
 	"os"
 
 	"github.com/moshrank/spacey-backend/config"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/Graylog2/go-gelf.v2/gelf"
 )
 
 type LoggerInterface interface {
@@ -30,6 +29,8 @@ var logLevelMapping = map[string]log.Level{
 func NewLogger(
 	cfg config.ConfigInterface,
 ) LoggerInterface {
+	fmt.Println("Starting logger...")
+
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetLevel(logLevelMapping[cfg.GetLogLevel()])
 	log.SetOutput(os.Stderr)
@@ -40,14 +41,6 @@ func NewLogger(
 			"port":    cfg.GetPort(),
 		},
 	)
-
-	gelfWriter, err := gelf.NewUDPWriter(cfg.GetGrayLogConnection())
-
-	if err != nil {
-		log.Warn("Failed to connect to graylog: ", err)
-	} else {
-		log.SetOutput(io.MultiWriter(os.Stderr, gelfWriter))
-	}
 
 	return logger
 }
