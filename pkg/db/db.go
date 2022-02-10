@@ -2,9 +2,17 @@ package db
 
 import (
 	"context"
+	"embed"
 
+	_ "embed"
+
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/mongodb"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/moshrank/spacey-backend/config"
 	"github.com/moshrank/spacey-backend/pkg/logger"
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -25,6 +33,9 @@ type DatabaseInterface interface {
 	DeleteDocument(string, interface{}) (*mongo.DeleteResult, error)
 }
 
+//go:embed migrations/*
+var migrationFiles embed.FS
+
 func NewDB(cfg config.ConfigInterface, logger logger.LoggerInterface) DatabaseInterface {
 	db := &Database{
 		client: nil,
@@ -32,10 +43,19 @@ func NewDB(cfg config.ConfigInterface, logger logger.LoggerInterface) DatabaseIn
 		DB:     nil,
 	}
 
+	db.logger.Info("Running migration...")
+	err := db.runMigration(
+		cfg.GetMongoDBConnection()+"/"+cfg.GetDBName(),
+		"",
+	)
+	if err != nil {
+		logger.Error("Could not run migrations:", err)
+	}
+
 	client, err := db.connect(cfg.GetMongoDBConnection())
 
 	if err != nil {
-		logger.Fatal("Could not connect to Database:", err)
+		logger.Fatal("Could not connect to Database: ", err)
 	}
 
 	db.client = client
@@ -58,6 +78,21 @@ func (db *Database) connect(connectionString string) (*mongo.Client, error) {
 	}
 
 	return client, nil
+}
+
+func (db *Database) runMigration(connString, migrationFilePath string) error {
+	driver, err := iofs.New(migrationFiles, "migrations")
+	if err != nil {
+		return errors.Wrap(err, "could not create migration driver")
+	}
+	m, err := migrate.NewWithSourceInstance("iofs", driver, connString)
+	if err != nil {
+		return err
+	}
+
+	err = m.Up()
+
+	return err
 }
 
 func (db *Database) GetDB(dbName string) *mongo.Database {

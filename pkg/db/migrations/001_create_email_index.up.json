@@ -1,6 +1,6 @@
 [
     {
-        "createIndexes": "users",
+        "createIndexes": "user",
         "indexes": [
             {
                 "key": {
