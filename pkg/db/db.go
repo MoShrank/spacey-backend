@@ -45,11 +45,10 @@ func NewDB(cfg config.ConfigInterface, logger logger.LoggerInterface) DatabaseIn
 
 	db.logger.Info("Running migration...")
 	err := db.runMigration(
-		cfg.GetMongoDBConnection()+"/"+cfg.GetDBName(),
-		"",
+		cfg.GetMongoDBConnection(),
 	)
 	if err != nil {
-		logger.Error("Could not run migrations:", err)
+		logger.Error("Could not run migrations: ", err)
 	}
 
 	client, err := db.connect(cfg.GetMongoDBConnection())
@@ -80,7 +79,7 @@ func (db *Database) connect(connectionString string) (*mongo.Client, error) {
 	return client, nil
 }
 
-func (db *Database) runMigration(connString, migrationFilePath string) error {
+func (db *Database) runMigration(connString string) error {
 	driver, err := iofs.New(migrationFiles, "migrations")
 	if err != nil {
 		return errors.Wrap(err, "could not create migration driver")
