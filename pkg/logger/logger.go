@@ -1,8 +1,6 @@
 package logger
 
 import (
-	"os"
-
 	"github.com/moshrank/spacey-backend/config"
 	log "github.com/sirupsen/logrus"
 )
@@ -30,7 +28,6 @@ func NewLogger(
 ) LoggerInterface {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetLevel(logLevelMapping[cfg.GetLogLevel()])
-	log.SetOutput(os.Stderr)
 
 	logger := log.WithFields(
 		log.Fields{

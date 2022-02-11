@@ -8,40 +8,19 @@ import (
 	"github.com/moshrank/spacey-backend/services/api/routes"
 )
 
-type API struct {
-	router *gin.Engine
-}
+func main() {
+	config, err := config.NewConfig()
+	log := logger.NewLogger(config)
 
-type APIInterface interface {
-	Run(port string)
-}
-
-func NewAPI(config config.ConfigInterface) APIInterface {
 	router := gin.New()
-	router.Use(gin.Logger())
+	router.Use(middleware.Logger(log))
 	router.Use(middleware.Recovery())
 
 	routes.CreateRoutes(router, config)
 
-	return &API{
-		router: router,
-	}
-}
-
-func (api *API) Run(port string) {
-	api.router.Run(":" + port)
-}
-
-func main() {
-	config, err := config.NewConfig()
-
 	if err != nil {
 		panic(err)
 	}
-
-	api := NewAPI(config)
-
-	log := logger.NewLogger(config)
 	log.Info("Starting server on port: " + config.GetPort())
-	api.Run(config.GetPort())
+	router.Run(":" + config.GetPort())
 }

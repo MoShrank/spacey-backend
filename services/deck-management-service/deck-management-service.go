@@ -25,7 +25,7 @@ func runServer(
 ) {
 	lifecycle.Append(fx.Hook{OnStart: func(context.Context) error {
 		router := gin.New()
-		router.Use(gin.Logger())
+		router.Use(middleware.Logger(log))
 		router.Use(middleware.Recovery())
 
 		router.GET("ping", func(c *gin.Context) {
@@ -44,8 +44,8 @@ func runServer(
 		router.PUT("decks/:deckID/cards/:id", cardHandler.UpdateCard)
 		router.DELETE("decks/:deckID/cards/:id", cardHandler.DeleteCard)
 
-		router.Run(":" + cfg.GetPort())
 		log.Info("Starting server on port: " + cfg.GetPort())
+		router.Run(":" + cfg.GetPort())
 		return nil
 	}})
 }
