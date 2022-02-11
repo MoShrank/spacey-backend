@@ -23,7 +23,7 @@ func runServer(
 ) {
 	lifecycle.Append(fx.Hook{OnStart: func(context.Context) error {
 		router := gin.New()
-		router.Use(gin.Logger())
+		router.Use(middleware.Logger(log))
 		router.Use(middleware.Recovery())
 
 		router.GET("/ping", func(c *gin.Context) {
