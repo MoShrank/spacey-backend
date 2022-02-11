@@ -6,6 +6,7 @@ import (
 )
 
 type LoggerInterface interface {
+	WithFields(fields log.Fields) *log.Entry
 	Debug(args ...interface{})
 	Info(args ...interface{})
 	Warn(args ...interface{})

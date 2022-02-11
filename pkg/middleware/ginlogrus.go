@@ -4,7 +4,6 @@ package middleware
 //	https://github.com/toorop/gin-logrus
 
 import (
-	"encoding/json"
 	"math"
 	"net/http"
 	"os"
@@ -51,7 +50,7 @@ func Logger(logger logger.LoggerInterface, notLogged ...string) gin.HandlerFunc 
 			return
 		}
 
-		fieldsObj := map[string]interface{}{
+		fields := map[string]interface{}{
 			"hostname":   hostname,
 			"statusCode": statusCode,
 			"latency":    latency,
@@ -63,20 +62,17 @@ func Logger(logger logger.LoggerInterface, notLogged ...string) gin.HandlerFunc 
 			"userAgent":  clientUserAgent,
 			"time":       time.Now().Format(timeFormat),
 		}
-		fieldsStr, err := json.Marshal(fieldsObj)
-		if err != nil {
-			fieldsStr = []byte("Could not marshal fields to JSON, " + err.Error())
-		}
 
 		if len(c.Errors) > 0 {
-			logger.Error(fieldsStr)
+			fields["error"] = c.Errors.ByType(gin.ErrorTypePrivate).String()
+			logger.WithFields(fields).Error("Private Error")
 		} else {
 			if statusCode >= http.StatusInternalServerError {
-				logger.Error(fieldsStr)
+				logger.WithFields(fields).Error("Internal Server Error")
 			} else if statusCode >= http.StatusBadRequest {
-				logger.Warn(fieldsStr)
+				logger.WithFields(fields).Warn("Client Error")
 			} else {
-				logger.Info(fieldsStr)
+				logger.WithFields(fields).Info("Success")
 			}
 		}
 	}
