@@ -66,7 +66,6 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 
 	userServiceHostName := cfg.GetUserServiceHostName()
 	configServiceHostName := "config-service"
-
 	router.GET("/config/frontend", proxyWithPath(getUrl(configServiceHostName, "config/frontend")))
 
 	userGroup := router.Group("/user")
@@ -99,12 +98,13 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 		deckGroup.POST("/public", handler.CopyPublicDeck)
 	}
 
+	learningServiceHostName := cfg.GetLearningServiceHostName()
 	learningGroup := router.Group("/learning").Use(middleware.Auth(authMiddleware))
 	{
-		learningGroup.POST("/session", handler.CreateLearningSession)
-		learningGroup.GET("/session/:id", handler.GetLearningSession)
-		learningGroup.PUT("/session/:id", handler.UpdateLearningSession)
-		learningGroup.GET("/test/:id", handler.TestCard)
+		learningGroup.POST("/session", proxyWithPath(getUrl(learningServiceHostName, "session")))
+		learningGroup.PUT("/session", proxyWithPath(getUrl(learningServiceHostName, "session")))
+		learningGroup.POST("event", proxyWithPath(getUrl(learningServiceHostName, "event")))
+		learningGroup.GET("events", proxyWithPath(getUrl(learningServiceHostName, "events")))
 	}
 
 	reminder := router.Group("/reminder").Use(middleware.Auth(authMiddleware))

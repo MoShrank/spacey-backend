@@ -34,6 +34,14 @@ services:
     networks:
       - spacey-services
 
+  learning-service:
+    build: ./services/learning-service
+    container_name: learning-service
+    env_file:
+      - .env
+    networks:
+      - spacey-services
+
   mongodb:
     image: mongo
     container_name: mongodb

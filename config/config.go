@@ -9,17 +9,18 @@ import (
 )
 
 type Config struct {
-	Port                string
-	MongoDBConnection   string
-	LogLevel            string
-	AuthSecretKey       string
-	GraylogConnection   string
-	DBName              string
-	UserServiceHostName string
-	DeckServiceHostName string
-	Domain              string
-	MaxAgeAuth          int
-	MigrationFilePath   string
+	Port                    string
+	MongoDBConnection       string
+	LogLevel                string
+	AuthSecretKey           string
+	GraylogConnection       string
+	DBName                  string
+	UserServiceHostName     string
+	DeckServiceHostName     string
+	LearningServiceHostName string
+	Domain                  string
+	MaxAgeAuth              int
+	MigrationFilePath       string
 }
 
 type ConfigInterface interface {
@@ -31,6 +32,7 @@ type ConfigInterface interface {
 	GetDBName() string
 	GetUserServiceHostName() string
 	GetDeckServiceHostName() string
+	GetLearningServiceHostName() string
 	GetDomain() string
 	GetMaxAgeAuth() int
 	GetMigrationFilePath() string
@@ -64,17 +66,18 @@ func NewConfig() (ConfigInterface, error) {
 	}
 
 	return &Config{
-		Port:                loadEnv("PORT", "8080"),
-		MongoDBConnection:   loadEnv("MONGO_DB_CONNECTION", "mongodb://127.0.0.1:27017/spacey"),
-		LogLevel:            loadEnv("LOG_LEVEL", "info"),
-		GraylogConnection:   loadEnv("GRAYLOG_CONNECTION", "localhost://localhost:12201"),
-		AuthSecretKey:       loadEnv("AUTH_SECRET_KEY", "secret"),
-		DBName:              loadEnv("DB_NAME", "spacey"),
-		UserServiceHostName: loadEnv("USER_SERVICE_HOST_NAME", "user-service"),
-		DeckServiceHostName: loadEnv("DECK_SERVICE_HOST_NAME", "deck-management-service"),
-		Domain:              loadEnv("DOMAIN", "localhost"),
-		MaxAgeAuth:          maxAgeAuth,
-		MigrationFilePath:   loadEnv("MIGRATION_FILE_PATH", "../../migrations"),
+		Port:                    loadEnv("PORT", "8080"),
+		MongoDBConnection:       loadEnv("MONGO_DB_CONNECTION", "mongodb://127.0.0.1:27017/spacey"),
+		LogLevel:                loadEnv("LOG_LEVEL", "info"),
+		GraylogConnection:       loadEnv("GRAYLOG_CONNECTION", "localhost://localhost:12201"),
+		AuthSecretKey:           loadEnv("AUTH_SECRET_KEY", "secret"),
+		DBName:                  loadEnv("DB_NAME", "spacey"),
+		UserServiceHostName:     loadEnv("USER_SERVICE_HOST_NAME", "user-service"),
+		DeckServiceHostName:     loadEnv("DECK_SERVICE_HOST_NAME", "deck-management-service"),
+		Domain:                  loadEnv("DOMAIN", "localhost"),
+		MaxAgeAuth:              maxAgeAuth,
+		MigrationFilePath:       loadEnv("MIGRATION_FILE_PATH", "../../migrations"),
+		LearningServiceHostName: loadEnv("LEARNING_SERVICE_HOST_NAME", "learning-service"),
 	}, nil
 }
 
@@ -120,4 +123,8 @@ func (c *Config) GetMaxAgeAuth() int {
 
 func (c *Config) GetMigrationFilePath() string {
 	return c.MigrationFilePath
+}
+
+func (c *Config) GetLearningServiceHostName() string {
+	return c.LearningServiceHostName
 }

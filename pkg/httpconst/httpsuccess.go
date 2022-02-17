@@ -7,15 +7,25 @@ import (
 )
 
 func WriteCreated(c *gin.Context, data interface{}) {
-	c.JSON(http.StatusCreated, gin.H{
+	message := gin.H{
 		"message": "Created",
-		"data":    data,
-	})
+	}
+
+	if data != nil {
+		message["data"] = data
+	}
+
+	c.JSON(http.StatusCreated, message)
 }
 
 func WriteSuccess(c *gin.Context, data interface{}) {
-	c.JSON(http.StatusOK, gin.H{
+	message := gin.H{
 		"message": "Success",
-		"data":    data,
-	})
+	}
+
+	if data != nil {
+		message["data"] = data
+	}
+
+	c.JSON(http.StatusOK, message)
 }

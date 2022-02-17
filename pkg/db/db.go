@@ -24,10 +24,10 @@ type Database struct {
 }
 
 type DatabaseInterface interface {
-	GetDB(string) *mongo.Database
+	GetDB() *mongo.Database
 	connect(string) (*mongo.Client, error)
 	QueryDocument(string, interface{}) *mongo.SingleResult
-	QueryDocuments(string, interface{}) (*mongo.Cursor, error)
+	QueryDocuments(string, interface{}, ...*options.FindOptions) (*mongo.Cursor, error)
 	CreateDocument(string, interface{}) (*mongo.InsertOneResult, error)
 	UpdateDocument(string, interface{}, interface{}) (*mongo.UpdateResult, error)
 	DeleteDocument(string, interface{}) (*mongo.DeleteResult, error)
@@ -94,9 +94,8 @@ func (db *Database) runMigration(connString string) error {
 	return err
 }
 
-func (db *Database) GetDB(dbName string) *mongo.Database {
-	return db.client.Database(dbName)
-
+func (db *Database) GetDB() *mongo.Database {
+	return db.DB
 }
 
 func (db *Database) QueryDocument(
@@ -109,8 +108,9 @@ func (db *Database) QueryDocument(
 func (db *Database) QueryDocuments(
 	collectionName string,
 	filter interface{},
+	opts ...*options.FindOptions,
 ) (*mongo.Cursor, error) {
-	return db.DB.Collection(collectionName).Find(context.TODO(), filter)
+	return db.DB.Collection(collectionName).Find(context.TODO(), filter, opts...)
 }
 
 func (db *Database) CreateDocument(
