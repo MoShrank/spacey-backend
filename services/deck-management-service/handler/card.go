@@ -72,7 +72,7 @@ func (h *CardHandler) UpdateCard(c *gin.Context) {
 	deckID := c.Param("deckID")
 	cardID := c.Param("id")
 
-	cardRes, err := h.cardUseCase.UpdateCard(userID, cardID, deckID, &card)
+	cardRes, err := h.cardUseCase.UpdateCard(cardID, userID, deckID, &card)
 	if err != nil {
 		httpconst.WriteBadRequest(c, err.Error())
 		return
