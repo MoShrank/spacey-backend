@@ -5,7 +5,7 @@ import (
 )
 
 type LearningSession struct {
-	ID         string     `bson:"_id ,omitempty"`
+	ID         string     `bson:"_id,omitempty"`
 	UserID     string     `bson:"userID"`
 	DeckID     string     `bson:"deckID"`
 	StartedAt  *time.Time `bson:"startedAt"`
@@ -16,7 +16,6 @@ type LearningSession struct {
 type LearningSessionStoreInterface interface {
 	Create(session *LearningSession) (string, error)
 	Update(userID, sessionID string, finishedAt *time.Time) error
-	GetLearningSessionByDay(userID string, startDate, endDate *time.Time) (*LearningSession, error)
 }
 
 type LearningSessionUsecaseInterface interface {

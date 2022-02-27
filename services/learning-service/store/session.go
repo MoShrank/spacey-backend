@@ -37,7 +37,9 @@ func (s *LearningSessionStore) Create(session *entity.LearningSession) (string, 
 		return "", err
 	}
 
-	return res.InsertedID.(string), nil
+	id, _ := res.InsertedID.(primitive.ObjectID)
+
+	return id.Hex(), err
 }
 
 func (s *LearningSessionStore) Update(userID, sessionID string, finishedAt *time.Time) error {
@@ -67,31 +69,4 @@ func (s *LearningSessionStore) Update(userID, sessionID string, finishedAt *time
 	}
 
 	return nil
-}
-
-func (s *LearningSessionStore) GetLearningSessionByDay(
-	userID string, startDate, endDate *time.Time,
-) (*entity.LearningSession, error) {
-	cur, err := s.db.QueryDocuments(learningSessionCollection, bson.M{
-		"userID": userID,
-		"createdAt": bson.M{
-			"$gte": startDate,
-			"$lt":  endDate,
-		},
-	})
-	if err != nil {
-		err := errors.Wrap(err, "failed to query learning sessions")
-		s.logger.Error(err)
-		return nil, err
-	}
-
-	var session entity.LearningSession
-	err = cur.Decode(&session)
-	if err != nil {
-		err = errors.Wrap(err, "could not decode learning session")
-		s.logger.Error(err)
-		return nil, err
-	}
-
-	return nil, nil
 }

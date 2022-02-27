@@ -103,18 +103,14 @@ func (u *EventUsecase) GetLearningCards(
 		return nil, err
 	}
 
-	var cardEventRes []entity.CardEventRes
-	fmt.Println(res)
+	cardEventRes := []entity.CardEventRes{}
+
 	for _, e := range res {
 		timelag := u.getTimelag(e.CreatedAt)
-		fmt.Println(timelag)
-		fmt.Println(e.MemoryHalfLife)
 		recallProbability := u.calculateRecallProbability(
 			float64(timelag),
 			float64(e.MemoryHalfLife),
 		)
-
-		fmt.Println(recallProbability)
 
 		if recallProbability <= threshold {
 			cardEventRes = append(

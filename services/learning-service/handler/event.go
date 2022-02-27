@@ -41,7 +41,7 @@ func (h *EventHandler) GetLearningCards(c *gin.Context) {
 	}
 
 	if len(ids) == 0 {
-		httpconst.WriteBadRequest(c, "ids are required")
+		httpconst.WriteSuccess(c, []entity.CardEventRes{})
 		return
 	}
 
