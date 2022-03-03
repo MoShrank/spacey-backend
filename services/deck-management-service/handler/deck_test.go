@@ -85,6 +85,12 @@ func TestCreateDeck(t *testing.T) {
 			"test_user_id",
 			400,
 		},
+		{
+			"Long Deck Name",
+			`{"name": "Test Deck with more than 30 characters", "description": "Test Description", "color": "#FFFFFF"}`,
+			"test_user_id",
+			400,
+		},
 	}
 
 	deckUseCaseMock := new(DeckUseCaseMock)

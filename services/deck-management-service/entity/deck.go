@@ -15,8 +15,8 @@ type Deck struct {
 }
 
 type DeckReq struct {
-	Name        string `json:"name"        binding:"required"`
-	Description string `json:"description"`
+	Name        string `json:"name"        binding:"required,max=30"`
+	Description string `json:"description" binding:"max=200"`
 	Color       string `json:"color"       binding:"required"`
 }
 
