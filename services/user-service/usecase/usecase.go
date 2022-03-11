@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"strings"
 	"time"
 
 	mapper "github.com/PeteProgrammer/go-automapper"
@@ -39,6 +40,7 @@ func (u *UserUsecase) CreateUser(user interface{}) (*entity.UserResponseModel, e
 	now := time.Now()
 
 	dbUser.Password = hashedPassword
+	dbUser.Email = strings.ToLower(dbUser.Email)
 	dbUser.CreatedAtTs = &now
 	dbUser.UpdatedAtTs = &now
 	dbUser.DeletedAtTs = nil
@@ -57,6 +59,8 @@ func (u *UserUsecase) CreateUser(user interface{}) (*entity.UserResponseModel, e
 }
 
 func (u *UserUsecase) Login(email, password string) (*entity.UserResponseModel, error) {
+	email = strings.ToLower(email)
+
 	dbUser, err := u.userStore.GetUserByEmail(email)
 	if err != nil {
 		return nil, err
