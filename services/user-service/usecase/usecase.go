@@ -66,7 +66,7 @@ func (u *UserUsecase) Login(email, password string) (*entity.UserResponseModel, 
 		return nil, err
 	}
 
-	if ok, _ := u.jwt.CheckPasswordHash(password, dbUser.Password); !ok {
+	if ok, err := u.jwt.CheckPasswordHash(password, dbUser.Password); !ok {
 		return nil, err
 	}
 
