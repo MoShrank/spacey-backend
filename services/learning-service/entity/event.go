@@ -20,15 +20,25 @@ type CardEvent struct {
 	FinishedAt                 *time.Time `bson:"finishedAt"`
 }
 
+type DeckCardEvents struct {
+	DeckID     string      `bson:"_id"`
+	CardEvents []CardEvent `bson:"cardEvents"`
+}
+
 type CardEventStoreInterface interface {
 	GetLatestEvents(userID string, cardIDs []string) ([]CardEvent, error)
 	GetLatestEvent(userID, cardID string) (*CardEvent, error)
 	CreateCardEvent(event *CardEvent) (string, error)
+	GetCardEventsByDeckIDs(userID string, deckIDs []string) ([]DeckCardEvents, error)
 }
 
 type CardEventUsecaseInterface interface {
 	GetLearningCards(userID string, cardIDs []string) ([]CardEventRes, error)
 	CreateCardEvent(userID string, event *CardEventReq) error
+	CalculateDeckRecallProbabilities(
+		userID string,
+		deckData []ProbabilitiesReq,
+	) (map[string]float64, error)
 }
 
 type CardEventReq struct {
@@ -44,4 +54,9 @@ type CardEventRes struct {
 	CardID            string  `json:"cardID"`
 	LearningSessionID string  `json:"learningSessionID"`
 	RecallProbability float64 `json:"recallProbability"`
+}
+
+type ProbabilitiesReq struct {
+	DeckID       string `json:"deckID"       binding:"required"`
+	TotalNoCards int    `json:"totalNoCards"`
 }

@@ -17,6 +17,7 @@ type EventHandler struct {
 type EventHandlerInterface interface {
 	GetLearningCards(c *gin.Context)
 	CreateCardEvent(c *gin.Context)
+	GetDeckRecallProbabilities(c *gin.Context)
 }
 
 func NewEventHandler(
@@ -73,4 +74,25 @@ func (h *EventHandler) CreateCardEvent(c *gin.Context) {
 	}
 
 	httpconst.WriteCreated(c, nil)
+}
+
+func (h *EventHandler) GetDeckRecallProbabilities(c *gin.Context) {
+	userID := c.Query("userID")
+	if userID == "" {
+		httpconst.WriteBadRequest(c, "userID is required")
+		return
+	}
+
+	var deckData []entity.ProbabilitiesReq
+	if err := h.validator.ValidateJSON(c, &deckData); err != nil {
+		return
+	}
+
+	probabilities, err := h.usecase.CalculateDeckRecallProbabilities(userID, deckData)
+	if err != nil {
+		httpconst.WriteBadRequest(c, err.Error())
+		return
+	}
+
+	httpconst.WriteSuccess(c, probabilities)
 }

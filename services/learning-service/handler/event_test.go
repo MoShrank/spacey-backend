@@ -28,6 +28,14 @@ func (u *EventUsecaseMock) CreateCardEvent(userID string, event *entity.CardEven
 	return args.Error(0)
 }
 
+func (u *EventUsecaseMock) CalculateDeckRecallProbabilities(
+	userID string,
+	deckData []entity.ProbabilitiesReq,
+) (map[string]float64, error) {
+	args := u.Called(userID, deckData)
+	return args.Get(0).(map[string]float64), args.Error(1)
+}
+
 func TestGetValidLearningCards(t *testing.T) {
 	expStatusCode := 200
 
