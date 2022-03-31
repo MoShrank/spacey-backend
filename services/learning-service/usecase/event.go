@@ -252,3 +252,67 @@ func (u *EventUsecase) CreateCardEvent(
 
 	return err
 }
+
+func (u *EventUsecase) CalculateDeckRecallProbabilities(
+	userID string,
+	deckData []entity.ProbabilitiesReq,
+) (map[string]float64, error) {
+	deckIDs := []string{}
+	totalNoOfCards := map[string]int{}
+	for _, d := range deckData {
+		deckIDs = append(deckIDs, d.DeckID)
+		totalNoOfCards[d.DeckID] = d.TotalNoCards
+	}
+
+	deckEvents, err := u.store.GetCardEventsByDeckIDs(userID, deckIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	deckRecallProbabilities := map[string]float64{}
+
+	for _, deckEvent := range deckEvents {
+		recallProbabilities := []float64{}
+
+		for _, cardEvent := range deckEvent.CardEvents {
+			timelag := u.getTimelag(cardEvent.CreatedAt)
+			recallProbability := u.calculateRecallProbability(
+				float64(timelag),
+				float64(cardEvent.MemoryHalfLife),
+			)
+
+			if recallProbability > 0.5 {
+				recallProbability = 1.
+			}
+
+			recallProbabilities = append(
+				recallProbabilities,
+				recallProbability,
+			)
+		}
+
+		sum := 0.
+
+		for _, recallProbability := range recallProbabilities {
+			sum += recallProbability
+		}
+
+		avgRecallProbability := 0.
+
+		if totalNoOfCards[deckEvent.DeckID] > 0 {
+
+			avgRecallProbability = sum / float64(totalNoOfCards[deckEvent.DeckID])
+			avgRecallProbability = math.Round(avgRecallProbability*100) / 100
+		}
+
+		deckRecallProbabilities[deckEvent.DeckID] = avgRecallProbability
+
+		deckIDs = u.removeIDFromArray(deckIDs, deckEvent.DeckID)
+	}
+
+	for _, deckID := range deckIDs {
+		deckRecallProbabilities[deckID] = 0.
+	}
+
+	return deckRecallProbabilities, nil
+}

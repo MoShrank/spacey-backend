@@ -34,6 +34,7 @@ func runServer(
 		router.PUT("session", sessionHandler.FinishLearningSession)
 		router.POST("event", eventHandler.CreateCardEvent)
 		router.GET("events", eventHandler.GetLearningCards)
+		router.POST("probabilities", eventHandler.GetDeckRecallProbabilities)
 
 		router.Run(":" + cfg.GetPort())
 		return nil

@@ -124,3 +124,63 @@ func (s *EventStore) CreateCardEvent(event *entity.CardEvent) (string, error) {
 
 	return id, nil
 }
+
+func (s *EventStore) GetCardEventsByDeckIDs(
+	userID string,
+	deckIDs []string,
+) ([]entity.DeckCardEvents, error) {
+	/* mongo db get latest unique events filtered by ids */
+	db := s.db.GetDB()
+	col := db.Collection(cardEventCollection)
+
+	cur, err := col.Aggregate(context.TODO(), []bson.M{
+		{
+			"$match": bson.M{
+				"userID": userID,
+				"deckID": bson.M{
+					"$in": deckIDs,
+				},
+			},
+		},
+		{
+			"$sort": bson.M{
+				"createdAt": 1,
+			},
+		},
+		{
+			"$group": bson.M{
+				"_id": bson.M{"id": "$cardID"},
+				"doc": bson.M{"$last": "$$ROOT"},
+			},
+		},
+		{
+			"$replaceRoot": bson.M{
+				"newRoot": "$doc",
+			},
+		},
+		{
+			"$group": bson.M{
+				"_id":        "$deckID",
+				"cardEvents": bson.M{"$push": "$$ROOT"},
+			},
+		},
+	})
+
+	if err != nil {
+		err = errors.Wrap(err, "could query latest card events")
+		s.logger.Error(err)
+		return nil, err
+	}
+
+	var events []entity.DeckCardEvents
+
+	err = cur.All(context.TODO(), &events)
+	if err != nil {
+		err = errors.Wrap(err, "could not decode events")
+		s.logger.Error(err)
+		return nil, err
+	}
+
+	return events, nil
+
+}

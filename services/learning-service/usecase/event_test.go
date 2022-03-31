@@ -35,6 +35,14 @@ func (s *EventStoreMock) CreateCardEvent(event *entity.CardEvent) (string, error
 	return args.String(0), args.Error(1)
 }
 
+func (s *EventStoreMock) GetCardEventsByDeckIDs(
+	userID string,
+	deckIDs []string,
+) ([]entity.DeckCardEvents, error) {
+	args := s.Called(userID, deckIDs)
+	return args.Get(0).([]entity.DeckCardEvents), args.Error(1)
+}
+
 func TestCalculateRecallProbability(t *testing.T) {
 	tests := []struct {
 		testName string
