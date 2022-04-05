@@ -14,7 +14,7 @@ func TestCORSValidHost(t *testing.T) {
 		host           string
 		method         string
 		wantStatusCode int
-		wantHost       string
+		wantOrigin     string
 	}{
 		{
 			"Preflight Valid Host",
@@ -25,9 +25,9 @@ func TestCORSValidHost(t *testing.T) {
 		},
 		{
 			"Preflight Invalid Host",
-			"http://localhost:3001",
+			"http://google.com",
 			"OPTIONS",
-			403,
+			401,
 			"",
 		},
 		{
@@ -39,24 +39,17 @@ func TestCORSValidHost(t *testing.T) {
 		},
 		{
 			"Invalid Host",
-			"http://localhost:3001",
+			"http://google.com",
 			"POST",
-			403,
+			401,
 			"",
 		},
 		{
 			"Valid Host",
-			"https://www.spacey.moritz.dev",
+			"https://www.spacey-learn.com",
 			"POST",
 			200,
-			"https://www.spacey.moritz.dev",
-		},
-		{
-			"Valid Host",
-			"https://spacey.moritz.dev",
-			"POST",
-			200,
-			"https://spacey.moritz.dev",
+			"https://www.spacey-learn.com",
 		},
 	}
 
@@ -65,13 +58,13 @@ func TestCORSValidHost(t *testing.T) {
 		t.Run(test.testName, func(t *testing.T) {
 			c, _ := gin.CreateTestContext(httptest.NewRecorder())
 			c.Request = httptest.NewRequest(test.method, "/", nil)
-			c.Request.Header.Set("Referer", test.host)
+			c.Request.Header.Set("Origin", test.host)
 
 			CORSMiddleware()(c)
 
 			assert.Equal(
 				t,
-				test.wantHost,
+				test.wantOrigin,
 				c.Writer.Header().Get("Access-Control-Allow-Origin"),
 			)
 			assert.Equal(t, test.wantStatusCode, c.Writer.Status())

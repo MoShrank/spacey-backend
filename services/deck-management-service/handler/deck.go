@@ -38,7 +38,7 @@ func (h *DeckHandler) CreateDeck(c *gin.Context) {
 	userID := c.Request.URL.Query().Get("userID")
 
 	if userID == "" {
-		httpconst.WriteUnauthorized(c)
+		httpconst.WriteUnauthorized(c, "missing user id")
 		return
 	}
 
@@ -61,7 +61,7 @@ func (h *DeckHandler) GetDeck(c *gin.Context) {
 	userID := c.Request.URL.Query().Get("userID")
 
 	if userID == "" {
-		httpconst.WriteUnauthorized(c)
+		httpconst.WriteUnauthorized(c, "missing user id")
 		return
 	}
 
@@ -84,7 +84,7 @@ func (h *DeckHandler) GetDecks(c *gin.Context) {
 	userID := c.Request.URL.Query().Get("userID")
 
 	if userID == "" {
-		httpconst.WriteUnauthorized(c)
+		httpconst.WriteUnauthorized(c, "missing user id")
 		return
 	}
 
@@ -101,7 +101,7 @@ func (h *DeckHandler) UpdateDeck(c *gin.Context) {
 	userID := c.Request.URL.Query().Get("userID")
 
 	if userID == "" {
-		httpconst.WriteUnauthorized(c)
+		httpconst.WriteUnauthorized(c, "missing user id")
 		return
 	}
 
@@ -129,7 +129,7 @@ func (h *DeckHandler) DeleteDeck(c *gin.Context) {
 	userID := c.Request.URL.Query().Get("userID")
 
 	if userID == "" {
-		httpconst.WriteUnauthorized(c)
+		httpconst.WriteUnauthorized(c, "missing user id")
 		return
 	}
 

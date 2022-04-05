@@ -2,54 +2,41 @@ package middleware
 
 import (
 	"net/url"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/moshrank/spacey-backend/pkg/httpconst"
 )
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		validHost := false
-		var origin *url.URL
 
-		validCORS := []struct {
-			Host     string
-			Protocol string
-		}{
-			{
-				"localhost:3000",
-				"http",
-			},
-			{
-				"spacey.moritz.dev",
-				"https",
-			},
-			{
-				"www.spacey.moritz.dev",
-				"https",
-			},
-			{
-				"www.spacey-learn.com",
-				"https",
-			},
-			{
-				"spacey-learn.com",
-				"https",
-			},
+		spaceyOrigin := "https://www.spacey-learn.com"
+		origin := c.Request.Header.Get("Origin")
+
+		originParsed, _ := url.Parse(origin)
+		originHost := originParsed.Host
+		originHostSplit := strings.Split(originHost, ":")
+		originHostCleaned := originHostSplit[0]
+
+		if origin == "" {
+			c.Next()
+			return
 		}
 
-		referer := c.Request.Header.Get("Referer")
-		remote, _ := url.Parse(referer)
-
-		for _, setting := range validCORS {
-			if remote.Host == setting.Host && remote.Scheme == setting.Protocol {
-				validHost = true
-				origin = remote
-			}
+		if origin == spaceyOrigin {
+			validHost = true
+		} else if originHostCleaned == "localhost" {
+			validHost = true
+		} else {
+			validHost = false
 		}
 
 		if validHost {
-			c.Writer.Header().Set("Access-Control-Allow-Origin", origin.Scheme+"://"+origin.Host)
+			c.Writer.Header().
+				Set("Access-Control-Allow-Origin", origin)
 			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 			c.Writer.Header().
 				Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
@@ -62,7 +49,7 @@ func CORSMiddleware() gin.HandlerFunc {
 
 			c.Next()
 		} else {
-			c.AbortWithStatusJSON(403, gin.H{"message": "cors error. invalid origin: " + remote.Host})
+			httpconst.WriteUnauthorized(c, "cors error. invalid origin: "+origin)
 			return
 		}
 	}

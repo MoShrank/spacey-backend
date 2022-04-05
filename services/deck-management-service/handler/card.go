@@ -36,7 +36,7 @@ func (h *CardHandler) CreateCard(c *gin.Context) {
 	userID := c.Request.URL.Query().Get("userID")
 
 	if userID == "" {
-		httpconst.WriteUnauthorized(c)
+		httpconst.WriteUnauthorized(c, "missing user id")
 		return
 	}
 
@@ -60,7 +60,7 @@ func (h *CardHandler) UpdateCard(c *gin.Context) {
 	userID := c.Request.URL.Query().Get("userID")
 
 	if userID == "" {
-		httpconst.WriteUnauthorized(c)
+		httpconst.WriteUnauthorized(c, "missing user id")
 		return
 	}
 
@@ -85,7 +85,7 @@ func (h *CardHandler) DeleteCard(c *gin.Context) {
 	userID := c.Request.URL.Query().Get("userID")
 
 	if userID == "" {
-		httpconst.WriteUnauthorized(c)
+		httpconst.WriteUnauthorized(c, "missing user id")
 		return
 	}
 

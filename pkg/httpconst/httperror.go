@@ -15,9 +15,10 @@ var ErrorMapping = map[int]string{
 	http.StatusInternalServerError: "Internal Server Error",
 }
 
-func WriteUnauthorized(c *gin.Context) {
+func WriteUnauthorized(c *gin.Context, message string) {
 	c.JSON(http.StatusUnauthorized, gin.H{
-		"error": ErrorMapping[http.StatusUnauthorized],
+		"error":   ErrorMapping[http.StatusUnauthorized],
+		"message": message,
 	})
 }
 
