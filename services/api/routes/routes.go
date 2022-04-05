@@ -11,6 +11,7 @@ import (
 	"github.com/moshrank/spacey-backend/pkg/httpconst"
 	"github.com/moshrank/spacey-backend/pkg/middleware"
 	"github.com/moshrank/spacey-backend/services/api/handler"
+	limiter "github.com/ulule/limiter/v3"
 )
 
 func getUrl(hostName, path string) string {
@@ -68,6 +69,12 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	configServiceHostName := "config-service"
 	router.GET("/config/frontend", proxyWithPath(getUrl(configServiceHostName, "config/frontend")))
 
+	rate, err := limiter.NewRateFromFormatted("10-M")
+	if err != nil {
+		panic(err)
+	}
+	rateLimiterMiddleware := middleware.RateLimiter(rate)
+
 	userGroup := router.Group("/user")
 	{
 		router.GET(
@@ -75,8 +82,16 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 			middleware.Auth(authMiddleware),
 			proxyWithPath(getUrl(userServiceHostName, "user")),
 		)
-		userGroup.POST("", proxyWithPath(getUrl(userServiceHostName, "user")))
-		userGroup.POST("/login", proxyWithPath(getUrl(userServiceHostName, "login")))
+		userGroup.POST(
+			"",
+			proxyWithPath(getUrl(userServiceHostName, "user")),
+			rateLimiterMiddleware,
+		)
+		userGroup.POST(
+			"/login",
+			proxyWithPath(getUrl(userServiceHostName, "login")),
+			rateLimiterMiddleware,
+		)
 		userGroup.GET("/logout", proxyWithPath(getUrl(userServiceHostName, "logout")))
 		userGroup.DELETE("", proxyWithPath(getUrl(userServiceHostName, "users")))
 		userGroup.PUT("/password", proxyWithPath(getUrl(userServiceHostName, "password")))
@@ -109,18 +124,5 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 			"/probabilities",
 			proxyWithPath(getUrl(learningServiceHostName, "probabilities")),
 		)
-	}
-
-	reminder := router.Group("/reminder").Use(middleware.Auth(authMiddleware))
-	{
-		reminder.POST("", handler.CreateReminder)
-		reminder.GET("/:id", handler.GetReminder)
-		reminder.PUT("/:id", handler.UpdateReminder)
-		reminder.DELETE("/:id", handler.DeleteReminder)
-	}
-
-	statistics := router.Group("/statistics").Use(middleware.Auth(authMiddleware))
-	{
-		statistics.GET("", handler.GetStatistics)
 	}
 }

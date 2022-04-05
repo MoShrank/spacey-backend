@@ -54,3 +54,9 @@ func WriteNotFound(c *gin.Context, message string) {
 		"messsage": message,
 	})
 }
+
+func WriteLimitReached(c *gin.Context) {
+	c.JSON(429, gin.H{
+		"error": "Too many requests",
+	})
+}
