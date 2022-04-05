@@ -84,13 +84,13 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 		)
 		userGroup.POST(
 			"",
-			proxyWithPath(getUrl(userServiceHostName, "user")),
 			rateLimiterMiddleware,
+			proxyWithPath(getUrl(userServiceHostName, "user")),
 		)
 		userGroup.POST(
 			"/login",
-			proxyWithPath(getUrl(userServiceHostName, "login")),
 			rateLimiterMiddleware,
+			proxyWithPath(getUrl(userServiceHostName, "login")),
 		)
 		userGroup.GET("/logout", proxyWithPath(getUrl(userServiceHostName, "logout")))
 		userGroup.DELETE("", proxyWithPath(getUrl(userServiceHostName, "users")))

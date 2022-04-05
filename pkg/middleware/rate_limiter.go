@@ -8,10 +8,6 @@ import (
 	"github.com/ulule/limiter/v3/drivers/store/memory"
 )
 
-func ExtractUserID(c *gin.Context) string {
-	return c.Query("userID")
-}
-
 func LimitReachHandler(c *gin.Context) {
 	httpconst.WriteLimitReached(c)
 }
@@ -22,7 +18,6 @@ func RateLimiter(rate limiter.Rate) gin.HandlerFunc {
 
 	return mgin.NewMiddleware(
 		limiter,
-		mgin.WithKeyGetter(ExtractUserID),
 		mgin.WithLimitReachedHandler(LimitReachHandler),
 	)
 }
