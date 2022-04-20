@@ -17,8 +17,8 @@ type JWT struct {
 type JWTInterface interface {
 	HashPassword(password string) (string, error)
 	CheckPasswordHash(password, hash string) (bool, error)
-	ValidateJWT(tokenString string) (*jwt.StandardClaims, error)
-	CreateJWTWithClaims(userID string) (string, error)
+	ValidateJWT(tokenString string) (jwt.MapClaims, error)
+	CreateJWTWithClaims(userID string, isBeta bool) (string, error)
 }
 
 func NewJWT(cfg config.ConfigInterface) JWTInterface {
@@ -40,14 +40,17 @@ func (j *JWT) CheckPasswordHash(password, hash string) (bool, error) {
 	return err == nil, err
 }
 
-func (j *JWT) ValidateJWT(tokenString string) (*jwt.StandardClaims, error) {
+func (j *JWT) ValidateJWT(tokenString string) (jwt.MapClaims, error) {
 
 	token, err := jwt.ParseWithClaims(
 		tokenString,
-		&jwt.StandardClaims{},
+		jwt.MapClaims{},
 		func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return false, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			if !token.Claims.(jwt.MapClaims).VerifyExpiresAt(time.Now().Unix(), true) {
+				return false, fmt.Errorf("token expired")
 			}
 
 			return j.secretKey, nil
@@ -62,22 +65,23 @@ func (j *JWT) ValidateJWT(tokenString string) (*jwt.StandardClaims, error) {
 		return nil, fmt.Errorf("invalid token")
 	}
 
-	claims, ok := token.Claims.(*jwt.StandardClaims)
+	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return nil, fmt.Errorf("error while asserting standard claims: %w", err)
 	}
 
-	if claims.Id == "" {
+	if claims["Id"] == "" {
 		return nil, fmt.Errorf("invalid token, cannot find user id")
 	}
 
 	return claims, nil
 }
 
-func (j *JWT) CreateJWTWithClaims(userID string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Id:        userID,
-		ExpiresAt: time.Now().Add(j.expireOffset).Unix(),
+func (j *JWT) CreateJWTWithClaims(userID string, isBeta bool) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"Id":     userID,
+		"exp":    time.Now().Add(j.expireOffset).Unix(),
+		"IsBeta": isBeta,
 	})
 
 	tokenString, err := token.SignedString(j.secretKey)

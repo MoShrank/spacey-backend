@@ -44,6 +44,7 @@ func (u *UserUsecase) CreateUser(user interface{}) (*entity.UserResponseModel, e
 	dbUser.CreatedAtTs = &now
 	dbUser.UpdatedAtTs = &now
 	dbUser.DeletedAtTs = nil
+	dbUser.BetaUser = false
 
 	id, err := u.userStore.SaveUser(&dbUser)
 	if err != nil {
@@ -70,7 +71,7 @@ func (u *UserUsecase) Login(email, password string) (*entity.UserResponseModel, 
 		return nil, err
 	}
 
-	token, err := u.jwt.CreateJWTWithClaims(dbUser.ID)
+	token, err := u.jwt.CreateJWTWithClaims(dbUser.ID, dbUser.BetaUser)
 	if err != nil {
 		return nil, err
 	}

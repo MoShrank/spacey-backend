@@ -1,0 +1,17 @@
+[
+    {
+        "updateMany": "user",
+        "filter": {},
+        "updates": [
+            {
+                "q": {},
+                "u": {
+                    "$unset": {
+                        "betaUser": ""
+                    }
+                },
+                "multi": true
+            }
+        ]
+    }
+]

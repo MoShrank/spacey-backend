@@ -46,9 +46,10 @@ func TestCreateUser(t *testing.T) {
 				Password: "test_password",
 			},
 			&entity.UserResponseModel{
-				ID:    "1",
-				Name:  "moritz",
-				Email: "moritz.e50@gmail.com",
+				ID:       "1",
+				Name:     "moritz",
+				Email:    "moritz.e50@gmail.com",
+				BetaUser: false,
 			},
 			nil,
 		},

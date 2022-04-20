@@ -10,16 +10,18 @@ type User struct {
 	Name        string     `bson:"name,omitempty"`
 	Email       string     `bson:"email"`
 	Password    string     `bson:"password"`
+	BetaUser    bool       `bson:"betaUser"`
 	CreatedAtTs *time.Time `bson:"created_at_ts"`
 	UpdatedAtTs *time.Time `bson:"updated_at_ts"`
 	DeletedAtTs *time.Time `bson:"deleted_at_ts"`
 }
 
 type UserResponseModel struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Token string `json:"token,omitempty"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	BetaUser bool   `json:"betaUser"`
+	Token    string `json:"token,omitempty"`
 }
 
 type UserReq struct {
