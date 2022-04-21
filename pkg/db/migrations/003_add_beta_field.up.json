@@ -1,0 +1,16 @@
+[
+    {
+        "update": "user",
+        "updates": [
+            {
+                "q": {},
+                "u": {
+                    "$set": {
+                        "betaUser": false
+                    }
+                },
+                "multi": true
+            }
+        ]
+    }
+]

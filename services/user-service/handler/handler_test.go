@@ -127,8 +127,8 @@ func TestCreateUserHandlerInvalidUser(t *testing.T) {
 
 func TestCreateUserValidUser(t *testing.T) {
 
-	inpBody := "{\"name\": \"moritz\", \"email\": \"moritz.e50@gmail.com\", \"password\": \"test_password\"}"
-	wantBody := "{\"data\": {\"id\": \"1\", \"name\": \"moritz\", \"email\": \"moritz.e50@gmail.com\", \"token\": \"test_token\"}, \"message\": \"Created\"}"
+	inpBody := `{"name": "moritz", "email": "moritz.e50@gmail.com", "password": "test_password"}`
+	wantBody := `{"data": {"id": "1", "name": "moritz", "email": "moritz.e50@gmail.com", "token": "test_token", "betaUser": false}, "message": "Created"}`
 	wantStatusCode := 201
 
 	usecaseMock := &UserUsecaseMock{}
@@ -147,10 +147,11 @@ func TestCreateUserValidUser(t *testing.T) {
 	}, nil)
 
 	usecaseMock.On("Login", mock.Anything, mock.Anything).Return(&entity.UserResponseModel{
-		ID:    "1",
-		Name:  "moritz",
-		Email: "moritz.e50@gmail.com",
-		Token: "test_token",
+		ID:       "1",
+		Name:     "moritz",
+		Email:    "moritz.e50@gmail.com",
+		Token:    "test_token",
+		BetaUser: false,
 	}, nil)
 
 	w := httptest.NewRecorder()
@@ -229,7 +230,10 @@ func TestLoginInvalidUser(t *testing.T) {
 
 func TestLoginValidUser(t *testing.T) {
 	inpBody := "{\"email\": \"moritz.e50@gmail.com\", \"password\": \"test_password\"}"
-	wantBody := "{\"data\": {\"id\": \"1\", \"name\": \"moritz\", \"email\": \"moritz.e50@gmail.com\", \"token\": \"test_token\"}, \"message\": \"Success\"}"
+	wantBody := `{"data": 
+					{"id": "1", "name": "moritz", "email": "moritz.e50@gmail.com", "token": "test_token", "betaUser": false}, 
+					"message": "Success"
+				}`
 	wantStatusCode := 200
 
 	usecaseMock := &UserUsecaseMock{}
@@ -259,7 +263,7 @@ func TestLoginValidUser(t *testing.T) {
 }
 
 func TestGetUser(t *testing.T) {
-	wantBody := "{\"data\": {\"id\": \"1\", \"name\": \"moritz\", \"email\": \"moritz.e50@gmail.com\"}, \"message\": \"Success\"}"
+	wantBody := `{"data": {"id": "1", "name": "moritz", "email": "moritz.e50@gmail.com", "betaUser": false}, "message": "Success"}`
 	wantStatusCode := 200
 
 	usecaseMock := &UserUsecaseMock{}
@@ -272,9 +276,10 @@ func TestGetUser(t *testing.T) {
 		config:      conf,
 	}
 	usecaseMock.On("GetUserByID", mock.Anything).Return(&entity.UserResponseModel{
-		ID:    "1",
-		Name:  "moritz",
-		Email: "moritz.e50@gmail.com",
+		ID:       "1",
+		Name:     "moritz",
+		Email:    "moritz.e50@gmail.com",
+		BetaUser: false,
 	}, nil)
 
 	w := httptest.NewRecorder()

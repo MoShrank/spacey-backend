@@ -9,18 +9,19 @@ import (
 )
 
 type Config struct {
-	Port                    string
-	MongoDBConnection       string
-	LogLevel                string
-	AuthSecretKey           string
-	GraylogConnection       string
-	DBName                  string
-	UserServiceHostName     string
-	DeckServiceHostName     string
-	LearningServiceHostName string
-	Domain                  string
-	MaxAgeAuth              int
-	MigrationFilePath       string
+	Port                          string
+	MongoDBConnection             string
+	LogLevel                      string
+	AuthSecretKey                 string
+	GraylogConnection             string
+	DBName                        string
+	UserServiceHostName           string
+	DeckServiceHostName           string
+	LearningServiceHostName       string
+	CardGenerationServiceHostName string
+	Domain                        string
+	MaxAgeAuth                    int
+	MigrationFilePath             string
 }
 
 type ConfigInterface interface {
@@ -36,6 +37,7 @@ type ConfigInterface interface {
 	GetDomain() string
 	GetMaxAgeAuth() int
 	GetMigrationFilePath() string
+	GetCardGenerationServiceHostName() string
 }
 
 func loadEnvWithoutDefault(key string) string {
@@ -66,8 +68,11 @@ func NewConfig() (ConfigInterface, error) {
 	}
 
 	return &Config{
-		Port:                    loadEnv("PORT", "8080"),
-		MongoDBConnection:       loadEnv("MONGO_DB_CONNECTION", "mongodb://127.0.0.1:27017/spacey"),
+		Port: loadEnv("PORT", "8080"),
+		MongoDBConnection: loadEnv(
+			"MONGO_DB_CONNECTION",
+			"mongodb://127.0.0.1:27017/spacey",
+		),
 		LogLevel:                loadEnv("LOG_LEVEL", "info"),
 		GraylogConnection:       loadEnv("GRAYLOG_CONNECTION", "localhost://localhost:12201"),
 		AuthSecretKey:           loadEnv("AUTH_SECRET_KEY", "secret"),
@@ -78,6 +83,10 @@ func NewConfig() (ConfigInterface, error) {
 		MaxAgeAuth:              maxAgeAuth,
 		MigrationFilePath:       loadEnv("MIGRATION_FILE_PATH", "../../migrations"),
 		LearningServiceHostName: loadEnv("LEARNING_SERVICE_HOST_NAME", "learning-service"),
+		CardGenerationServiceHostName: loadEnv(
+			"CARD_GENERATION_SERVICE_HOST_NAME",
+			"card-generation-service",
+		),
 	}, nil
 }
 
@@ -127,4 +136,8 @@ func (c *Config) GetMigrationFilePath() string {
 
 func (c *Config) GetLearningServiceHostName() string {
 	return c.LearningServiceHostName
+}
+
+func (c *Config) GetCardGenerationServiceHostName() string {
+	return c.CardGenerationServiceHostName
 }

@@ -110,7 +110,6 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 		deckGroup.DELETE("/:deckID/cards/:id", proxy(deckServiceHostName))
 
 		deckGroup.GET("/public", proxyWithPath(getUrl(deckServiceHostName, "/public")))
-		deckGroup.POST("/public", handler.CopyPublicDeck)
 	}
 
 	learningServiceHostName := cfg.GetLearningServiceHostName()
@@ -118,11 +117,25 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	{
 		learningGroup.POST("/session", proxyWithPath(getUrl(learningServiceHostName, "session")))
 		learningGroup.PUT("/session", proxyWithPath(getUrl(learningServiceHostName, "session")))
-		learningGroup.POST("event", proxyWithPath(getUrl(learningServiceHostName, "event")))
-		learningGroup.GET("events", proxyWithPath(getUrl(learningServiceHostName, "events")))
+		learningGroup.POST("/event", proxyWithPath(getUrl(learningServiceHostName, "event")))
+		learningGroup.GET("/events", proxyWithPath(getUrl(learningServiceHostName, "events")))
 		learningGroup.POST(
 			"/probabilities",
 			proxyWithPath(getUrl(learningServiceHostName, "probabilities")),
+		)
+	}
+
+	cardGenerationServiceHostName := cfg.GetCardGenerationServiceHostName()
+	cardGenerationGroup := router.Group("/notes").
+		Use(middleware.Auth(authMiddleware), middleware.NeedsBeta())
+	{
+		cardGenerationGroup.POST(
+			"",
+			proxy(cardGenerationServiceHostName),
+		)
+		cardGenerationGroup.GET(
+			"",
+			proxy(cardGenerationServiceHostName),
 		)
 	}
 }
