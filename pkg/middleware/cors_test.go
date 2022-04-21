@@ -51,6 +51,13 @@ func TestCORSValidHost(t *testing.T) {
 			200,
 			"https://www.spacey-learn.com",
 		},
+		{
+			"Valid Host",
+			"https://spacey-learn.com",
+			"POST",
+			200,
+			"https://spacey-learn.com",
+		},
 	}
 
 	for _, test := range tests {

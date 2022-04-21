@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/moshrank/spacey-backend/pkg/httpconst"
+	"github.com/moshrank/spacey-backend/pkg/strutil"
 )
 
 func CORSMiddleware() gin.HandlerFunc {
@@ -13,7 +14,11 @@ func CORSMiddleware() gin.HandlerFunc {
 
 		validHost := false
 
-		spaceyOrigin := "https://www.spacey-learn.com"
+		spaceyOrigins := []string{
+			"https://www.spacey-learn.com",
+			"https://spacey-learn.com",
+		}
+
 		origin := c.Request.Header.Get("Origin")
 
 		originParsed, _ := url.Parse(origin)
@@ -26,7 +31,7 @@ func CORSMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if origin == spaceyOrigin {
+		if strutil.IsStrInList(origin, spaceyOrigins) {
 			validHost = true
 		} else if originHostCleaned == "localhost" {
 			validHost = true
