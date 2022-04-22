@@ -46,6 +46,7 @@ func Auth(authObj auth.JWTInterface, config config.ConfigInterface) gin.HandlerF
 			c.SetCookie("LoggedIn", "false", -1, "/", config.GetDomain(), false, false)
 			httpconst.WriteUnauthorized(c, "invalid authorization token")
 			c.Abort()
+			return
 		}
 
 	}
