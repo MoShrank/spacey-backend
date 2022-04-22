@@ -12,7 +12,6 @@ import (
 func Auth(authObj auth.JWTInterface, config config.ConfigInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authCookie, err := c.Request.Cookie("Authorization")
-		fmt.Println(err)
 		if err != nil {
 			httpconst.WriteUnauthorized(c, "missing authorization cookie")
 			c.Abort()

@@ -64,7 +64,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	router.Use(middleware.JSONMiddleware())
 
 	jwt := auth.NewJWT(cfg)
-	authMiddlware := middleware.Auth(jwt, cfg)
+	authMiddleware := middleware.Auth(jwt, cfg)
 
 	userServiceHostName := cfg.GetUserServiceHostName()
 	configServiceHostName := "config-service"
@@ -80,7 +80,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	{
 		router.GET(
 			"/user",
-			authMiddlware,
+			authMiddleware,
 			proxyWithPath(getUrl(userServiceHostName, "user")),
 		)
 		userGroup.POST(
@@ -93,11 +93,15 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 			rateLimiterMiddleware,
 			proxyWithPath(getUrl(userServiceHostName, "login")),
 		)
-		userGroup.GET("/logout", authMiddlware, proxy(userServiceHostName))
+		userGroup.GET(
+			"/logout",
+			authMiddleware,
+			proxyWithPath(getUrl(userServiceHostName, "logout")),
+		)
 	}
 
 	deckServiceHostName := cfg.GetDeckServiceHostName()
-	deckGroup := router.Group("/decks").Use(authMiddlware)
+	deckGroup := router.Group("/decks").Use(authMiddleware)
 	{
 		deckGroup.GET("", proxyWithPath(getUrl(deckServiceHostName, "decks")))
 		deckGroup.POST("", proxyWithPath(getUrl(deckServiceHostName, "decks")))
@@ -112,7 +116,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	}
 
 	learningServiceHostName := cfg.GetLearningServiceHostName()
-	learningGroup := router.Group("/learning").Use(authMiddlware)
+	learningGroup := router.Group("/learning").Use(authMiddleware)
 	{
 		learningGroup.POST("/session", proxyWithPath(getUrl(learningServiceHostName, "session")))
 		learningGroup.PUT("/session", proxyWithPath(getUrl(learningServiceHostName, "session")))
@@ -126,7 +130,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 
 	cardGenerationServiceHostName := cfg.GetCardGenerationServiceHostName()
 	cardGenerationGroup := router.Group("/notes").
-		Use(authMiddlware, middleware.NeedsBeta())
+		Use(authMiddleware, middleware.NeedsBeta())
 	{
 		cardGenerationGroup.POST(
 			"",

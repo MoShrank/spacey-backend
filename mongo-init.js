@@ -2,6 +2,8 @@
 // email: admin@spacey-learn.com
 // password: 123456
 
+// --> betaUser will be false because migration overrides field
+
 db = db.getSiblingDB("spacey");
 db.createCollection("user");
 
