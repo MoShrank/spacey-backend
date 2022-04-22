@@ -12,7 +12,7 @@ import (
 func Auth(authObj auth.JWTInterface, config config.ConfigInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authCookie, err := c.Request.Cookie("Authorization")
-
+		fmt.Println(err)
 		if err != nil {
 			httpconst.WriteUnauthorized(c, "missing authorization cookie")
 			c.Abort()
@@ -28,10 +28,9 @@ func Auth(authObj auth.JWTInterface, config config.ConfigInterface) gin.HandlerF
 		}
 
 		if claims, err := authObj.ValidateJWT(tokenString); err == nil {
-
 			userID := claims["Id"].(string)
 			isBeta := claims["IsBeta"].(bool)
-			//construct new url with userID as query parameter and set it in request
+
 			q := c.Request.URL.Query()
 			q.Del("userID")
 			q.Add("userID", userID)
@@ -46,7 +45,6 @@ func Auth(authObj auth.JWTInterface, config config.ConfigInterface) gin.HandlerF
 			c.SetCookie("LoggedIn", "false", -1, "/", config.GetDomain(), false, false)
 			httpconst.WriteUnauthorized(c, "invalid authorization token")
 			c.Abort()
-			return
 		}
 
 	}

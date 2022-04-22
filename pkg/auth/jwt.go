@@ -74,6 +74,10 @@ func (j *JWT) ValidateJWT(tokenString string) (jwt.MapClaims, error) {
 		return nil, fmt.Errorf("invalid token, cannot find user id")
 	}
 
+	if claims["IsBeta"] == nil {
+		return nil, fmt.Errorf("invalid token, cannot find is beta")
+	}
+
 	return claims, nil
 }
 

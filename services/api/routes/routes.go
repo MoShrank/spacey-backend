@@ -93,9 +93,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 			rateLimiterMiddleware,
 			proxyWithPath(getUrl(userServiceHostName, "login")),
 		)
-		userGroup.GET("/logout", proxyWithPath(getUrl(userServiceHostName, "logout")))
-		userGroup.DELETE("", proxyWithPath(getUrl(userServiceHostName, "users")))
-		userGroup.PUT("/password", proxyWithPath(getUrl(userServiceHostName, "password")))
+		userGroup.GET("/logout", authMiddlware, proxy(userServiceHostName))
 	}
 
 	deckServiceHostName := cfg.GetDeckServiceHostName()
