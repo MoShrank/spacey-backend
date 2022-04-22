@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/moshrank/spacey-backend/config"
 	"github.com/moshrank/spacey-backend/pkg/auth"
 	"github.com/moshrank/spacey-backend/pkg/httpconst"
 )
 
-func Auth(authObj auth.JWTInterface) gin.HandlerFunc {
+func Auth(authObj auth.JWTInterface, config config.ConfigInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authCookie, err := c.Request.Cookie("Authorization")
 
@@ -21,7 +22,7 @@ func Auth(authObj auth.JWTInterface) gin.HandlerFunc {
 		tokenString := authCookie.Value
 
 		if tokenString == "" {
-			httpconst.WriteBadRequest(c, "Could not find authorization token.")
+			httpconst.WriteBadRequest(c, "could not find authorization token.")
 			c.Abort()
 			return
 		}
@@ -41,6 +42,8 @@ func Auth(authObj auth.JWTInterface) gin.HandlerFunc {
 			c.Next()
 
 		} else {
+			c.SetCookie("Authorization", "", -1, "/", config.GetDomain(), false, true)
+			c.SetCookie("LoggedIn", "false", -1, "/", config.GetDomain(), false, false)
 			httpconst.WriteUnauthorized(c, "invalid authorization token")
 			c.Abort()
 		}

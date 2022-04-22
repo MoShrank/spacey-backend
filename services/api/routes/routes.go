@@ -63,7 +63,8 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	router.Use(middleware.CORSMiddleware())
 	router.Use(middleware.JSONMiddleware())
 
-	authMiddleware := auth.NewJWT(cfg)
+	jwt := auth.NewJWT(cfg)
+	authMiddlware := middleware.Auth(jwt, cfg)
 
 	userServiceHostName := cfg.GetUserServiceHostName()
 	configServiceHostName := "config-service"
@@ -79,7 +80,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	{
 		router.GET(
 			"/user",
-			middleware.Auth(authMiddleware),
+			authMiddlware,
 			proxyWithPath(getUrl(userServiceHostName, "user")),
 		)
 		userGroup.POST(
@@ -98,7 +99,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	}
 
 	deckServiceHostName := cfg.GetDeckServiceHostName()
-	deckGroup := router.Group("/decks").Use(middleware.Auth(authMiddleware))
+	deckGroup := router.Group("/decks").Use(authMiddlware)
 	{
 		deckGroup.GET("", proxyWithPath(getUrl(deckServiceHostName, "decks")))
 		deckGroup.POST("", proxyWithPath(getUrl(deckServiceHostName, "decks")))
@@ -113,7 +114,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	}
 
 	learningServiceHostName := cfg.GetLearningServiceHostName()
-	learningGroup := router.Group("/learning").Use(middleware.Auth(authMiddleware))
+	learningGroup := router.Group("/learning").Use(authMiddlware)
 	{
 		learningGroup.POST("/session", proxyWithPath(getUrl(learningServiceHostName, "session")))
 		learningGroup.PUT("/session", proxyWithPath(getUrl(learningServiceHostName, "session")))
@@ -127,7 +128,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 
 	cardGenerationServiceHostName := cfg.GetCardGenerationServiceHostName()
 	cardGenerationGroup := router.Group("/notes").
-		Use(middleware.Auth(authMiddleware), middleware.NeedsBeta())
+		Use(authMiddlware, middleware.NeedsBeta())
 	{
 		cardGenerationGroup.POST(
 			"",

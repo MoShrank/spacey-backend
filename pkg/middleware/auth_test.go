@@ -15,7 +15,7 @@ func TestAuthMiddlewareMissingToken(t *testing.T) {
 	c.Request = httptest.NewRequest("GET", "/", nil)
 
 	cfg, _ := config.NewConfig()
-	Auth(auth.NewJWT(cfg))(c)
+	Auth(auth.NewJWT(cfg), cfg)(c)
 
 	assert.Equal(t, c.Writer.Status(), 401)
 }
@@ -26,6 +26,6 @@ func TestAuthMiddlewareInvalidToken(t *testing.T) {
 	c.SetCookie("Authorization", "invalid_token", 0, "", "", false, false)
 
 	cfg, _ := config.NewConfig()
-	Auth(auth.NewJWT(cfg))(c)
+	Auth(auth.NewJWT(cfg), cfg)(c)
 	assert.Equal(t, c.Writer.Status(), 401)
 }

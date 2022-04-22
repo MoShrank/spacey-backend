@@ -43,14 +43,22 @@ services:
       - spacey-services
 
   mongodb:
-    image: mongo
+    image: mongo:5.0.5
     container_name: mongodb
     ports:
       - "27017:27017"
     networks:
       - spacey-services
+    volumes:
+      - mongodb-data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+  
 
 networks:
   spacey-services:
     name: spacey-services
     driver: bridge
+
+volumes:
+  mongodb-data:
+    name: "mongodb-data"
