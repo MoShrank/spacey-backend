@@ -1,9 +1,8 @@
 # spacey-backend
-
-## Description
 This repository contains all spacey backend services including the API Gateway written
 in go.
 
+## Services
 ### api
 The api gateway is responsible for routing all requests from any client side facing app
 to the corresponding microservice. It is also responsible for common tasks such as authentication, rate limiting and cors. The api is the only public facing service.
@@ -27,35 +26,64 @@ The card generation service is not contained in this repository since it is writ
 
 ## User flow
 
-![alt text](./.github/images/user-flow.png)
+![user-flow](./.github/images/user-flow.png)
 
 ## Files and Folders
 
-    /config
-    package for handling configuration values. Each value has a default value that can be overwritten by a .env file.
-    /pkg
-    package folder that contains all packages used across the project.
-    /service
-    folder which contains microservices.
-    build.sh
-    script to build all microservices as go apps
-    docker-compose.yml
-    simple docker compose file to start a local docker environment which also sets up
-    a docker network and the database.
-    mongo-init.js
-    init script for database setup to insert test user into db
-
-## Requirements
-- GO 1.17 needed
-- docker & docker compose needs to be installed to start the dev environment
+`/config` <br>
+package for handling configuration values. Each value has a default value that can be overwritten by a .env file.
+`/pkg` <br>
+package folder that contains all packages used across the project. <br>
+`/services` <br>
+folder which contains microservices.<br>
+`build.sh` <br>
+script to build all microservices as go apps<br>
+`docker-compose.yml`<br>
+simple docker compose file to start a local docker environment which also sets up
+a docker network and the database.<br>
+`mongo-init.js`<br>
+init script for database setup to insert test user into db
 
 ## Run dev environment locally
 
-- `./build.sh`
-- `docker-compose up -d`
+### Prerequisites
+- GO 1.17 needed
+- docker & docker compose is needed
+
+### Environment Variables
+The following environment variables should be declared to run the backend locally. There are a few additional config values that can be set via environment variables, which can also be found in the config package. Those are not important for running the backend locally.
+
+```
+MONGO_DB_CONNECTION=<mongo_db_uri>
+DB_NAME=<name_of_database>
+PORT=<port_for_server>
+```
+
+### Serving the backend
+
+- `make serve`
+
+### Shutting the backend down
+
+- `make cleanup`
+
+
+### Running Tests
+
+- `make test`
 
 ## API Routes
 
-## CI/CD
+## Database
+full description of collections can be found here: [collection](./docs/Collections.md)
+
+## Security
+![threat-model](./.github/images/threat-model.png)
+
+full list of security measures can be found here: [security](./docs/Security.md)
+
 
 ## Deployment
+The backend is deployed on a virtual private server uisng a docker compose file.
+Continous Integration is done by a github workflow that runs unit tests on a pull request and builds and pushed the docker image to an AWS container registry. Continous deployment is then done by watchtower, a separate service running on the same server, that pools the latest docker images and deploys it.
+![CI/CD Pipeline](./.github/images/pipeline.png)

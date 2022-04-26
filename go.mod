@@ -62,6 +62,5 @@ require (
 
 require (
 	github.com/mattn/go-isatty v0.0.14 // indirect
-	github.com/ulule/limiter v2.2.2+incompatible
 	github.com/ulule/limiter/v3 v3.10.0
 )

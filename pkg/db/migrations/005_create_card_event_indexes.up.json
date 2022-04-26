@@ -1,0 +1,30 @@
+[
+    {
+        "createIndexes": "cardEvent",
+        "indexes": [
+            {
+                "key": {
+                    "createdAt": 1
+                },
+                "name": "created_at_1",
+                "background": true
+            },
+            {
+                "key": {
+                    "userID": 1,
+                    "cardID": 1
+                },
+                "name": "user_id_card_id_1",
+                "background": true
+            },
+            {
+                "key": {
+                    "userID": 1,
+                    "deckID": 1
+                },
+                "name": "user_id_deck_id_1",
+                "background": true
+            }
+        ]
+    }
+]

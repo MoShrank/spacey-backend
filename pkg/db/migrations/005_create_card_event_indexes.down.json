@@ -1,0 +1,10 @@
+[
+    {
+        "dropIndexes": "cardEvent",
+        "index": [
+            "created_at_1",
+            "user_id_card_id_1",
+            "user_id_deck_id_1"
+        ]
+    }
+]

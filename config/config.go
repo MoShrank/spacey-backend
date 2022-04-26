@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strconv"
 
@@ -36,7 +37,6 @@ type ConfigInterface interface {
 	GetLearningServiceHostName() string
 	GetDomain() string
 	GetMaxAgeAuth() int
-	GetMigrationFilePath() string
 	GetCardGenerationServiceHostName() string
 }
 
@@ -59,7 +59,17 @@ func loadEnv(name, defaultValue string) string {
 }
 
 func NewConfig() (ConfigInterface, error) {
-	godotenv.Load()
+	envFile := os.Getenv("ENV_FILE_PATH")
+
+	if envFile == "" {
+		envFile = ".env"
+	}
+
+	err := godotenv.Load(envFile)
+
+	if err != nil {
+		fmt.Println("Warning: could not find .env file")
+	}
 
 	maxAgeAuth, err := strconv.Atoi(loadEnv("MAX_AGE_AUTH", "604800"))
 
@@ -75,13 +85,12 @@ func NewConfig() (ConfigInterface, error) {
 		),
 		LogLevel:                loadEnv("LOG_LEVEL", "info"),
 		GraylogConnection:       loadEnv("GRAYLOG_CONNECTION", "localhost://localhost:12201"),
-		AuthSecretKey:           loadEnv("AUTH_SECRET_KEY", "secret"),
+		AuthSecretKey:           loadEnv("AUTH_SECRET_KEY", "test_secret_key"),
 		DBName:                  loadEnv("DB_NAME", "spacey"),
 		UserServiceHostName:     loadEnv("USER_SERVICE_HOST_NAME", "user-service"),
 		DeckServiceHostName:     loadEnv("DECK_SERVICE_HOST_NAME", "deck-management-service"),
 		Domain:                  loadEnv("DOMAIN", "localhost"),
 		MaxAgeAuth:              maxAgeAuth,
-		MigrationFilePath:       loadEnv("MIGRATION_FILE_PATH", "../../migrations"),
 		LearningServiceHostName: loadEnv("LEARNING_SERVICE_HOST_NAME", "learning-service"),
 		CardGenerationServiceHostName: loadEnv(
 			"CARD_GENERATION_SERVICE_HOST_NAME",
@@ -128,10 +137,6 @@ func (c *Config) GetDomain() string {
 
 func (c *Config) GetMaxAgeAuth() int {
 	return c.MaxAgeAuth
-}
-
-func (c *Config) GetMigrationFilePath() string {
-	return c.MigrationFilePath
 }
 
 func (c *Config) GetLearningServiceHostName() string {
