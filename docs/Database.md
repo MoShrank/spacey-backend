@@ -1,12 +1,8 @@
 # Database
-
-# Backup
-
-
 # user-service
 
 ## User
-```json
+```
 _id: ObjectID
 name: string
 email: string
@@ -29,7 +25,7 @@ deleted_at_ts: datetime
 # deck-managament-service
 
 ## Deck
-```json
+```
 _id: ObjectID
 name: string
 description: string
@@ -42,7 +38,7 @@ deleted_at: datetime
 ```
 
 ## Card
-```json
+```
 _id: ObjectID
 question: string
 answer: string
