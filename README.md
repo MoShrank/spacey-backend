@@ -40,7 +40,7 @@ a docker network and the database.<br>
 [`mongo-init.js`](./mongo-init.js)<br>
 init script for database setup to insert test user into db
 
-## Run dev environment locally
+## Getting Started
 
 ### Prerequisites
 - GO 1.17 needed
@@ -58,19 +58,24 @@ PORT=<port_for_server>
 ```
 
 ### Serving the backend
-- `make serve`
+`make serve`
 
 ### Shutting the backend down
-- `make cleanup`
+`make cleanup`
 
 ### Running Tests
-- `make test`
+`make test`
+
+
+## Code Style
+Formatting is provided by gopls which can be installed via the official go VSCode plugin. In addition to that, [golines](https://github.com/segmentio/golines) should be used to keep a maximum line length of 100 characters.
 
 ## API Routes
 
 ## Database
 MongoDB was chosen because of its maturity, scallability and flexibility to use. Although it is currently deployed on a single VPS instance together with all services, which makes it difficult to scale and less resistant to failures, it can theoretically be deployed on a managed AWS instance and therefore be scaled up using either shards or replicas.
 Since we do not have any real users and therefore not a lot of data, we use mongodump to backup the data once a day at night and push the exported bson dumps to a s3 bucket.
+Although all services access the same database instance, each service is only aware of its own data model and does not access collections used by a different service, to not couple any of the services. 
 A full description of collections and its corresponding indices can be found [here](./docs/Collections.md).
 
 ## Security
