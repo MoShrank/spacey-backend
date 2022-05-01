@@ -1,4 +1,6 @@
 # Database
+Below is a simple description of all collections and their corresponding indices separated by each microservice.
+
 # user-service
 
 ## User
@@ -13,7 +15,7 @@ updated_at_ts: datetime
 deleted_at_ts: datetime
 ```
 
-### indices:
+## indices
 ```
 {
     key: email,
@@ -23,6 +25,8 @@ deleted_at_ts: datetime
 ```
 
 # deck-managament-service
+`Deck` and `Card` are a single collection whereas cards are contained as an embeeded document in the deck collection.
+
 
 ## Deck
 ```
@@ -49,7 +53,7 @@ updated_at: datetime
 deleted_at: datetime
 ```
 
-### indices
+## indices
 
 ```
 {
