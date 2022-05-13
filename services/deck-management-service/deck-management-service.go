@@ -40,7 +40,8 @@ func runServer(
 		router.PUT("decks/:deckID", deckHandler.UpdateDeck)
 		router.DELETE("decks/:deckID", deckHandler.DeleteDeck)
 
-		router.POST("decks/:deckID/cards", cardHandler.CreateCard)
+		router.POST("decks/:deckID/card", cardHandler.CreateCard)
+		router.POST("decks/:deckID/cards", cardHandler.CreateCards)
 		router.PUT("decks/:deckID/cards/:id", cardHandler.UpdateCard)
 		router.DELETE("decks/:deckID/cards/:id", cardHandler.DeleteCard)
 

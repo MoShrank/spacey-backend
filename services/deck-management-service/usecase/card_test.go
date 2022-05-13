@@ -27,6 +27,14 @@ func (c *CardStoreMock) DeleteCard(userID, deckID, cardID string) error {
 	return args.Error(0)
 }
 
+func (c *CardStoreMock) SaveCards(
+	deckID, userID string,
+	cards []entity.Card,
+) ([]string, error) {
+	args := c.Called(deckID, userID, cards)
+	return args.Get(0).([]string), args.Error(1)
+}
+
 func TestCreateCardValidCard(t *testing.T) {
 	inpCard := entity.CardReq{
 		Question: "Test Question",
@@ -86,4 +94,34 @@ func TestDeleteCard(t *testing.T) {
 	err := cardUseCase.DeleteCard("1", "1", "test_card_id")
 
 	assert.Nil(t, err)
+}
+
+func TestCreateCards(t *testing.T) {
+	inpCards := []entity.CardReq{
+		{
+			Question: "Test Question",
+			Answer:   "Test Answer",
+			DeckID:   "test_deck_id",
+		},
+	}
+
+	expOutputCards := []entity.CardRes{
+		{
+			ID:       "test_card_id",
+			Question: "Test Question",
+			Answer:   "Test Answer",
+			DeckID:   "test_deck_id",
+		},
+	}
+
+	cardStoreMock := new(CardStoreMock)
+	cardStoreMock.On("SaveCards", mock.Anything, mock.Anything, mock.Anything).
+		Return([]string{"test_card_id"}, nil)
+
+	cardUseCase := NewCardUseCase(cardStoreMock)
+
+	cards, err := cardUseCase.CreateCards("test_deck_id", "1", inpCards)
+
+	assert.Nil(t, err)
+	assert.Equal(t, expOutputCards, cards)
 }

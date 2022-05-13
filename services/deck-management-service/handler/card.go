@@ -16,6 +16,7 @@ type CardHandler struct {
 
 type CardHandlerInterface interface {
 	CreateCard(c *gin.Context)
+	CreateCards(c *gin.Context)
 	UpdateCard(c *gin.Context)
 	DeleteCard(c *gin.Context)
 }
@@ -98,4 +99,28 @@ func (h *CardHandler) DeleteCard(c *gin.Context) {
 	}
 
 	httpconst.WriteSuccess(c, "Deleted Card")
+}
+
+func (h *CardHandler) CreateCards(c *gin.Context) {
+	userID := c.Request.URL.Query().Get("userID")
+
+	if userID == "" {
+		httpconst.WriteUnauthorized(c, "missing user id")
+		return
+	}
+
+	deckID := c.Param("deckID")
+
+	var cards []entity.CardReq
+	if err := h.validator.ValidateJSON(c, &cards); err != nil {
+		return
+	}
+
+	cardsRes, err := h.cardUseCase.CreateCards(deckID, userID, cards)
+	if err != nil {
+		httpconst.WriteBadRequest(c, err.Error())
+		return
+	}
+
+	httpconst.WriteCreated(c, cardsRes)
 }

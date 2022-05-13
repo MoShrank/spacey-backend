@@ -67,3 +67,33 @@ func (c *CardUseCase) UpdateCard(
 func (c *CardUseCase) DeleteCard(userID, deckID, cardID string) error {
 	return c.cardStore.DeleteCard(userID, deckID, cardID)
 }
+
+func (c *CardUseCase) CreateCards(
+	deckID, userID string,
+	cards []entity.CardReq,
+) ([]entity.CardRes, error) {
+	var cardDBs []entity.Card
+	mapper.MapLoose(cards, &cardDBs)
+
+	timestamp := time.Now()
+	for i := range cardDBs {
+		cardDBs[i].CreatedAt = &timestamp
+		cardDBs[i].UpdatedAt = &timestamp
+		cardDBs[i].DeletedAt = nil
+		cardDBs[i].UserID = userID
+		cardDBs[i].DeckID = deckID
+	}
+
+	cardIDs, err := c.cardStore.SaveCards(deckID, userID, cardDBs)
+	if err != nil {
+		return nil, err
+	}
+
+	var cardsRes []entity.CardRes
+	mapper.MapLoose(cardDBs, &cardsRes)
+	for i := range cardsRes {
+		cardsRes[i].ID = cardIDs[i]
+	}
+
+	return cardsRes, nil
+}
