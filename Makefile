@@ -7,7 +7,7 @@ serve:
     	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $$file/bin/main ./$$file; \
 	  done
 	- docker-compose build
-	- docker-compose up -d
+	- docker-compose up
 
 cleanup:
 	- docker-compose down --remove-orphans

@@ -108,6 +108,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 		deckGroup.PUT("/:deckID", proxy(deckServiceHostName))
 		deckGroup.DELETE("/:deckID", proxy(deckServiceHostName))
 
+		deckGroup.POST("/:deckID/card", proxy(deckServiceHostName))
 		deckGroup.POST("/:deckID/cards", proxy(deckServiceHostName))
 		deckGroup.PUT("/:deckID/cards/:id", proxy(deckServiceHostName))
 		deckGroup.DELETE("/:deckID/cards/:id", proxy(deckServiceHostName))
@@ -138,6 +139,14 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 		)
 		cardGenerationGroup.GET(
 			"",
+			proxy(cardGenerationServiceHostName),
+		)
+		cardGenerationGroup.PUT(
+			"/:noteID",
+			proxy(cardGenerationServiceHostName),
+		)
+		cardGenerationGroup.POST(
+			"/:noteID/cards",
 			proxy(cardGenerationServiceHostName),
 		)
 	}

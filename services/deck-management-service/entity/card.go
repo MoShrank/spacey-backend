@@ -29,12 +29,14 @@ type CardRes struct {
 
 type CardUseCaseInterface interface {
 	CreateCard(deckID, userID string, card *CardReq) (*CardRes, error)
+	CreateCards(deckID, userID string, card []CardReq) ([]CardRes, error)
 	UpdateCard(cardID, userID, deckID string, card *CardReq) (*CardRes, error)
 	DeleteCard(userID, deckID, cardID string) error
 }
 
 type CardStoreInterface interface {
 	SaveCard(deckID, userID string, card *Card) (string, error)
+	SaveCards(deckID, userID string, card []Card) ([]string, error)
 	UpdateCard(cardID, userID, deckID string, card *Card) error
 	DeleteCard(userID, deckID, cardID string) error
 }

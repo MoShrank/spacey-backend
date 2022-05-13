@@ -40,6 +40,14 @@ func (m *CardUseCaseMock) DeleteCard(userID, deckID, cardID string) error {
 	return args.Error(0)
 }
 
+func (m *CardUseCaseMock) CreateCards(
+	deckID, userID string,
+	card []entity.CardReq,
+) ([]entity.CardRes, error) {
+	args := m.Called(deckID, userID, card)
+	return args.Get(0).([]entity.CardRes), args.Error(1)
+}
+
 func TestCreateCard(t *testing.T) {
 	tests := []struct {
 		testName       string
@@ -119,6 +127,50 @@ func TestCreateCard(t *testing.T) {
 			assert.Equal(t, test.wantStatusCode, c.Writer.Status())
 		})
 	}
+}
+
+func TestCreateCards(t *testing.T) {
+	body := `[{"question": "Test Question", "answer": "Test Answer", "deckID": "test_deck_id"}]`
+	expBody := `{"message": "Created", "data": [{"id": "test_card_id", "question": "Test Question", "answer": "Test Answer", "deckID": "test_deck_id"}]}`
+	expStatusCode := 201
+
+	cardUseCaseMock := new(CardUseCaseMock)
+
+	var handler = NewCardHandler(log.New(), cardUseCaseMock, validator.NewValidator())
+
+	cardUseCaseMock.On("CreateCards", mock.Anything, mock.Anything, mock.Anything).
+		Return([]entity.CardRes{
+			{
+				ID:       "test_card_id",
+				Question: "Test Question",
+				Answer:   "Test Answer",
+				DeckID:   "test_deck_id",
+			},
+		}, nil)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request, _ = http.NewRequest(
+		"POST",
+		"decks/:id/cards",
+		bytes.NewBuffer([]byte(body)),
+	)
+
+	q := c.Request.URL.Query()
+	q.Add("userID", "test_user_id")
+	c.Request.URL.RawQuery = q.Encode()
+
+	c.Params = []gin.Param{
+		{
+			Key:   "id",
+			Value: "test_deck_id",
+		},
+	}
+
+	handler.CreateCards(c)
+
+	assert.Equal(t, expStatusCode, c.Writer.Status())
+	assert.JSONEq(t, expBody, w.Body.String())
 }
 
 func TestUpdateCard(t *testing.T) {

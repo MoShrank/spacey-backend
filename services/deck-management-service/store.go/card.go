@@ -87,3 +87,37 @@ func (s *CardStore) DeleteCard(userID, deckID, cardID string) error {
 
 	return err
 }
+
+func (s *CardStore) SaveCards(deckID, userID string, cards []entity.Card) ([]string, error) {
+	deckObjID, err := primitive.ObjectIDFromHex(deckID)
+	if err != nil {
+		return nil, err
+	}
+
+	objCards := []bson.M{}
+
+	var cardIDs []string
+	for _, card := range cards {
+		id := primitive.NewObjectID()
+
+		objCards = append(objCards, bson.M{
+			"_id":        id,
+			"question":   card.Question,
+			"answer":     card.Answer,
+			"user_id":    userID,
+			"deck_id":    deckID,
+			"created_at": card.CreatedAt,
+			"updated_at": card.UpdatedAt,
+			"deleted_at": card.DeletedAt,
+		})
+
+		cardIDs = append(cardIDs, id.Hex())
+	}
+
+	_, err = s.db.UpdateDocument(DECK_COLLECTION, bson.M{
+		"_id":     deckObjID,
+		"user_id": userID,
+	}, bson.M{"$push": bson.M{"cards": bson.M{"$each": objCards}}})
+
+	return cardIDs, err
+}
