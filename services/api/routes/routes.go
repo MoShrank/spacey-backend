@@ -60,7 +60,7 @@ func proxy(serviceName string) gin.HandlerFunc {
 func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	router.GET("/ping", handler.Ping)
 
-	router.Use(middleware.CORSMiddleware())
+	router.Use(middleware.CORSMiddleware(cfg.GetDomain()))
 	router.Use(middleware.JSONMiddleware())
 
 	jwt := auth.NewJWT(cfg)

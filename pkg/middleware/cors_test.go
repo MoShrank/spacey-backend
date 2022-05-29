@@ -67,7 +67,7 @@ func TestCORSValidHost(t *testing.T) {
 			c.Request = httptest.NewRequest(test.method, "/", nil)
 			c.Request.Header.Set("Origin", test.host)
 
-			CORSMiddleware()(c)
+			CORSMiddleware("spacey-learn.com")(c)
 
 			assert.Equal(
 				t,
