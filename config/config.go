@@ -68,7 +68,7 @@ func NewConfig() (ConfigInterface, error) {
 	err := godotenv.Load(envFile)
 
 	if err != nil {
-		fmt.Println("Warning: could not find .env file")
+		fmt.Println("Warning: could not find .env file under: ", envFile)
 	}
 
 	maxAgeAuth, err := strconv.Atoi(loadEnv("MAX_AGE_AUTH", "604800"))
@@ -81,7 +81,7 @@ func NewConfig() (ConfigInterface, error) {
 		Port: loadEnv("PORT", "8080"),
 		MongoDBConnection: loadEnv(
 			"MONGO_DB_CONNECTION",
-			"mongodb://127.0.0.1:27017/spacey",
+			"mongodb://mongodb:27017/spacey",
 		),
 		LogLevel:                loadEnv("LOG_LEVEL", "info"),
 		GraylogConnection:       loadEnv("GRAYLOG_CONNECTION", "localhost://localhost:12201"),
