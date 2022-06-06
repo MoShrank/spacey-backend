@@ -130,14 +130,16 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	}
 
 	cardGenerationServiceHostName := cfg.GetCardGenerationServiceHostName()
+
+	router.GET(
+		"/notes",
+		proxy(cardGenerationServiceHostName),
+	)
+
 	cardGenerationGroup := router.Group("/notes").
 		Use(authMiddleware, middleware.NeedsBeta())
 	{
 		cardGenerationGroup.POST(
-			"",
-			proxy(cardGenerationServiceHostName),
-		)
-		cardGenerationGroup.GET(
 			"",
 			proxy(cardGenerationServiceHostName),
 		)
