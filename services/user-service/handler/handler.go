@@ -160,21 +160,13 @@ func (h *Handler) Validate(c *gin.Context) {
 		return
 	}
 
-	h.userUsecase.VerifyEmail(userID, body.Token)
-
-	user, err := h.userUsecase.GetUserByID(userID)
+	authToken, err := h.userUsecase.VerifyEmail(userID, body.Token)
 	if err != nil {
-		httpconst.WriteNotFound(c, "Could not find user in database.")
+		httpconst.WriteBadRequest(c, "Invalid token.")
 		return
 	}
 
-	token, err := h.userUsecase.CreateToken(userID, user.BetaUser, true)
-	if err != nil {
-		httpconst.WriteBadRequest(c, "Could not create token.")
-		return
-	}
-
-	h.setAuthCookie(c, token)
+	h.setAuthCookie(c, authToken)
 
 	httpconst.WriteSuccess(c, nil)
 }
