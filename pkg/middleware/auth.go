@@ -26,15 +26,18 @@ func Auth(authObj auth.JWTInterface, config config.ConfigInterface) gin.HandlerF
 			return
 		}
 
-		if claims, err := authObj.ValidateJWT(tokenString); err == nil {
+		if claims, err := authObj.ValidateJWT(tokenString, []string{"IsBeta", "EmailValidated"}); err == nil {
 			userID := claims["Id"].(string)
 			isBeta := claims["IsBeta"].(bool)
+			emailValidated := claims["EmailValidated"].(bool)
 
 			q := c.Request.URL.Query()
 			q.Del("userID")
 			q.Add("userID", userID)
 			q.Del("isBeta")
 			q.Add("isBeta", fmt.Sprintf("%t", isBeta))
+			q.Del("emailValidated")
+			q.Add("emailValidated", fmt.Sprintf("%t", emailValidated))
 			c.Request.URL.RawQuery = q.Encode()
 
 			c.Next()

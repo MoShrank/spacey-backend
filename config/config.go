@@ -23,6 +23,7 @@ type Config struct {
 	Domain                        string
 	MaxAgeAuth                    int
 	MigrationFilePath             string
+	MailGunAPIKey                 string
 }
 
 type ConfigInterface interface {
@@ -38,6 +39,7 @@ type ConfigInterface interface {
 	GetDomain() string
 	GetMaxAgeAuth() int
 	GetCardGenerationServiceHostName() string
+	GetMailGunAPIKey() string
 }
 
 func loadEnvWithoutDefault(key string) string {
@@ -96,6 +98,7 @@ func NewConfig() (ConfigInterface, error) {
 			"CARD_GENERATION_SERVICE_HOST_NAME",
 			"card-generation-service",
 		),
+		MailGunAPIKey: loadEnv("MAIL_GUN_API_KEY", ""),
 	}, nil
 }
 
@@ -145,4 +148,8 @@ func (c *Config) GetLearningServiceHostName() string {
 
 func (c *Config) GetCardGenerationServiceHostName() string {
 	return c.CardGenerationServiceHostName
+}
+
+func (c *Config) GetMailGunAPIKey() string {
+	return c.MailGunAPIKey
 }
