@@ -6,26 +6,24 @@ import (
 )
 
 type User struct {
-	ID                        string     `bson:"_id,omitempty"`
-	Name                      string     `bson:"name,omitempty"`
-	Email                     string     `bson:"email"`
-	Password                  string     `bson:"password"`
-	BetaUser                  bool       `bson:"betaUser"`
-	EmailValidated            bool       `bson:"emailValidated"`
-	LastValidationEmailSentTs *time.Time `bson:"lastValidationEmailSentTs"`
-	CreatedAtTs               *time.Time `bson:"created_at_ts"`
-	UpdatedAtTs               *time.Time `bson:"updated_at_ts"`
-	DeletedAtTs               *time.Time `bson:"deleted_at_ts"`
+	ID             string     `bson:"_id,omitempty"`
+	Name           string     `bson:"name,omitempty"`
+	Email          string     `bson:"email"`
+	Password       string     `bson:"password"`
+	BetaUser       bool       `bson:"betaUser"`
+	EmailValidated bool       `bson:"emailValidated"`
+	CreatedAtTs    *time.Time `bson:"created_at_ts"`
+	UpdatedAtTs    *time.Time `bson:"updated_at_ts"`
+	DeletedAtTs    *time.Time `bson:"deleted_at_ts"`
 }
 
 type UserResponseModel struct {
-	ID                        string     `json:"id"`
-	Name                      string     `json:"name"`
-	Email                     string     `json:"email"`
-	BetaUser                  bool       `json:"betaUser"`
-	EmailValidated            bool       `json:"emailValidated"`
-	LastValidationEmailSentTs *time.Time `json:"lastValidationEmailSentTs"`
-	Token                     string     `json:"token,omitempty"`
+	ID             string `json:"id"`
+	Name           string `json:"name"`
+	Email          string `json:"email"`
+	BetaUser       bool   `json:"betaUser"`
+	EmailValidated bool   `json:"emailValidated"`
+	Token          string `json:"token,omitempty"`
 }
 
 type UserReq struct {

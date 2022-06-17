@@ -143,7 +143,7 @@ func TestCreateUserHandlerInvalidUser(t *testing.T) {
 func TestCreateUserValidUser(t *testing.T) {
 
 	inpBody := `{"name": "moritz", "email": "moritz.e50@gmail.com", "password": "test_password"}`
-	wantBody := `{"data": {"id": "1", "name": "moritz", "email": "moritz.e50@gmail.com", "token": "test_token", "betaUser": false}, "message": "Created"}`
+	wantBody := `{"data": {"id": "1", "name": "moritz", "email": "moritz.e50@gmail.com", "token": "test_token", "betaUser": false, "emailValidated": false}, "message": "Created"}`
 	wantStatusCode := 201
 
 	usecaseMock := &UserUsecaseMock{}
@@ -249,7 +249,7 @@ func TestLoginInvalidUser(t *testing.T) {
 func TestLoginValidUser(t *testing.T) {
 	inpBody := "{\"email\": \"moritz.e50@gmail.com\", \"password\": \"test_password\"}"
 	wantBody := `{"data": 
-					{"id": "1", "name": "moritz", "email": "moritz.e50@gmail.com", "token": "test_token", "betaUser": false}, 
+					{"id": "1", "name": "moritz", "email": "moritz.e50@gmail.com", "token": "test_token", "betaUser": false, "emailValidated": false}, 
 					"message": "Success"
 				}`
 	wantStatusCode := 200
@@ -281,7 +281,7 @@ func TestLoginValidUser(t *testing.T) {
 }
 
 func TestGetUser(t *testing.T) {
-	wantBody := `{"data": {"id": "1", "name": "moritz", "email": "moritz.e50@gmail.com", "betaUser": false}, "message": "Success"}`
+	wantBody := `{"data": {"id": "1", "name": "moritz", "email": "moritz.e50@gmail.com", "betaUser": false, "emailValidated": false}, "message": "Success"}`
 	wantStatusCode := 200
 
 	usecaseMock := &UserUsecaseMock{}
