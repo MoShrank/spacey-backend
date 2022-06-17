@@ -2,7 +2,7 @@ name: Build and Push User Service docker image
 
 on:
   push:
-    branches: [master]
+    branches: [master, staging]
     paths:
       - "services/user-service/**"
   workflow_dispatch:
