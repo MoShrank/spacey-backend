@@ -7,6 +7,7 @@ import (
 	"github.com/moshrank/spacey-backend/pkg/validator"
 
 	"github.com/moshrank/spacey-backend/services/user-service/entity"
+	"github.com/moshrank/spacey-backend/services/user-service/external"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,6 +24,8 @@ type HandlerInterface interface {
 	Login(c *gin.Context)
 	Logout(c *gin.Context)
 	GetUser(c *gin.Context)
+	Validate(c *gin.Context)
+	SendValidationEmail(c *gin.Context)
 }
 
 func NewHandler(
@@ -30,6 +33,7 @@ func NewHandler(
 	usecase entity.UserUsecaseInterface,
 	validatorObj validator.ValidatorInterface,
 	configObj config.ConfigInterface,
+	emailSender external.EmailSenderInterface,
 ) HandlerInterface {
 	return &Handler{
 		logger:      logger,
@@ -87,6 +91,8 @@ func (h *Handler) CreateUser(c *gin.Context) {
 		return
 	}
 
+	h.userUsecase.SendVerificationEmail(userRes.ID)
+
 	h.setAuthCookie(c, userRes.Token)
 
 	httpconst.WriteCreated(c, userRes)
@@ -132,4 +138,60 @@ func (h *Handler) GetUser(c *gin.Context) {
 	}
 
 	httpconst.WriteSuccess(c, userRes)
+}
+
+func (h *Handler) Validate(c *gin.Context) {
+	userID := c.Request.URL.Query().Get("userID")
+
+	if userID == "" {
+		httpconst.WriteBadRequest(c, "userID is required.")
+		return
+	}
+
+	var body struct {
+		Token string `json:"token" binding:"required"`
+	}
+	if err := h.validator.ValidateJSON(c, &body); err != nil {
+		return
+	}
+
+	if body.Token == "" {
+		httpconst.WriteBadRequest(c, "token is required.")
+		return
+	}
+
+	h.userUsecase.VerifyEmail(userID, body.Token)
+
+	user, err := h.userUsecase.GetUserByID(userID)
+	if err != nil {
+		httpconst.WriteNotFound(c, "Could not find user in database.")
+		return
+	}
+
+	token, err := h.userUsecase.CreateToken(userID, user.BetaUser, true)
+	if err != nil {
+		httpconst.WriteBadRequest(c, "Could not create token.")
+		return
+	}
+
+	h.setAuthCookie(c, token)
+
+	httpconst.WriteSuccess(c, nil)
+}
+
+func (h *Handler) SendValidationEmail(c *gin.Context) {
+	userID := c.Request.URL.Query().Get("userID")
+
+	if userID == "" {
+		httpconst.WriteBadRequest(c, "userID is required.")
+		return
+	}
+
+	err := h.userUsecase.SendVerificationEmail(userID)
+	if err != nil {
+		httpconst.WriteBadRequest(c, err.Error())
+		return
+	}
+
+	httpconst.WriteSuccess(c, nil)
 }

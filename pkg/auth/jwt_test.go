@@ -16,15 +16,15 @@ func setup(exp int) JWT {
 
 func TestCreateJWT(t *testing.T) {
 	jwtObj := setup(60)
-	token, err := jwtObj.CreateJWTWithClaims("1", true)
+	token, err := jwtObj.CreateJWTWithClaims("1")
 	assert.NotEmpty(t, token)
 	assert.NoError(t, err)
 }
 
 func TestValidateValidJWT(t *testing.T) {
 	jwtObj := setup(60)
-	token, _ := jwtObj.CreateJWTWithClaims("1", true)
-	claims, err := jwtObj.ValidateJWT(token)
+	token, _ := jwtObj.CreateJWTWithClaims("1")
+	claims, err := jwtObj.ValidateJWT(token, []string{})
 	assert.NoError(t, err)
 	assert.NotNil(t, claims)
 }
@@ -32,10 +32,10 @@ func TestValidateValidJWT(t *testing.T) {
 func TestValidateInvalidJWT(t *testing.T) {
 	// set expire date to 0 so token is expired
 	jwtObj := setup(0)
-	token, _ := jwtObj.CreateJWTWithClaims("1", true)
+	token, _ := jwtObj.CreateJWTWithClaims("1")
 	// sleep one second to invalidate token
 	time.Sleep(time.Second * 2)
-	claims, err := jwtObj.ValidateJWT(token)
+	claims, err := jwtObj.ValidateJWT(token, []string{})
 	assert.Nil(t, claims)
 	assert.Error(t, err)
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/services/user-service/entity"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -56,4 +57,29 @@ func (s *Store) GetUserByID(id string) (*entity.User, error) {
 	err = res.Decode(&user)
 
 	return &user, err
+}
+
+func (s *Store) VerifyEmail(id string) error {
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return fmt.Errorf(
+			"invalid id. cannot convert id into object id: %s error: %w",
+			id,
+			err,
+		)
+	}
+
+	res, err := s.db.UpdateDocument(
+		USER_COLLECTION,
+		bson.M{"_id": objectId},
+		bson.M{"$set": bson.M{"emailValidated": true}},
+	)
+	if err != nil {
+		return err
+	}
+	if res.ModifiedCount == 0 {
+		return fmt.Errorf("user does not exist")
+	}
+
+	return nil
 }

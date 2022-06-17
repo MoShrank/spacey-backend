@@ -1,30 +1,39 @@
 package usecase
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
 	mapper "github.com/PeteProgrammer/go-automapper"
+	"github.com/moshrank/spacey-backend/config"
 	"github.com/moshrank/spacey-backend/pkg/auth"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/services/user-service/entity"
+	"github.com/moshrank/spacey-backend/services/user-service/external"
 )
 
 type UserUsecase struct {
-	logger    logger.LoggerInterface
-	jwt       auth.JWTInterface
-	userStore entity.UserStoreInterface
+	logger      logger.LoggerInterface
+	jwt         auth.JWTInterface
+	userStore   entity.UserStoreInterface
+	emailSender external.EmailSenderInterface
+	cfg         config.ConfigInterface
 }
 
 func NewUserUseCase(
 	loggerObj logger.LoggerInterface,
 	jwtObj auth.JWTInterface,
 	userStore entity.UserStoreInterface,
+	emailSender external.EmailSenderInterface,
+	cfg config.ConfigInterface,
 ) entity.UserUsecaseInterface {
 	return &UserUsecase{
-		logger:    loggerObj,
-		jwt:       jwtObj,
-		userStore: userStore,
+		logger:      loggerObj,
+		jwt:         jwtObj,
+		userStore:   userStore,
+		emailSender: emailSender,
+		cfg:         cfg,
 	}
 }
 
@@ -59,6 +68,18 @@ func (u *UserUsecase) CreateUser(user interface{}) (*entity.UserResponseModel, e
 	return &respUser, nil
 }
 
+func (u *UserUsecase) CreateToken(id string, isBeta, emailVerified bool) (string, error) {
+	token, err := u.jwt.CreateJWTWithClaims(id, map[string]interface{}{
+		"IsBeta":         isBeta,
+		"EmailValidated": emailVerified,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
 func (u *UserUsecase) Login(email, password string) (*entity.UserResponseModel, error) {
 	email = strings.ToLower(email)
 
@@ -71,7 +92,7 @@ func (u *UserUsecase) Login(email, password string) (*entity.UserResponseModel, 
 		return nil, err
 	}
 
-	token, err := u.jwt.CreateJWTWithClaims(dbUser.ID, dbUser.BetaUser)
+	token, err := u.CreateToken(dbUser.ID, dbUser.BetaUser, dbUser.EmailValidated)
 	if err != nil {
 		return nil, err
 	}
@@ -93,4 +114,55 @@ func (u *UserUsecase) GetUserByID(id string) (*entity.UserResponseModel, error) 
 	mapper.MapLoose(dbUser, &respUser)
 
 	return &respUser, nil
+}
+
+func (u *UserUsecase) VerifyEmail(userID, token string) (string, error) {
+	claims, err := u.jwt.ValidateJWT(token, []string{})
+
+	if err != nil {
+		return "", err
+	}
+
+	id := claims["Id"].(string)
+
+	if id != userID {
+		return "", fmt.Errorf("userID mismatch")
+	}
+
+	dbUser, err := u.userStore.GetUserByID(id)
+	if err != nil {
+		return "", err
+	}
+
+	dbUser.EmailValidated = true
+	err = u.userStore.VerifyEmail(id)
+	if err != nil {
+		return "", err
+	}
+
+	authToken, err := u.CreateToken(id, dbUser.BetaUser, dbUser.EmailValidated)
+
+	return authToken, err
+}
+
+func (u *UserUsecase) SendVerificationEmail(id string) error {
+	dbUser, err := u.userStore.GetUserByID(id)
+	if err != nil {
+		return err
+	}
+
+	if dbUser.EmailValidated {
+		return fmt.Errorf("email already verified")
+	}
+
+	token, err := u.jwt.CreateJWTWithClaims(id)
+	if err != nil {
+		return err
+	}
+
+	domain := u.cfg.GetDomain()
+
+	link := fmt.Sprintf("https://%s/verifying?token=%s", domain, token)
+
+	return u.emailSender.SendEmail(dbUser.Email, link)
 }

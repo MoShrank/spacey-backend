@@ -65,6 +65,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 
 	jwt := auth.NewJWT(cfg)
 	authMiddleware := middleware.Auth(jwt, cfg)
+	verifyEmailMiddleware := middleware.NeedsEmailVerified()
 
 	userServiceHostName := cfg.GetUserServiceHostName()
 	configServiceHostName := "config-service"
@@ -89,6 +90,18 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 			proxyWithPath(getUrl(userServiceHostName, "user")),
 		)
 		userGroup.POST(
+			"validate",
+			rateLimiterMiddleware,
+			authMiddleware,
+			proxyWithPath(getUrl(userServiceHostName, "validate")),
+		)
+		userGroup.GET(
+			"validate",
+			rateLimiterMiddleware,
+			authMiddleware,
+			proxyWithPath(getUrl(userServiceHostName, "validate")),
+		)
+		userGroup.POST(
 			"/login",
 			rateLimiterMiddleware,
 			proxyWithPath(getUrl(userServiceHostName, "login")),
@@ -101,7 +114,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	}
 
 	deckServiceHostName := cfg.GetDeckServiceHostName()
-	deckGroup := router.Group("/decks").Use(authMiddleware)
+	deckGroup := router.Group("/decks").Use(authMiddleware, verifyEmailMiddleware)
 	{
 		deckGroup.GET("", proxyWithPath(getUrl(deckServiceHostName, "decks")))
 		deckGroup.POST("", proxyWithPath(getUrl(deckServiceHostName, "decks")))
@@ -117,7 +130,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	}
 
 	learningServiceHostName := cfg.GetLearningServiceHostName()
-	learningGroup := router.Group("/learning").Use(authMiddleware)
+	learningGroup := router.Group("/learning").Use(authMiddleware, verifyEmailMiddleware)
 	{
 		learningGroup.POST("/session", proxyWithPath(getUrl(learningServiceHostName, "session")))
 		learningGroup.PUT("/session", proxyWithPath(getUrl(learningServiceHostName, "session")))
@@ -131,7 +144,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 
 	cardGenerationServiceHostName := cfg.GetCardGenerationServiceHostName()
 	cardGenerationGroup := router.Group("/notes").
-		Use(authMiddleware, middleware.NeedsBeta())
+		Use(authMiddleware, verifyEmailMiddleware, middleware.NeedsBeta())
 	{
 		cardGenerationGroup.POST(
 			"",

@@ -31,6 +31,11 @@ func (m *UserStoreMock) GetUserByID(id string) (*entity.User, error) {
 	return args.Get(0).(*entity.User), args.Error(1)
 }
 
+func (m *UserStoreMock) VerifyEmail(id string) error {
+	args := m.Called(id)
+	return args.Error(0)
+}
+
 func TestCreateUser(t *testing.T) {
 	tests := []struct {
 		TestName  string
@@ -60,7 +65,7 @@ func TestCreateUser(t *testing.T) {
 		storeMock.On("SaveUser", mock.Anything).Return("1", nil)
 
 		cfg, _ := config.NewConfig()
-		usecase := NewUserUseCase(log.New(), auth.NewJWT(cfg), storeMock)
+		usecase := NewUserUseCase(log.New(), auth.NewJWT(cfg), storeMock, nil, nil)
 
 		res, err := usecase.CreateUser(test.inpUser)
 

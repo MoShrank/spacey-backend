@@ -17,8 +17,8 @@ type JWT struct {
 type JWTInterface interface {
 	HashPassword(password string) (string, error)
 	CheckPasswordHash(password, hash string) (bool, error)
-	ValidateJWT(tokenString string) (jwt.MapClaims, error)
-	CreateJWTWithClaims(userID string, isBeta bool) (string, error)
+	ValidateJWT(tokenString string, expClaims []string) (jwt.MapClaims, error)
+	CreateJWTWithClaims(userID string, additionalClaims ...map[string]interface{}) (string, error)
 }
 
 func NewJWT(cfg config.ConfigInterface) JWTInterface {
@@ -40,7 +40,7 @@ func (j *JWT) CheckPasswordHash(password, hash string) (bool, error) {
 	return err == nil, err
 }
 
-func (j *JWT) ValidateJWT(tokenString string) (jwt.MapClaims, error) {
+func (j *JWT) ValidateJWT(tokenString string, expClaims []string) (jwt.MapClaims, error) {
 
 	token, err := jwt.ParseWithClaims(
 		tokenString,
@@ -74,19 +74,31 @@ func (j *JWT) ValidateJWT(tokenString string) (jwt.MapClaims, error) {
 		return nil, fmt.Errorf("invalid token, cannot find user id")
 	}
 
-	if claims["IsBeta"] == nil {
-		return nil, fmt.Errorf("invalid token, cannot find is beta")
+	for _, expClaim := range expClaims {
+		if claims[expClaim] == nil {
+			return nil, fmt.Errorf("invalid token, cannot find %s", expClaim)
+		}
 	}
 
 	return claims, nil
 }
 
-func (j *JWT) CreateJWTWithClaims(userID string, isBeta bool) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"Id":     userID,
-		"exp":    time.Now().Add(j.expireOffset).Unix(),
-		"IsBeta": isBeta,
-	})
+func (j *JWT) CreateJWTWithClaims(
+	userID string,
+	additionalClaims ...map[string]interface{},
+) (string, error) {
+	claims := jwt.MapClaims{
+		"Id":  userID,
+		"exp": time.Now().Add(j.expireOffset).Unix(),
+	}
+
+	for _, claim := range additionalClaims {
+		for key, value := range claim {
+			claims[key] = value
+		}
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	tokenString, err := token.SignedString(j.secretKey)
 	return tokenString, err

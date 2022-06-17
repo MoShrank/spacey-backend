@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/moshrank/spacey-backend/config"
+	"github.com/moshrank/spacey-backend/services/user-service/external"
 	"github.com/moshrank/spacey-backend/services/user-service/handler"
 	"github.com/moshrank/spacey-backend/services/user-service/store"
 	"github.com/moshrank/spacey-backend/services/user-service/usecase"
@@ -48,6 +49,8 @@ func runServer(
 		router.POST("/user", handler.CreateUser)
 		router.POST("/login", handler.Login)
 		router.GET("/logout", handler.Logout)
+		router.GET("/validate", handler.SendValidationEmail)
+		router.POST("/validate", handler.Validate)
 
 		log.Info("Starting server on port: " + cfg.GetPort())
 		router.Run(":" + cfg.GetPort())
@@ -63,6 +66,7 @@ func main() {
 		fx.Provide(db.NewDB),
 		fx.Provide(validator.NewValidator),
 		fx.Provide(auth.NewJWT),
+		fx.Provide(external.NewEmailSender),
 		fx.Provide(store.NewStore),
 		fx.Provide(usecase.NewUserUseCase),
 		fx.Provide(handler.NewHandler),

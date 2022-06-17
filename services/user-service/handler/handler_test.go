@@ -38,6 +38,21 @@ func (u *UserUsecaseMock) GetUserByID(id string) (*entity.UserResponseModel, err
 	return args.Get(0).(*entity.UserResponseModel), args.Error(1)
 }
 
+func (u *UserUsecaseMock) SendVerificationEmail(email string) error {
+	args := u.Called(email)
+	return args.Error(0)
+}
+
+func (u *UserUsecaseMock) VerifyEmail(userID, token string) (string, error) {
+	args := u.Called(userID, token)
+	return args.Get(0).(string), args.Error(1)
+}
+
+func (u *UserUsecaseMock) CreateToken(userID string, isBeta, emailVerified bool) (string, error) {
+	args := u.Called(userID, isBeta, emailVerified)
+	return args.Get(0).(string), args.Error(1)
+}
+
 func getJSONErr(statusCode int) string {
 	return fmt.Sprintf("{\"error\": \"%s\", \"message\": \"\"}", httpconst.ErrorMapping[statusCode])
 }
@@ -154,6 +169,8 @@ func TestCreateUserValidUser(t *testing.T) {
 		BetaUser: false,
 	}, nil)
 
+	usecaseMock.On("SendVerificationEmail", mock.Anything).Return(nil)
+
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request, _ = http.NewRequest("POST", "/user", bytes.NewBuffer([]byte(inpBody)))
@@ -200,6 +217,7 @@ func TestLoginInvalidUser(t *testing.T) {
 		userUsecaseMock,
 		validator.NewValidator(),
 		conf,
+		nil,
 	)
 
 	userUsecaseMock.On("Login", mock.Anything).Return(&entity.User{}, true)
