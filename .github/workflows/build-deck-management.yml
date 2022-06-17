@@ -2,7 +2,7 @@ name: Build and Push Deck Service docker image
 
 on:
   push:
-    branches: [master]
+    branches: [master, staging]
     paths:
       - "services/deck-management-service/**"
   workflow_dispatch:

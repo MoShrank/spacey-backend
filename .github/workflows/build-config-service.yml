@@ -2,7 +2,7 @@ name: Build and Push Config Service docker image
 
 on:
   push:
-    branches: [master]
+    branches: [master, staging]
     paths:
       - "services/config-service/**"
   workflow_dispatch:

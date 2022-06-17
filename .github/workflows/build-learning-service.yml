@@ -2,7 +2,7 @@ name: Build and Push Learning Service docker image
 
 on:
   push:
-    branches: [master]
+    branches: [master, staging]
     paths:
       - "services/learning-service/**"
   workflow_dispatch:
