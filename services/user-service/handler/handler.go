@@ -49,7 +49,7 @@ func (h *Handler) setAuthCookie(c *gin.Context, token string) {
 		token,
 		h.config.GetMaxAgeAuth(),
 		"/",
-		h.config.GetDomain(),
+		"",
 		false,
 		true,
 	)
@@ -58,7 +58,7 @@ func (h *Handler) setAuthCookie(c *gin.Context, token string) {
 		"true",
 		h.config.GetMaxAgeAuth(),
 		"/",
-		h.config.GetDomain(),
+		"",
 		false,
 		false,
 	)
@@ -118,8 +118,8 @@ func (h *Handler) Login(c *gin.Context) {
 }
 
 func (h *Handler) Logout(c *gin.Context) {
-	c.SetCookie("Authorization", "", -1, "/", h.config.GetDomain(), false, true)
-	c.SetCookie("LoggedIn", "false", -1, "/", h.config.GetDomain(), false, false)
+	c.SetCookie("Authorization", "", -1, "/", "", false, true)
+	c.SetCookie("LoggedIn", "false", -1, "/", "", false, false)
 	httpconst.WriteSuccess(c, nil)
 }
 

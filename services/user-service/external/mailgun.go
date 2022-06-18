@@ -41,7 +41,7 @@ func (e *EmailSender) SendEmail(recipient, validationLink string) error {
 		log.Fatal(err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
 	// Send the message with a 10 second timeout
