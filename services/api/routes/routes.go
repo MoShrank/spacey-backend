@@ -60,7 +60,8 @@ func proxy(serviceName string) gin.HandlerFunc {
 func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	router.GET("/ping", handler.Ping)
 
-	router.Use(middleware.CORSMiddleware(cfg.GetDomain()))
+	// TODO should be a cfg value
+	router.Use(middleware.CORSMiddleware("spacey-learn.com"))
 	router.Use(middleware.JSONMiddleware())
 
 	jwt := auth.NewJWT(cfg)

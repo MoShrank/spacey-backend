@@ -31,7 +31,6 @@ type ConfigInterface interface {
 	GetMongoDBConnection() string
 	GetLogLevel() string
 	GetJWTSecret() string
-	GetGrayLogConnection() string
 	GetDBName() string
 	GetUserServiceHostName() string
 	GetDeckServiceHostName() string
@@ -86,7 +85,6 @@ func NewConfig() (ConfigInterface, error) {
 			"mongodb://mongodb:27017/spacey",
 		),
 		LogLevel:                loadEnv("LOG_LEVEL", "info"),
-		GraylogConnection:       loadEnv("GRAYLOG_CONNECTION", "localhost://localhost:12201"),
 		AuthSecretKey:           loadEnv("AUTH_SECRET_KEY", "test_secret_key"),
 		DBName:                  loadEnv("DB_NAME", "spacey"),
 		UserServiceHostName:     loadEnv("USER_SERVICE_HOST_NAME", "user-service"),
@@ -116,10 +114,6 @@ func (c *Config) GetLogLevel() string {
 
 func (c *Config) GetJWTSecret() string {
 	return c.AuthSecretKey
-}
-
-func (c *Config) GetGrayLogConnection() string {
-	return c.GraylogConnection
 }
 
 func (c *Config) GetDBName() string {
