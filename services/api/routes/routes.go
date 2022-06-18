@@ -149,7 +149,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 		Use(authMiddleware, verifyEmailMiddleware, middleware.NeedsBeta())
 	{
 		cardGenerationGroup.GET(
-			"/notes",
+			"",
 			proxy(cardGenerationServiceHostName),
 		)
 		cardGenerationGroup.POST(
