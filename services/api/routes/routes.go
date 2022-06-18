@@ -1,61 +1,14 @@
 package routes
 
 import (
-	"net/http"
-	"net/http/httputil"
-	"net/url"
-
 	"github.com/gin-gonic/gin"
 	"github.com/moshrank/spacey-backend/config"
 	"github.com/moshrank/spacey-backend/pkg/auth"
-	"github.com/moshrank/spacey-backend/pkg/httpconst"
 	"github.com/moshrank/spacey-backend/pkg/middleware"
 	"github.com/moshrank/spacey-backend/services/api/handler"
+	"github.com/moshrank/spacey-backend/services/api/util"
 	limiter "github.com/ulule/limiter/v3"
 )
-
-func getUrl(hostName, path string) string {
-	return "http://" + hostName + "/" + path
-}
-
-func proxyWithPath(targetUrl string) gin.HandlerFunc {
-	remote, err := url.Parse(targetUrl)
-
-	return func(c *gin.Context) {
-
-		if err != nil {
-			httpconst.WriteBadRequest(c, "failed to parse url")
-			return
-		}
-
-		director := func(req *http.Request) {
-			req.URL.Scheme = remote.Scheme
-			req.URL.Host = remote.Host
-			req.Host = remote.Host
-			req.URL.Path = remote.Path
-		}
-
-		proxy := &httputil.ReverseProxy{Director: director}
-		proxy.ServeHTTP(c.Writer, c.Request)
-
-	}
-}
-
-func proxy(serviceName string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-
-		director := func(req *http.Request) {
-			req.URL.Scheme = "http"
-			req.URL.Host = serviceName
-			req.Host = serviceName
-			req.URL.Path = c.Request.URL.Path
-		}
-
-		proxy := &httputil.ReverseProxy{Director: director}
-		proxy.ServeHTTP(c.Writer, c.Request)
-
-	}
-}
 
 func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	router.GET("/ping", handler.Ping)
@@ -70,7 +23,10 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 
 	userServiceHostName := cfg.GetUserServiceHostName()
 	configServiceHostName := "config-service"
-	router.GET("/config/frontend", proxyWithPath(getUrl(configServiceHostName, "config/frontend")))
+	router.GET(
+		"/config/frontend",
+		util.ProxyWithPath(util.GetUrl(configServiceHostName, "config/frontend")),
+	)
 
 	rate, err := limiter.NewRateFromFormatted("10-M")
 	if err != nil {
@@ -83,63 +39,75 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 		router.GET(
 			"/user",
 			authMiddleware,
-			proxyWithPath(getUrl(userServiceHostName, "user")),
+			util.ProxyWithPath(util.GetUrl(userServiceHostName, "user")),
 		)
 		userGroup.POST(
 			"",
 			rateLimiterMiddleware,
-			proxyWithPath(getUrl(userServiceHostName, "user")),
+			util.ProxyWithPath(util.GetUrl(userServiceHostName, "user")),
 		)
 		userGroup.POST(
 			"validate",
 			rateLimiterMiddleware,
 			authMiddleware,
-			proxyWithPath(getUrl(userServiceHostName, "validate")),
+			util.ProxyWithPath(util.GetUrl(userServiceHostName, "validate")),
 		)
 		userGroup.GET(
 			"validate",
 			rateLimiterMiddleware,
 			authMiddleware,
-			proxyWithPath(getUrl(userServiceHostName, "validate")),
+			util.ProxyWithPath(util.GetUrl(userServiceHostName, "validate")),
 		)
 		userGroup.POST(
 			"/login",
 			rateLimiterMiddleware,
-			proxyWithPath(getUrl(userServiceHostName, "login")),
+			util.ProxyWithPath(util.GetUrl(userServiceHostName, "login")),
 		)
 		userGroup.GET(
 			"/logout",
 			authMiddleware,
-			proxyWithPath(getUrl(userServiceHostName, "logout")),
+			util.ProxyWithPath(util.GetUrl(userServiceHostName, "logout")),
 		)
 	}
 
 	deckServiceHostName := cfg.GetDeckServiceHostName()
 	deckGroup := router.Group("/decks").Use(authMiddleware, verifyEmailMiddleware)
 	{
-		deckGroup.GET("", proxyWithPath(getUrl(deckServiceHostName, "decks")))
-		deckGroup.POST("", proxyWithPath(getUrl(deckServiceHostName, "decks")))
-		deckGroup.PUT("/:deckID", proxy(deckServiceHostName))
-		deckGroup.DELETE("/:deckID", proxy(deckServiceHostName))
+		deckGroup.GET("", util.ProxyWithPath(util.GetUrl(deckServiceHostName, "decks")))
+		deckGroup.POST("", util.ProxyWithPath(util.GetUrl(deckServiceHostName, "decks")))
+		deckGroup.PUT("/:deckID", util.Proxy(deckServiceHostName))
+		deckGroup.DELETE("/:deckID", util.Proxy(deckServiceHostName))
 
-		deckGroup.POST("/:deckID/card", proxy(deckServiceHostName))
-		deckGroup.POST("/:deckID/cards", proxy(deckServiceHostName))
-		deckGroup.PUT("/:deckID/cards/:id", proxy(deckServiceHostName))
-		deckGroup.DELETE("/:deckID/cards/:id", proxy(deckServiceHostName))
+		deckGroup.POST("/:deckID/card", util.Proxy(deckServiceHostName))
+		deckGroup.POST("/:deckID/cards", util.Proxy(deckServiceHostName))
+		deckGroup.PUT("/:deckID/cards/:id", util.Proxy(deckServiceHostName))
+		deckGroup.DELETE("/:deckID/cards/:id", util.Proxy(deckServiceHostName))
 
-		deckGroup.GET("/public", proxyWithPath(getUrl(deckServiceHostName, "/public")))
+		deckGroup.GET("/public", util.ProxyWithPath(util.GetUrl(deckServiceHostName, "/public")))
 	}
 
 	learningServiceHostName := cfg.GetLearningServiceHostName()
 	learningGroup := router.Group("/learning").Use(authMiddleware, verifyEmailMiddleware)
 	{
-		learningGroup.POST("/session", proxyWithPath(getUrl(learningServiceHostName, "session")))
-		learningGroup.PUT("/session", proxyWithPath(getUrl(learningServiceHostName, "session")))
-		learningGroup.POST("/event", proxyWithPath(getUrl(learningServiceHostName, "event")))
-		learningGroup.GET("/events", proxyWithPath(getUrl(learningServiceHostName, "events")))
+		learningGroup.POST(
+			"/session",
+			util.ProxyWithPath(util.GetUrl(learningServiceHostName, "session")),
+		)
+		learningGroup.PUT(
+			"/session",
+			util.ProxyWithPath(util.GetUrl(learningServiceHostName, "session")),
+		)
+		learningGroup.POST(
+			"/event",
+			util.ProxyWithPath(util.GetUrl(learningServiceHostName, "event")),
+		)
+		learningGroup.GET(
+			"/events",
+			util.ProxyWithPath(util.GetUrl(learningServiceHostName, "events")),
+		)
 		learningGroup.POST(
 			"/probabilities",
-			proxyWithPath(getUrl(learningServiceHostName, "probabilities")),
+			util.ProxyWithPath(util.GetUrl(learningServiceHostName, "probabilities")),
 		)
 	}
 
@@ -150,19 +118,19 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	{
 		cardGenerationGroup.GET(
 			"",
-			proxy(cardGenerationServiceHostName),
+			util.Proxy(cardGenerationServiceHostName),
 		)
 		cardGenerationGroup.POST(
 			"",
-			proxy(cardGenerationServiceHostName),
+			util.Proxy(cardGenerationServiceHostName),
 		)
 		cardGenerationGroup.PUT(
 			"/:noteID",
-			proxy(cardGenerationServiceHostName),
+			util.Proxy(cardGenerationServiceHostName),
 		)
 		cardGenerationGroup.POST(
 			"/:noteID/cards",
-			proxy(cardGenerationServiceHostName),
+			util.Proxy(cardGenerationServiceHostName),
 		)
 	}
 }
