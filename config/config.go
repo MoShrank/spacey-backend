@@ -25,6 +25,7 @@ type Config struct {
 	MigrationFilePath             string
 	MailGunAPIKey                 string
 	Environment                   string
+	ConfigServiceHostName         string
 }
 
 type ConfigInterface interface {
@@ -39,6 +40,7 @@ type ConfigInterface interface {
 	GetDomain() string
 	GetMaxAgeAuth() int
 	GetCardGenerationServiceHostName() string
+	GetConfigServiceHostName() string
 	GetMailGunAPIKey() string
 	GetEnv() string
 }
@@ -91,6 +93,7 @@ func NewConfig() (ConfigInterface, error) {
 		DBName:                  loadEnv("DB_NAME", "spacey"),
 		UserServiceHostName:     loadEnv("USER_SERVICE_HOST_NAME", "user-service"),
 		DeckServiceHostName:     loadEnv("DECK_SERVICE_HOST_NAME", "deck-management-service"),
+		ConfigServiceHostName:   loadEnv("CONFIG_SERVICE_HOST_NAME", "config-service"),
 		Domain:                  loadEnv("DOMAIN", "localhost"),
 		MaxAgeAuth:              maxAgeAuth,
 		LearningServiceHostName: loadEnv("LEARNING_SERVICE_HOST_NAME", "learning-service"),
@@ -153,4 +156,8 @@ func (c *Config) GetMailGunAPIKey() string {
 
 func (c *Config) GetEnv() string {
 	return c.Environment
+}
+
+func (c *Config) GetConfigServiceHostName() string {
+	return c.ConfigServiceHostName
 }
