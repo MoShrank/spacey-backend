@@ -55,9 +55,19 @@ func (u *UserUsecase) CreateUser(user interface{}) (*entity.UserResponseModel, e
 	dbUser.DeletedAtTs = nil
 	dbUser.BetaUser = false
 
+	if u.cfg.GetEnv() == "production" {
+		dbUser.EmailValidated = false
+	} else {
+		dbUser.EmailValidated = true
+	}
+
 	id, err := u.userStore.SaveUser(&dbUser)
 	if err != nil {
 		return nil, entity.ErrEmailAlreadyExists
+	}
+
+	if u.cfg.GetEnv() == "production" {
+		u.SendVerificationEmail(id)
 	}
 
 	dbUser.ID = id

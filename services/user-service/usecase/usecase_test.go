@@ -51,10 +51,11 @@ func TestCreateUser(t *testing.T) {
 				Password: "test_password",
 			},
 			&entity.UserResponseModel{
-				ID:       "1",
-				Name:     "moritz",
-				Email:    "moritz.e50@gmail.com",
-				BetaUser: false,
+				ID:             "1",
+				Name:           "moritz",
+				Email:          "moritz.e50@gmail.com",
+				BetaUser:       false,
+				EmailValidated: true,
 			},
 			nil,
 		},
@@ -65,7 +66,7 @@ func TestCreateUser(t *testing.T) {
 		storeMock.On("SaveUser", mock.Anything).Return("1", nil)
 
 		cfg, _ := config.NewConfig()
-		usecase := NewUserUseCase(log.New(), auth.NewJWT(cfg), storeMock, nil, nil)
+		usecase := NewUserUseCase(log.New(), auth.NewJWT(cfg), storeMock, nil, cfg)
 
 		res, err := usecase.CreateUser(test.inpUser)
 
