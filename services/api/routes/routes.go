@@ -22,7 +22,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	verifyEmailMiddleware := middleware.NeedsEmailVerified()
 
 	userServiceHostName := cfg.GetUserServiceHostName()
-	configServiceHostName := "config-service"
+	configServiceHostName := cfg.GetConfigServiceHostName()
 	router.GET(
 		"/config/frontend",
 		util.ProxyWithPath(util.GetUrl(configServiceHostName, "config/frontend")),
