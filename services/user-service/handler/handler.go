@@ -78,20 +78,16 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	}
 
 	_, err := h.userUsecase.CreateUser(&user)
-
 	if err != nil {
 		httpconst.WriteBadRequest(c, err.Error())
 		return
 	}
 
 	userRes, err := h.userUsecase.Login(user.Email, user.Password)
-
 	if err != nil {
 		httpconst.WriteBadRequest(c, err.Error())
 		return
 	}
-
-	h.userUsecase.SendVerificationEmail(userRes.ID)
 
 	h.setAuthCookie(c, userRes.Token)
 
