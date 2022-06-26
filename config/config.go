@@ -26,6 +26,7 @@ type Config struct {
 	MailGunAPIKey                 string
 	Environment                   string
 	ConfigServiceHostName         string
+	UserRateLimit                 int
 }
 
 type ConfigInterface interface {
@@ -43,6 +44,7 @@ type ConfigInterface interface {
 	GetConfigServiceHostName() string
 	GetMailGunAPIKey() string
 	GetEnv() string
+	GetUserRateLimit() int
 }
 
 func loadEnvWithoutDefault(key string) string {
@@ -77,7 +79,11 @@ func NewConfig() (ConfigInterface, error) {
 	}
 
 	maxAgeAuth, err := strconv.Atoi(loadEnv("MAX_AGE_AUTH", "604800"))
+	if err != nil {
+		panic(err)
+	}
 
+	userRateLimit, err := strconv.Atoi(loadEnv("USER_RATE_LIMIT", "10"))
 	if err != nil {
 		panic(err)
 	}
@@ -103,6 +109,7 @@ func NewConfig() (ConfigInterface, error) {
 		),
 		MailGunAPIKey: loadEnv("MAIL_GUN_API_KEY", ""),
 		Environment:   loadEnv("ENVIRONMENT", "dev"),
+		UserRateLimit: userRateLimit,
 	}, nil
 }
 
@@ -160,4 +167,8 @@ func (c *Config) GetEnv() string {
 
 func (c *Config) GetConfigServiceHostName() string {
 	return c.ConfigServiceHostName
+}
+
+func (c *Config) GetUserRateLimit() int {
+	return c.UserRateLimit
 }
