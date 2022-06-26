@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/moshrank/spacey-backend/config"
 	"github.com/moshrank/spacey-backend/pkg/auth"
@@ -28,7 +30,8 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 		util.ProxyWithPath(util.GetUrl(configServiceHostName, "config/frontend")),
 	)
 
-	rate, err := limiter.NewRateFromFormatted("10-M")
+	userRateLimit := cfg.GetUserRateLimit()
+	rate, err := limiter.NewRateFromFormatted(fmt.Sprintf("%d-M", userRateLimit))
 	if err != nil {
 		panic(err)
 	}
