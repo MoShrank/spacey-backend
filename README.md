@@ -20,10 +20,11 @@ The learning service is responsible for handling all tasks related to learning a
 Each review of a card is stored as an event which therefore allows to track progress of a user over time.
 
 ### card-generation-service
-The card generation service is not contained in this repository since it is written in python. It can be found [here](https://github.com/MoShrank/card-generation-service).
+The card generation service is contaiend in a different repository which can be found here [here](https://github.com/MoShrank/card-generation-service).
 
 
 ## Architecture
+The picture below shows what a simple user flow looks like and does not contain things such as our logging or monitoring infrastructure.
 ![user-flow](./.github/images/user-flow.png)
 
 ## Files and Folders
@@ -46,15 +47,16 @@ init script for database setup to insert test user into db
 - GO 1.17 needed
 - docker and make needed
 
-If make is not installed, the commands can also be executed manually and found inside the [Makefile](./Makefile).
+If make is not installed, the commands found insde the [Makefile](./Makefile) can also be executed manually .
 
 ### Environment Variables
-The following environment variables should be declared to run the backend locally. There are a few additional config values that can be set via environment variables, which can also be found in the config package. Those are not important for running the backend locally.
+The following environment variables should be declared to run the backend locally. There are a few additional config values that can be set via environment variables, which can also be found in the config package. Those are not important for running it locally.
 
 ```
 MONGO_DB_CONNECTION=<mongo_db_uri>
 DB_NAME=<name_of_database>
 PORT=<port_for_server>
+ENVIRONMENT=dev
 ```
 
 ### Serving the backend
@@ -71,6 +73,7 @@ PORT=<port_for_server>
 Formatting is provided by gopls which can be installed via the official go VSCode plugin. In addition to that, [golines](https://github.com/segmentio/golines) should be used to keep a maximum line length of 100 characters.
 
 ## API Routes
+The API documentation is written and published in postman and can be found [here](https://documenter.getpostman.com/view/18939600/UyrEhv7s)
 
 ## Database
 MongoDB was chosen because of its maturity, scallability and flexibility to use. Although it is currently deployed on a single VPS instance together with all services, which makes it difficult to scale and less resistant to failures, it can theoretically be deployed on a managed AWS instance and therefore be scaled up using either shards or replicas.
@@ -86,3 +89,4 @@ A full list of security measures that we use can be found [here](./docs/Security
 ## Deployment
 The backend is deployed on a virtual private server uisng a [docker compose file](https://github.com/MoShrank/spacey-docker-services). A github workflow is used to run tests, build and push the docker image to a AWS docker registry on each push/merge to master. The VPS runs [watchtower](https://github.com/containrrr/watchtower) which continuously polls the latest docker image and updates it if a newer version is available.
 ![CI/CD Pipeline](./.github/images/pipeline.png)
+In addition to our production environment, there is also the option to push changes to staging which can be spinned up on demand to test certain features.
