@@ -42,6 +42,14 @@ services:
     networks:
       - spacey-services
 
+  reminder-service:
+    build: ./services/reminder-service
+    container_name: reminder-service
+    env_file:
+      - .env
+    networks:
+      - spacey-services
+
   mongodb:
     image: mongo:5.0.5
     container_name: mongodb
