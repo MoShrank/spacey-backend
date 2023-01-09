@@ -15,19 +15,22 @@ type EmailSenderInterface interface {
 }
 
 type EmailSender struct {
-	mg mailgun.Mailgun
+	mg  mailgun.Mailgun
+	cfg config.ConfigInterface
 }
 
 func NewEmailSender(cfg config.ConfigInterface) EmailSenderInterface {
-	mg := mailgun.NewMailgun("spacey-learn.com", cfg.GetMailGunAPIKey())
+	domain := cfg.GetDomain()
+	mg := mailgun.NewMailgun(domain, cfg.GetMailGunAPIKey())
 	mg.SetAPIBase(mailgun.APIBaseEU)
 
-	return &EmailSender{mg: mg}
+	return &EmailSender{mg: mg, cfg: cfg}
 }
 
 func (e *EmailSender) SendEmail(recipient, validationLink string) error {
 
-	sender := "noreply@spacey-learn.com"
+	domain := e.cfg.GetDomain()
+	sender := fmt.Sprintf("noreply@<%s>", domain)
 	subject := "Welcome to Spacey! Please Validate your email."
 	body := ""
 

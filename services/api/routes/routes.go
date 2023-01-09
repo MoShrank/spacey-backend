@@ -15,8 +15,8 @@ import (
 func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 	router.GET("/ping", handler.Ping)
 
-	// TODO should be a cfg value
-	router.Use(middleware.CORSMiddleware("spacey-learn.com"))
+	domain := cfg.GetDomain()
+	router.Use(middleware.CORSMiddleware(domain))
 	router.Use(middleware.JSONMiddleware())
 
 	jwt := auth.NewJWT(cfg)
