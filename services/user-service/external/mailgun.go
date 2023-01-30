@@ -20,7 +20,7 @@ type EmailSender struct {
 }
 
 func NewEmailSender(cfg config.ConfigInterface) EmailSenderInterface {
-	domain := cfg.GetDomain()
+	domain := cfg.GetMailDomain()
 	mg := mailgun.NewMailgun(domain, cfg.GetMailGunAPIKey())
 	mg.SetAPIBase(mailgun.APIBaseEU)
 
@@ -29,7 +29,7 @@ func NewEmailSender(cfg config.ConfigInterface) EmailSenderInterface {
 
 func (e *EmailSender) SendEmail(recipient, validationLink string) error {
 
-	domain := e.cfg.GetDomain()
+	domain := e.cfg.GetMailDomain()
 	sender := fmt.Sprintf("noreply@<%s>", domain)
 	subject := "Welcome to Spacey! Please Validate your email."
 	body := ""

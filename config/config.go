@@ -21,6 +21,7 @@ type Config struct {
 	LearningServiceHostName       string
 	CardGenerationServiceHostName string
 	Domain                        string
+	MailDomain                    string
 	MaxAgeAuth                    int
 	MigrationFilePath             string
 	MailGunAPIKey                 string
@@ -39,6 +40,7 @@ type ConfigInterface interface {
 	GetDeckServiceHostName() string
 	GetLearningServiceHostName() string
 	GetDomain() string
+	GetMailDomain() string
 	GetMaxAgeAuth() int
 	GetCardGenerationServiceHostName() string
 	GetConfigServiceHostName() string
@@ -101,6 +103,7 @@ func NewConfig() (ConfigInterface, error) {
 		DeckServiceHostName:     loadEnv("DECK_SERVICE_HOST_NAME", "deck-management-service"),
 		ConfigServiceHostName:   loadEnv("CONFIG_SERVICE_HOST_NAME", "config-service"),
 		Domain:                  loadEnv("DOMAIN", "localhost"),
+		MailDomain:              loadEnv("MAIL_DOMAIN", "localhost"),
 		MaxAgeAuth:              maxAgeAuth,
 		LearningServiceHostName: loadEnv("LEARNING_SERVICE_HOST_NAME", "learning-service"),
 		CardGenerationServiceHostName: loadEnv(
@@ -171,4 +174,8 @@ func (c *Config) GetConfigServiceHostName() string {
 
 func (c *Config) GetUserRateLimit() int {
 	return c.UserRateLimit
+}
+
+func (c *Config) GetMailDomain() string {
+	return c.MailDomain
 }
