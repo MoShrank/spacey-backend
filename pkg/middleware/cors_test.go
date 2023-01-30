@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCORSValidHost(t *testing.T) {
+func TestCORS(t *testing.T) {
 	tests := []struct {
 		testName       string
 		host           string
@@ -43,13 +43,6 @@ func TestCORSValidHost(t *testing.T) {
 			"POST",
 			401,
 			"",
-		},
-		{
-			"Valid Host",
-			"https://www.spacey-learn.com",
-			"POST",
-			200,
-			"https://www.spacey-learn.com",
 		},
 		{
 			"Valid Host",

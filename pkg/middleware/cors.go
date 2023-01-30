@@ -19,19 +19,13 @@ func CORSMiddleware(rootDomain string) gin.HandlerFunc {
 		originHost := originParsed.Host
 		originHostSplit := strings.Split(originHost, ":")
 		originHostCleaned := originHostSplit[0]
-		subDomainSplit := strings.Split(originHostCleaned, ".")
-		originHostRoot := subDomainSplit[0]
-
-		if len(subDomainSplit) > 1 {
-			originHostRoot = subDomainSplit[len(subDomainSplit)-2] + "." + subDomainSplit[len(subDomainSplit)-1]
-		}
 
 		if origin == "" {
 			c.Next()
 			return
 		}
 
-		if originHostRoot == rootDomain {
+		if originHostCleaned == rootDomain {
 			validHost = true
 		} else if originHostCleaned == "localhost" {
 			validHost = true
