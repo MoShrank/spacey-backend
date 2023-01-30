@@ -30,7 +30,8 @@ func NewEmailSender(cfg config.ConfigInterface) EmailSenderInterface {
 func (e *EmailSender) SendEmail(recipient, validationLink string) error {
 
 	domain := e.cfg.GetMailDomain()
-	sender := fmt.Sprintf("noreply@<%s>", domain)
+
+	sender := fmt.Sprintf("Spacey <noreply@%s>", domain)
 	subject := "Welcome to Spacey! Please Validate your email."
 	body := ""
 
