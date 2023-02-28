@@ -66,11 +66,6 @@ func (h *DeckHandler) GetDeck(c *gin.Context) {
 	}
 
 	deckID := c.Param("deckID")
-	if deckID == "" {
-		httpconst.WriteBadRequest(c, "Deck ID is required")
-		return
-	}
-
 	deck, err := h.deckUseCase.GetDeck(userID, deckID)
 	if err != nil {
 		httpconst.WriteDatabaseError(c)
@@ -134,11 +129,6 @@ func (h *DeckHandler) DeleteDeck(c *gin.Context) {
 	}
 
 	deckID := c.Param("deckID")
-	if deckID == "" {
-		httpconst.WriteBadRequest(c, "Deck ID is required")
-		return
-	}
-
 	if err := h.deckUseCase.DeleteDeck(userID, deckID); err != nil {
 		httpconst.WriteDatabaseError(c)
 		return

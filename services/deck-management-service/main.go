@@ -5,6 +5,7 @@ import (
 
 	"github.com/moshrank/spacey-backend/config"
 	"github.com/moshrank/spacey-backend/pkg/db"
+	heha "github.com/moshrank/spacey-backend/pkg/handler"
 	"github.com/moshrank/spacey-backend/pkg/logger"
 	"github.com/moshrank/spacey-backend/pkg/middleware"
 	"github.com/moshrank/spacey-backend/pkg/validator"
@@ -24,15 +25,13 @@ func runServer(
 	log logger.LoggerInterface,
 ) {
 	lifecycle.Append(fx.Hook{OnStart: func(context.Context) error {
+		port := cfg.GetPort()
+
 		router := gin.New()
 		router.Use(middleware.Logger(log))
 		router.Use(middleware.Recovery())
 
-		router.GET("ping", func(c *gin.Context) {
-			c.JSON(200, gin.H{
-				"message": "pong",
-			})
-		})
+		router.GET("ping", heha.Ping)
 
 		router.GET("decks", deckHandler.GetDecks)
 		router.GET("decks/:deckID", deckHandler.GetDeck)
@@ -45,8 +44,8 @@ func runServer(
 		router.PUT("decks/:deckID/cards/:id", cardHandler.UpdateCard)
 		router.DELETE("decks/:deckID/cards/:id", cardHandler.DeleteCard)
 
-		log.Info("Starting server on port: " + cfg.GetPort())
-		router.Run(":" + cfg.GetPort())
+		log.Info("Starting server on port: " + port)
+		router.Run(":" + port)
 		return nil
 	}})
 }
