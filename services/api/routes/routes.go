@@ -135,13 +135,19 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
 			"/:noteID/cards",
 			util.Proxy(cardGenerationServiceHostName),
 		)
-		cardGenerationGroup.GET(
-			"web-content/post",
+	}
+
+	webContentGroup := router.Group("/web-content").
+		Use(authMiddleware, verifyEmailMiddleware)
+	{
+		webContentGroup.GET(
+			"/post",
 			util.ProxyWithPath(util.GetUrl(cardGenerationServiceHostName, "web-content/post")),
 		)
-		cardGenerationGroup.POST(
-			"web-content/post",
+		webContentGroup.POST(
+			"/post",
 			util.ProxyWithPath(util.GetUrl(cardGenerationServiceHostName, "web-content/post")),
 		)
 	}
+
 }

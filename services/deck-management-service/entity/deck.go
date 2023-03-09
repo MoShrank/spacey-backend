@@ -21,11 +21,12 @@ type DeckReq struct {
 }
 
 type DeckRes struct {
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Color       string    `json:"color"`
-	Cards       []CardRes `json:"cards"`
+	ID          string     `json:"id"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	Color       string     `json:"color"`
+	Cards       []CardRes  `json:"cards"`
+	CreatedAt   *time.Time `json:"created_at"`
 }
 
 type DeckUseCaseInterface interface {
