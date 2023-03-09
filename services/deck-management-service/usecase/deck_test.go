@@ -59,6 +59,8 @@ func TestCreateDeck(t *testing.T) {
 
 	deck, err := deckUseCase.CreateDeck("1", &inpDeck)
 
+	deck.CreatedAt = nil
+
 	assert.Nil(t, err)
 	assert.Equal(t, &expDeck, deck)
 }
