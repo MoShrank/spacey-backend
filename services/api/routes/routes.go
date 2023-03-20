@@ -6,22 +6,25 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/moshrank/spacey-backend/config"
 	"github.com/moshrank/spacey-backend/pkg/auth"
+	"github.com/moshrank/spacey-backend/pkg/db"
 	"github.com/moshrank/spacey-backend/pkg/middleware"
 	"github.com/moshrank/spacey-backend/services/api/handler"
+	"github.com/moshrank/spacey-backend/services/api/store"
 	"github.com/moshrank/spacey-backend/services/api/util"
 	limiter "github.com/ulule/limiter/v3"
 )
 
-func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface) {
+func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface, db db.DatabaseInterface) {
 	router.GET("/ping", handler.Ping)
 
 	domain := cfg.GetDomain()
 	router.Use(middleware.CORSMiddleware(domain))
 	router.Use(middleware.JSONMiddleware())
 
+	userStore := store.NewStore(db)
 	jwt := auth.NewJWT(cfg)
 	authMiddleware := middleware.Auth(jwt, cfg)
-	verifyEmailMiddleware := middleware.NeedsEmailVerified()
+	verifyEmailMiddleware := middleware.NeedsEmailVerified(userStore, jwt, cfg)
 
 	userServiceHostName := cfg.GetUserServiceHostName()
 	configServiceHostName := cfg.GetConfigServiceHostName()
