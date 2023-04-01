@@ -1,0 +1,18 @@
+[
+    {
+        "updateMany": "user",
+        "filter": {},
+        "updates": [
+            {
+                "q": {},
+                "u": {
+                    "$unset": {
+                        "cards.$[].cards.$[].source_start_index": 0,
+                        "cards.$[].cards.$[].source_end_index": 0
+                    }
+                },
+                "multi": true
+            }
+        ]
+    }
+]

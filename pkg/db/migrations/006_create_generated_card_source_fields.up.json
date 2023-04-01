@@ -1,0 +1,17 @@
+[
+    {
+        "update": "note",
+        "updates": [
+            {
+                "q": {},
+                "u": {
+                    "$set": {
+                        "cards.$[].cards.$[].source_start_index": 0,
+                        "cards.$[].cards.$[].source_end_index": 0
+                    }
+                },
+                "multi": true
+            }
+        ]
+    }
+]
