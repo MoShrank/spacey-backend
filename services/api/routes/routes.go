@@ -140,16 +140,20 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface, db db.Database
 		)
 	}
 
-	webContentGroup := router.Group("/web-content").
+	webContentGroup := router.Group("/post").
 		Use(authMiddleware, verifyEmailMiddleware)
 	{
 		webContentGroup.GET(
-			"/post",
-			util.ProxyWithPath(util.GetUrl(cardGenerationServiceHostName, "web-content/post")),
+			"",
+			util.Proxy(cardGenerationServiceHostName),
 		)
 		webContentGroup.POST(
-			"/post",
-			util.ProxyWithPath(util.GetUrl(cardGenerationServiceHostName, "web-content/post")),
+			"",
+			util.Proxy(cardGenerationServiceHostName),
+		)
+		webContentGroup.DELETE(
+			"/:id",
+			util.Proxy(cardGenerationServiceHostName),
 		)
 	}
 

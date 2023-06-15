@@ -16,12 +16,12 @@ type LoggerInterface interface {
 }
 
 var logLevelMapping = map[string]log.Level{
-	"debug": log.DebugLevel,
-	"info":  log.InfoLevel,
-	"warn":  log.WarnLevel,
-	"error": log.ErrorLevel,
-	"fatal": log.FatalLevel,
-	"panic": log.PanicLevel,
+	"DEBUG": log.DebugLevel,
+	"INFO":  log.InfoLevel,
+	"WARN":  log.WarnLevel,
+	"ERROR": log.ErrorLevel,
+	"FATAL": log.FatalLevel,
+	"PANIC": log.PanicLevel,
 }
 
 func NewLogger(
