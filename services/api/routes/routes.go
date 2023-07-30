@@ -155,6 +155,10 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface, db db.Database
 			"/:id",
 			util.Proxy(cardGenerationServiceHostName),
 		)
+		webContentGroup.GET(
+			"/:id/answer",
+			util.Proxy(cardGenerationServiceHostName),
+		)
 	}
 
 }
