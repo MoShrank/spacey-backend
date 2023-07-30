@@ -53,10 +53,14 @@ If make is not installed, the commands found insde the [Makefile](./Makefile) ca
 The following environment variables should be declared to run the backend locally. There are a few additional config values that can be set via environment variables, which can also be found in the config package. Those are not important for running it locally.
 
 ```
-MONGO_DB_CONNECTION=<mongo_db_uri>
-DB_NAME=<name_of_database>
-PORT=<port_for_server>
-ENVIRONMENT=dev
+AUTH_SECRET_KEY = <auth-secret-key>
+MONGO_DB_CONNECTION=<mongo-db-uri>
+DB_NAME=<name-of-database>
+PORT=<port-for-api>
+IGNORE_CORS = true
+MAIL_GUN_API_KEY = "mail-gun-api-key"
+ENVIRONMENT="dev"
+MAIL_DOMAIN="mail.spacey.moritz.dev"
 ```
 
 ### Serving the backend
