@@ -160,7 +160,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface, db db.Database
 			util.Proxy(cardGenerationServiceHostName),
 		)
 		webContentGroup.GET(
-			"search",
+			"/search",
 			util.Proxy(cardGenerationServiceHostName),
 		)
 	}
