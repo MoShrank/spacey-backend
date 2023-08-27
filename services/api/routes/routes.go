@@ -138,6 +138,10 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface, db db.Database
 			"/:noteID/cards",
 			util.Proxy(cardGenerationServiceHostName),
 		)
+		cardGenerationGroup.POST(
+			"/:noteID/card",
+			util.Proxy(cardGenerationServiceHostName),
+		)
 	}
 
 	webContentGroup := router.Group("/post").
