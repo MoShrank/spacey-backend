@@ -17,67 +17,77 @@ import (
 func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface, db db.DatabaseInterface) {
 	router.GET("/ping", handler.Ping)
 
+	/*
+		Middleware Setup
+	*/
 	domain := cfg.GetDomain()
-	router.Use(middleware.CORSMiddleware(domain))
-	router.Use(middleware.JSONMiddleware())
+	cors := middleware.CORSMiddleware(domain)
+	json := middleware.JSONMiddleware()
+
+	router.Use(cors)
+
+	jwt := auth.NewJWT(cfg)
+	auth := middleware.Auth(jwt, cfg)
 
 	userStore := store.NewStore(db)
-	jwt := auth.NewJWT(cfg)
-	authMiddleware := middleware.Auth(jwt, cfg)
-	verifyEmailMiddleware := middleware.NeedsEmailVerified(userStore, jwt, cfg)
-
-	userServiceHostName := cfg.GetUserServiceHostName()
-	configServiceHostName := cfg.GetConfigServiceHostName()
-	router.GET(
-		"/config/frontend",
-		util.ProxyWithPath(util.GetUrl(configServiceHostName, "config/frontend")),
-	)
+	emailVerified := middleware.NeedsEmailVerified(userStore, jwt, cfg)
 
 	userRateLimit := cfg.GetUserRateLimit()
 	rate, err := limiter.NewRateFromFormatted(fmt.Sprintf("%d-M", userRateLimit))
 	if err != nil {
 		panic(err)
 	}
-	rateLimiterMiddleware := middleware.RateLimiter(rate)
+	rateLimit := middleware.RateLimiter(rate)
+	/* ----- */
 
-	userGroup := router.Group("/user")
+	jsonEndpoints := router.Group("/")
+	jsonEndpoints.Use(json)
+
+	configServiceHostName := cfg.GetConfigServiceHostName()
+	jsonEndpoints.GET(
+		"/config/frontend",
+		util.ProxyWithPath(util.GetUrl(configServiceHostName, "config/frontend")),
+	)
+
+	userServiceHostName := cfg.GetUserServiceHostName()
+	userGroup := jsonEndpoints.Group("/user")
 	{
 		router.GET(
 			"/user",
-			authMiddleware,
+			auth,
 			util.ProxyWithPath(util.GetUrl(userServiceHostName, "user")),
 		)
 		userGroup.POST(
 			"",
-			rateLimiterMiddleware,
+			rateLimit,
 			util.ProxyWithPath(util.GetUrl(userServiceHostName, "user")),
 		)
 		userGroup.POST(
 			"validate",
-			rateLimiterMiddleware,
-			authMiddleware,
+			rateLimit,
+			auth,
 			util.ProxyWithPath(util.GetUrl(userServiceHostName, "validate")),
 		)
 		userGroup.GET(
 			"validate",
-			rateLimiterMiddleware,
-			authMiddleware,
+			rateLimit,
+			auth,
 			util.ProxyWithPath(util.GetUrl(userServiceHostName, "validate")),
 		)
 		userGroup.POST(
 			"/login",
-			rateLimiterMiddleware,
+			rateLimit,
 			util.ProxyWithPath(util.GetUrl(userServiceHostName, "login")),
 		)
 		userGroup.GET(
 			"/logout",
-			authMiddleware,
+			auth,
 			util.ProxyWithPath(util.GetUrl(userServiceHostName, "logout")),
 		)
 	}
 
 	deckServiceHostName := cfg.GetDeckServiceHostName()
-	deckGroup := router.Group("/decks").Use(authMiddleware, verifyEmailMiddleware)
+	deckGroup := jsonEndpoints.Group("/decks").Use(auth, emailVerified)
 	{
 		deckGroup.GET("", util.ProxyWithPath(util.GetUrl(deckServiceHostName, "decks")))
 		deckGroup.POST("", util.ProxyWithPath(util.GetUrl(deckServiceHostName, "decks")))
@@ -93,7 +103,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface, db db.Database
 	}
 
 	learningServiceHostName := cfg.GetLearningServiceHostName()
-	learningGroup := router.Group("/learning").Use(authMiddleware, verifyEmailMiddleware)
+	learningGroup := jsonEndpoints.Group("/learning").Use(auth, emailVerified)
 	{
 		learningGroup.POST(
 			"/session",
@@ -118,9 +128,8 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface, db db.Database
 	}
 
 	cardGenerationServiceHostName := cfg.GetCardGenerationServiceHostName()
-
-	cardGenerationGroup := router.Group("/notes").
-		Use(authMiddleware, verifyEmailMiddleware, middleware.NeedsBeta())
+	cardGenerationGroup := jsonEndpoints.Group("/notes").
+		Use(auth, emailVerified, middleware.NeedsBeta())
 	{
 		cardGenerationGroup.GET(
 			"",
@@ -144,8 +153,8 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface, db db.Database
 		)
 	}
 
-	webContentGroup := router.Group("/post").
-		Use(authMiddleware, verifyEmailMiddleware)
+	webContentGroup := jsonEndpoints.Group("/post").
+		Use(auth, emailVerified)
 	{
 		webContentGroup.GET(
 			"",
@@ -165,6 +174,24 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface, db db.Database
 		)
 		webContentGroup.GET(
 			"/search",
+			util.Proxy(cardGenerationServiceHostName),
+		)
+	}
+
+	pdfGroup := jsonEndpoints.Group("/pdf").
+		Use(auth, emailVerified)
+	{
+		pdfGroup.GET(
+			"/:id",
+			util.Proxy(cardGenerationServiceHostName),
+		)
+
+	}
+
+	fileUploadGroup := router.Group("/").Use(auth, emailVerified)
+	{
+		fileUploadGroup.POST(
+			"pdf",
 			util.Proxy(cardGenerationServiceHostName),
 		)
 	}
