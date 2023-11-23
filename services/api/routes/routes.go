@@ -182,10 +182,14 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface, db db.Database
 		Use(auth, emailVerified)
 	{
 		pdfGroup.GET(
-			"/:id",
+			"/",
 			util.Proxy(cardGenerationServiceHostName),
 		)
 
+		pdfGroup.GET(
+			"/:id/search",
+			util.Proxy(cardGenerationServiceHostName),
+		)
 	}
 
 	fileUploadGroup := router.Group("/").Use(auth, emailVerified)
