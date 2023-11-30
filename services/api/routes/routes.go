@@ -182,7 +182,7 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface, db db.Database
 		Use(auth, emailVerified)
 	{
 		pdfGroup.GET(
-			"/",
+			"",
 			util.Proxy(cardGenerationServiceHostName),
 		)
 
