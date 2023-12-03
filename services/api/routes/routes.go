@@ -190,6 +190,10 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface, db db.Database
 			"/:id/search",
 			util.Proxy(cardGenerationServiceHostName),
 		)
+		pdfGroup.DELETE(
+			"/:id",
+			util.Proxy(cardGenerationServiceHostName),
+		)
 	}
 
 	fileUploadGroup := router.Group("/").Use(auth, emailVerified)
