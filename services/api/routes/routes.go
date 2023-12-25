@@ -204,4 +204,13 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface, db db.Database
 		)
 	}
 
+	searchGroup := jsonEndpoints.Group("/search").
+		Use(auth, emailVerified)
+	{
+		searchGroup.GET(
+			"",
+			util.Proxy(cardGenerationServiceHostName),
+		)
+	}
+
 }
