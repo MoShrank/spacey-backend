@@ -153,62 +153,27 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface, db db.Database
 		)
 	}
 
-	webContentGroup := jsonEndpoints.Group("/post").
-		Use(auth, emailVerified)
+	contentGroup := jsonEndpoints.Group("/content").
+		Use(auth, emailVerified, middleware.NeedsBeta())
 	{
-		webContentGroup.GET(
+		contentGroup.GET(
 			"",
 			util.Proxy(cardGenerationServiceHostName),
 		)
-		webContentGroup.POST(
-			"",
-			util.Proxy(cardGenerationServiceHostName),
-		)
-		webContentGroup.DELETE(
+		contentGroup.DELETE(
 			"/:id",
 			util.Proxy(cardGenerationServiceHostName),
 		)
-		webContentGroup.GET(
-			"/:id/answer",
-			util.Proxy(cardGenerationServiceHostName),
-		)
-		webContentGroup.GET(
-			"/search",
+		contentGroup.GET(
+			"/file/:id",
 			util.Proxy(cardGenerationServiceHostName),
 		)
 	}
 
-	pdfGroup := jsonEndpoints.Group("/pdf").
-		Use(auth, emailVerified)
-	{
-		pdfGroup.GET(
-			"",
-			util.Proxy(cardGenerationServiceHostName),
-		)
-
-		pdfGroup.GET(
-			"/:id/search",
-			util.Proxy(cardGenerationServiceHostName),
-		)
-		pdfGroup.DELETE(
-			"/:id",
-			util.Proxy(cardGenerationServiceHostName),
-		)
-	}
-
-	fileUploadGroup := router.Group("/").Use(auth, emailVerified)
+	fileUploadGroup := router.Group("/").Use(auth, emailVerified, middleware.NeedsBeta())
 	{
 		fileUploadGroup.POST(
-			"pdf",
-			util.Proxy(cardGenerationServiceHostName),
-		)
-	}
-
-	searchGroup := jsonEndpoints.Group("/search").
-		Use(auth, emailVerified)
-	{
-		searchGroup.GET(
-			"",
+			"content",
 			util.Proxy(cardGenerationServiceHostName),
 		)
 	}
