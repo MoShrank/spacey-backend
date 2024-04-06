@@ -164,6 +164,10 @@ func CreateRoutes(router *gin.Engine, cfg config.ConfigInterface, db db.Database
 			"/:id",
 			util.Proxy(cardGenerationServiceHostName),
 		)
+		contentGroup.PUT(
+			"/:id/annotation",
+			util.Proxy(cardGenerationServiceHostName),
+		)
 		contentGroup.GET(
 			"/file/:id",
 			util.Proxy(cardGenerationServiceHostName),
