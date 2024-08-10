@@ -1,83 +1,83 @@
 name: Build and Push Docker Image
 
 on:
-  workflow_call:
-    secrets:
-      AWS_ACCESS_KEY_ID:
-        required: true
-      AWS_SECRET_ACCESS_KEY:
-        required: true
-    inputs:
-      service_name:
-        required: true
-        type: string
-      service_dir:
-        required: true
-        type: string
+    workflow_call:
+        secrets:
+            AWS_ACCESS_KEY_ID:
+                required: true
+            AWS_SECRET_ACCESS_KEY:
+                required: true
+        inputs:
+            service_name:
+                required: true
+                type: string
+            service_dir:
+                required: true
+                type: string
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.17
+            - name: Set up Go
+              uses: actions/setup-go@v2
+              with:
+                  go-version: 1.22.6
 
-      - name: Test Service
-        run: go test -v ./...
+            - name: Test Service
+              run: go test -v ./...
 
-      - name: Build Go App
-        run: mkdir ./services/${{ inputs.service_name }}/bin && env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./services/${{ inputs.service_name }}/bin/main ./services/${{ inputs.service_name }}
+            - name: Build Go App
+              run: mkdir ./services/${{ inputs.service_name }}/bin && env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./services/${{ inputs.service_name }}/bin/main ./services/${{ inputs.service_name }}
 
-  build:
-    runs-on: ubuntu-latest
+    build:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Set env vars (dev)
-        if: endsWith(github.ref, '/staging')
-        run: |
-          echo "ENV=staging" >> $GITHUB_ENV
-      - name: Set env vars (prod)
-        if: endsWith(github.ref, '/master')
-        run: |
-          echo "ENV=prod" >> $GITHUB_ENV
+        steps:
+            - name: Set env vars (dev)
+              if: endsWith(github.ref, '/staging')
+              run: |
+                  echo "ENV=staging" >> $GITHUB_ENV
+            - name: Set env vars (prod)
+              if: endsWith(github.ref, '/master')
+              run: |
+                  echo "ENV=prod" >> $GITHUB_ENV
 
-      - uses: actions/checkout@v2
+            - uses: actions/checkout@v2
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.17
+            - name: Set up Go
+              uses: actions/setup-go@v2
+              with:
+                  go-version: 1.22.6
 
-      - name: Test
-        run: go test -v ./...
+            - name: Test
+              run: go test -v ./...
 
-      - name: Build Go App
-        run: mkdir ./services/${{ inputs.service_name }}/bin && env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./services/${{ inputs.service_name }}/bin/main ./services/${{ inputs.service_name }}
+            - name: Build Go App
+              run: mkdir ./services/${{ inputs.service_name }}/bin && env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./services/${{ inputs.service_name }}/bin/main ./services/${{ inputs.service_name }}
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-central-1
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-region: eu-central-1
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+            - name: Login to Amazon ECR
+              id: login-ecr
+              uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, tag, and push the image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ inputs.service_name }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          # Build a docker container and push it to ECR 
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.ENV }} ./services/${{ inputs.service_name }}
-          echo "Pushing image to ECR..."
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+            - name: Build, tag, and push the image to Amazon ECR
+              id: build-image
+              env:
+                  ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+                  ECR_REPOSITORY: ${{ inputs.service_name }}
+                  IMAGE_TAG: ${{ github.sha }}
+              run: |
+                  # Build a docker container and push it to ECR 
+                  docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.ENV }} ./services/${{ inputs.service_name }}
+                  echo "Pushing image to ECR..."
+                  docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+                  echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
